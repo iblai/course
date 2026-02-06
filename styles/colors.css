@@ -1,0 +1,79 @@
+:root {
+  --primary-color: #0058cc;
+  --accent-color: #f6f8fe;
+  --gradient-start: #38A1E5;
+  --gradient-end: #7284FF;
+  --gradient-bg: linear-gradient(135deg, #38A1E5, #7284FF);
+  --primary-light: #38A1E5;
+  --primary-dark: #004499;
+  --background: #ffffff;
+  --sidebar-bg: #fafbfc;
+  --border-color: #e5e7eb;
+  --text-primary: #616a76;
+  --text-secondary: #717985;
+  --text-muted: #9ca3af;
+  --accent-color-2: #f5f8ff;
+  --hover-bg: #f3f4f6;
+  --active-bg: #f6f8fe;
+  --button-hover: #38A1E5;
+  --input-bg: #f9fafb;
+  --card-bg: #ffffff;
+  --notification-color: #ef4444;
+  --avatar-bg: #fb923c;
+  --link-color: #0058cc;
+  --link-hover: #004499;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --error-color: #ef4444;
+  --tool-button-bg: #ffffff;
+  --tool-button-border: #e5e7eb;
+  --separator-color: #d1d5db;
+  --chat-primary: #3b82f6;
+  --chat-primary-hover: #2563eb;
+  --chat-secondary: #6b7280;
+  --chat-secondary-hover: #4b5563;
+  --chat-input-bg: #f9fafb;
+  --chat-input-border: #e5e7eb;
+  --chat-input-text: #374151;
+  --chat-input-placeholder: #9ca3af;
+  --chat-tab-active: #3b82f6;
+  --chat-tab-inactive: #9ca3af;
+  --chat-icon-bg: #dbeafe;
+  --chat-icon-color: #3b82f6;
+  --chat-hover-bg: #f3f4f6;
+  --stroke: #e5e7eb;
+  --accent-blue: #f5f8ff;
+  --brand-primary: #0058cc;
+}
+
+.bg-accent-blue {
+  background-color: #f5f8ff;
+}
+
+.border-stroke {
+  border-color: #e5e7eb;
+}
+
+.bg-stroke {
+  background-color: #e5e7eb;
+}
+
+.text-text-primary {
+  color: #616a76;
+}
+
+.text-text-secondary {
+  color: #717985;
+}
+
+.text-brand-primary {
+  color: #0058cc;
+}
+
+.bg-brand-gradient {
+  background: linear-gradient(135deg, #38A1E5, #7284FF);
+}
+
+.hover\:bg-accent-blue:hover {
+  background-color: #f5f8ff;
+}
