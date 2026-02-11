@@ -122,22 +122,24 @@ export function Header({
               <Image src="/images/toolsAI-logo.png" alt="Chat" width={22} height={22} className="w-5 h-5 object-contain" />
             </button>
             {isLoggedIn ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
-                    className="w-8 h-8 rounded-full overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex-shrink-0"
-                    aria-label="Profile menu"
-                  >
-                    <Image
-                      src="/images/user-avatar.webp"
-                      alt={userName}
-                      width={32}
-                      height={32}
-                      className="w-8 h-8 object-cover"
-                    />
-                  </button>
-                </DropdownMenuTrigger>
+              <TooltipProvider>
+                <TooltipFlowbite content="Profile" position="bottom">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        className="w-8 h-8 rounded-full overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex-shrink-0"
+                        aria-label="Profile menu"
+                      >
+                        <Image
+                          src="/images/user-avatar.webp"
+                          alt={userName}
+                          width={32}
+                          height={32}
+                          className="w-8 h-8 object-cover"
+                        />
+                      </button>
+                    </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuItem
                     onClick={() => setIsAccountDialogOpen(true)}
@@ -154,7 +156,9 @@ export function Header({
                     Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>
-              </DropdownMenu>
+                  </DropdownMenu>
+                </TooltipFlowbite>
+              </TooltipProvider>
             ) : null}
           </div>
         </div>

@@ -43,7 +43,7 @@ export default function CourseSchedulePage() {
   const certNumber = "ibL_1"
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen overflow-y-auto bg-background">
       <SidebarLearner
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -68,10 +68,10 @@ export default function CourseSchedulePage() {
           sidebarCollapsed={sidebarCollapsed}
         />
 
-        <div className="flex flex-1 overflow-hidden">
-          <main className="flex-1 flex flex-col transition-all duration-300 overflow-y-auto">
-            <div className="flex">
-              <div className="flex-1 px-5 sm:px-2 py-4 sm:py-8 pb-[200px] md:pb-[200px] w-full sm:pl-8 sm:pr-8 md:pr-20 max-w-4xl mx-auto">
+        <div className="flex flex-1">
+          <main className="flex-1 transition-all duration-300 pb-[200px] md:pb-[200px] min-w-0">
+            <div className="flex min-w-0">
+              <div className="flex-1 min-w-0 w-full pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:pl-8 sm:pr-8 md:pr-20 py-4 sm:py-8 max-w-4xl mx-auto overflow-x-hidden">
                 {/* Page header */}
                 <div className="mb-6 sm:mb-8">
                   <h1 className="text-xl sm:text-2xl font-semibold mb-1 text-[var(--sidebar-foreground)]">

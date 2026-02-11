@@ -269,7 +269,7 @@ function CoursesPageContent() {
             <div className="flex">
               <div className="flex-1 px-5 sm:px-2 py-4 sm:py-8 w-full sm:pl-8 sm:pr-8 md:pr-20">
               {/* Page Title */}
-              <div className="mb-4 sm:mb-6">
+              <div className="mb-4 sm:mb-6 mt-[15px]">
                 <h1 className="text-lg sm:text-xl font-semibold mb-1 sm:mb-2" style={{ color: "rgb(113,121,133)" }}>
                   All Courses
                 </h1>

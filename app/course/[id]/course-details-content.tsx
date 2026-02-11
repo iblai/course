@@ -295,7 +295,7 @@ export default function CourseDetailsContent() {
             <div className="flex min-w-0">
               <div className="flex-1 min-w-0 w-full pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:pl-8 sm:pr-8 md:pr-20 py-4 sm:py-8 max-w-6xl mx-auto overflow-x-hidden">
                 {/* Page header - sticky (same pattern as edit course page) */}
-                <div className="sticky top-0 z-10 pt-4 pb-4 mb-4 sm:mb-6 bg-background border-b border-border">
+                <div className="sticky top-0 z-10 pt-4 pb-2 mb-1 bg-background border-b border-border">
                   <h1 className="text-base md:text-lg font-semibold text-text-secondary">{course.title}</h1>
                 </div>
 
