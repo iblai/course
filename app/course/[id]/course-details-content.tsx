@@ -215,7 +215,7 @@ export default function CourseDetailsContent() {
 
   if (loading) {
     return (
-      <div className="h-screen overflow-y-auto bg-background">
+      <div className="h-screen-dvh overflow-y-auto bg-background">
         <SidebarLearner
           isCollapsed={sidebarCollapsed}
           onToggleCollapse={toggleSidebar}
@@ -226,7 +226,7 @@ export default function CourseDetailsContent() {
         />
         <div
           className={cn(
-            "flex flex-col min-h-screen transition-all duration-300",
+            "flex flex-col min-h-screen-dvh transition-all duration-300",
             sidebarCollapsed ? "md:ml-16" : "md:ml-64",
           )}
         >
@@ -248,7 +248,7 @@ export default function CourseDetailsContent() {
   }
 
   return (
-    <div className="h-screen overflow-y-auto bg-background">
+    <div className="h-screen-dvh overflow-y-auto bg-background">
       {/* Sidebar */}
       <SidebarLearner
         isCollapsed={sidebarCollapsed}
@@ -262,7 +262,7 @@ export default function CourseDetailsContent() {
       {/* Main Content Area */}
       <div
         className={cn(
-          "flex flex-col min-h-screen transition-all duration-300",
+          "flex flex-col min-h-screen-dvh transition-all duration-300",
           sidebarCollapsed ? "md:ml-16" : "md:ml-64",
         )}
       >
@@ -437,7 +437,7 @@ export default function CourseDetailsContent() {
         </div>
 
         {voiceSidebarOpen && (
-          <div className="fixed top-0 md:top-[65px] right-0 w-full md:w-[380px] h-full md:h-[calc(100vh-65px)] z-50 md:z-40">
+          <div className="fixed top-0 md:top-[65px] right-0 w-full md:w-[380px] h-full md:h-[calc(100dvh-65px)] z-50 md:z-40">
             <VoiceColumn onClose={() => setVoiceSidebarOpen(false)} />
           </div>
         )}

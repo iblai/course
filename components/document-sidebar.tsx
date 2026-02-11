@@ -149,7 +149,7 @@ export function DocumentSidebar({ isOpen = false, onClose, isModal = false }: Do
   }
 
   return (
-    <div className="fixed top-0 md:top-[65px] right-0 w-full md:w-[380px] h-full md:h-[calc(100vh-65px)] border-l border-gray-200 bg-[#FAFBFC] z-50 md:z-40 overflow-hidden flex flex-col">
+    <div className="fixed top-0 md:top-[65px] right-0 w-full md:w-[380px] h-full md:h-[calc(100dvh-65px)] border-l border-gray-200 bg-[#FAFBFC] z-50 md:z-40 overflow-hidden flex flex-col">
       {/* Retrieved Documents Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
         <div className="flex items-center gap-2">

@@ -225,7 +225,7 @@ function CoursesPageContent() {
   }
 
   return (
-    <div className="h-screen overflow-y-auto bg-background">
+    <div className="h-screen-dvh overflow-y-auto bg-background">
       {/* Sidebar */}
       <SidebarLearner
         isCollapsed={isCollapsed}
@@ -237,7 +237,7 @@ function CoursesPageContent() {
 
       {/* Main Content */}
       <div
-        className={cn("flex flex-col min-h-screen transition-all duration-300", isCollapsed ? "md:ml-16" : "md:ml-64")}
+        className={cn("flex flex-col min-h-screen-dvh transition-all duration-300", isCollapsed ? "md:ml-16" : "md:ml-64")}
       >
         {/* Header */}
         <Header

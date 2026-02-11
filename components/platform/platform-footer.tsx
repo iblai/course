@@ -45,7 +45,7 @@ export function PlatformFooter() {
 
   return (
     <footer 
-      className="fixed bottom-0 left-0 right-0 border-t border-border bg-card z-30"
+      className="fixed bottom-0 left-0 right-0 border-t border-border bg-card z-30 pb-[env(safe-area-inset-bottom)]"
       style={{ left: `${sidebarWidth}px` }}
     >
       <div className="px-4 sm:px-6 py-4">

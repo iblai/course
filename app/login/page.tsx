@@ -342,10 +342,13 @@ export default function AuthPage() {
 
   return (
     <div className="w-full">
-      <div className="flex w-full flex-col xl:flex-row overflow-hidden min-h-screen xl:h-screen xl:max-h-screen">
+      <div className="flex w-full flex-col xl:flex-row overflow-hidden min-h-[100dvh] xl:h-[100dvh] xl:max-h-screen">
         {/* Left Column - Auth Form */}
-        <div className="flex w-full flex-col min-h-screen xl:w-1/2 xl:h-full xl:min-h-0">
-          <div className="flex flex-col h-screen px-5 py-3 md:p-4 lg:p-6 justify-between">
+        <div className="flex w-full flex-col min-h-[100dvh] xl:w-1/2 xl:h-full xl:min-h-0">
+          <div
+            className="flex flex-col h-[100dvh] min-h-[100dvh] px-5 py-3 md:p-4 lg:p-6 justify-between pt-[calc(0.75rem+env(safe-area-inset-top,0px))] pb-[calc(1rem+env(safe-area-inset-bottom,0px))]"
+            style={{ minHeight: "-webkit-fill-available" } as React.CSSProperties}
+          >
             {/* Logo Section */}
             <div className="flex justify-center flex-shrink-0 mt-3">
               <div className="flex items-center gap-2">
@@ -371,7 +374,7 @@ export default function AuthPage() {
                 <div className="text-center">
                   <div className="space-y-2 my-5 xl:my-12">
                     <h1
-                      className={`${sizes.titleSize} sm:${sizes.titleSize} md:text-xl lg:text-2xl xl:text-3xl text-[#4E5460] leading-tight font-normal`}
+                      className="text-xl sm:text-xl md:text-xl lg:text-2xl xl:text-3xl text-[#4E5460] leading-tight font-normal"
                     >
                       Instantly create and sell engaging courses
                     </h1>
@@ -538,7 +541,7 @@ export default function AuthPage() {
                   )}
                 </>
               ) : (
-                <div className="flex flex-col items-center justify-center w-full max-w-md text-center min-h-screen">
+                <div className="flex flex-col items-center justify-center w-full max-w-md text-center min-h-[100dvh]">
                   <div className="mb-4">
                     <Image
                       src="/images/email-verify-icon.png"

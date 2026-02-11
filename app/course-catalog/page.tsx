@@ -155,7 +155,7 @@ function CourseCatalogContent() {
   }
 
   return (
-    <div className="h-screen overflow-y-auto bg-background">
+    <div className="h-screen-dvh overflow-y-auto bg-background">
       {/* Sidebar */}
       <SidebarLearner
         isCollapsed={isCollapsed}
@@ -168,7 +168,7 @@ function CourseCatalogContent() {
 
       {/* Main Content */}
       <div
-        className={cn("flex flex-col min-h-screen transition-all duration-300", isCollapsed ? "md:ml-16" : "md:ml-64")}
+        className={cn("flex flex-col min-h-screen-dvh transition-all duration-300", isCollapsed ? "md:ml-16" : "md:ml-64")}
       >
         {/* Header */}
         <Header
@@ -260,7 +260,7 @@ function CourseCatalogContent() {
 
           {/* Right Sidebars - outside main like dashboard */}
           {isVoiceSidebarOpen && (
-            <div className="fixed top-0 md:top-[65px] right-0 w-full md:w-[380px] h-full md:h-[calc(100vh-65px)] z-50 md:z-40">
+            <div className="fixed top-0 md:top-[65px] right-0 w-full md:w-[380px] h-full md:h-[calc(100dvh-65px)] z-50 md:z-40">
               <VoiceColumn onClose={() => setIsVoiceSidebarOpen(false)} />
             </div>
           )}

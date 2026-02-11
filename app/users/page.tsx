@@ -241,7 +241,7 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="h-screen overflow-y-auto bg-background">
+    <div className="h-screen-dvh overflow-y-auto bg-background">
       {/* Sidebar */}
       <SidebarLearner
         isCollapsed={sidebarCollapsed}
@@ -255,7 +255,7 @@ export default function UsersPage() {
       {/* Main Content Area */}
       <div
         className={cn(
-          "flex flex-col min-h-screen transition-all duration-300",
+          "flex flex-col min-h-screen-dvh transition-all duration-300",
           sidebarCollapsed ? "md:ml-16" : "md:ml-64",
         )}
       >

@@ -125,6 +125,20 @@
   }
 }
 
+/* iOS Safari 15.4+ / iOS 26+: use dynamic viewport so fixed header/footer align to visible viewport */
+@layer utilities {
+  .h-screen-dvh {
+    height: 100vh;
+    height: 100dvh;
+    min-height: -webkit-fill-available;
+  }
+  .min-h-screen-dvh {
+    min-height: 100vh;
+    min-height: 100dvh;
+    min-height: -webkit-fill-available;
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

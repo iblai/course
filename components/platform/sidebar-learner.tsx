@@ -1062,7 +1062,7 @@ export function SidebarLearner({
       <aside
         data-sidebar="true"
         className={cn(
-          "hidden md:flex flex-col border-r bg-white transition-all duration-300 fixed top-0 left-0 h-screen z-50 overflow-visible",
+          "hidden md:flex flex-col border-r bg-white transition-all duration-300 fixed top-0 left-0 h-screen-dvh z-50 overflow-visible",
           isCollapsed ? "w-16" : "w-64",
         )}
         style={{ borderColor: "#D0E0FF" }}

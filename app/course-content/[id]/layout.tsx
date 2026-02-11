@@ -145,7 +145,7 @@ export default function CourseContentLayout({
   }
 
   return (
-    <div className="h-screen overflow-y-auto bg-background">
+    <div className="h-screen-dvh overflow-y-auto bg-background">
       {!isMobile && (
         <SidebarLearner
           isCollapsed={isCollapsed}
@@ -168,7 +168,7 @@ export default function CourseContentLayout({
 
       <div
         className={cn(
-          "flex flex-col min-h-screen transition-all duration-300",
+          "flex flex-col min-h-screen-dvh transition-all duration-300",
           !isMobile && (isCollapsed ? "md:ml-16" : "md:ml-64"),
         )}
       >
@@ -471,7 +471,7 @@ export default function CourseContentLayout({
 
           {/* Right Sidebars */}
         {voiceSidebarOpen && (
-          <div className="fixed top-0 md:top-[65px] right-0 w-full md:w-[380px] h-full md:h-[calc(100vh-65px)] z-50 md:z-40">
+          <div className="fixed top-0 md:top-[65px] right-0 w-full md:w-[380px] h-full md:h-[calc(100dvh-65px)] z-50 md:z-40">
             <VoiceColumn onClose={() => setVoiceSidebarOpen(false)} />
           </div>
         )}

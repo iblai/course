@@ -254,7 +254,7 @@ export default function ChatPage() {
     <TooltipProvider>
       <div
         className={cn(
-          "fixed right-0 left-0 z-20 bg-white/95 backdrop-blur px-3 sm:px-4 pb-2 pt-2 transition-[left] duration-300",
+          "fixed right-0 left-0 z-20 bg-white/95 backdrop-blur px-3 sm:px-4 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] transition-[left] duration-300",
           sidebarCollapsed ? "md:left-16" : "md:left-64",
         )}
         style={{ borderColor: "#F1F2F3", bottom: inputBarBottom }}
@@ -305,7 +305,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="h-screen overflow-y-auto bg-background">
+    <div className="h-screen-dvh overflow-y-auto bg-background">
       <SidebarLearner
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -321,7 +321,7 @@ export default function ChatPage() {
 
       <div
         className={cn(
-          "flex flex-col min-h-screen transition-all duration-300",
+          "flex flex-col min-h-screen-dvh transition-all duration-300",
           sidebarCollapsed ? "md:ml-16" : "md:ml-64",
         )}
       >

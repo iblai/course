@@ -383,7 +383,7 @@ export default function CourseEditPage() {
   }
 
   return (
-    <div className="h-screen overflow-y-auto bg-background">
+    <div className="h-screen-dvh overflow-y-auto bg-background">
       <SidebarLearner
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -395,7 +395,7 @@ export default function CourseEditPage() {
 
       <div
         className={cn(
-          "flex flex-col min-h-screen transition-all duration-300",
+          "flex flex-col min-h-screen-dvh transition-all duration-300",
           sidebarCollapsed ? "md:ml-16" : "md:ml-64",
         )}
       >

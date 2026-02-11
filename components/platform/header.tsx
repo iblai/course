@@ -67,7 +67,7 @@ export function Header({
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-40 bg-card border-b ${leftClass}`}
+        className={`fixed top-0 left-0 right-0 z-40 bg-card border-b pt-[env(safe-area-inset-top)] ${leftClass}`}
         style={{ borderColor: "#D0E0FF" }}
       >
         <div className="flex items-center justify-between gap-2 px-4 py-3.5 overflow-visible">
