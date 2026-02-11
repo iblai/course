@@ -192,13 +192,13 @@ export default function ChatPage() {
               msg.role === "user" ? (
                 <div key={msg.id} className="flex justify-end mb-4">
                   <div className="rounded-xl px-4 py-2.5 max-w-[85%] sm:max-w-[75%] bg-gray-100">
-                    <p className="text-xs text-slate-800">{msg.content}</p>
+                    <p className="text-base sm:text-sm text-slate-800">{msg.content}</p>
                   </div>
                 </div>
               ) : (
                 <div key={msg.id} className="mb-6">
                   <div
-                    className="text-xs leading-relaxed prose prose-sm max-w-none pb-2"
+                    className="text-base sm:text-sm leading-relaxed prose sm:prose-sm max-w-none pb-2"
                     style={{ color: "rgb(113,121,133)" }}
                     dangerouslySetInnerHTML={{ __html: formatAssistantMessage(msg.content) }}
                   />
