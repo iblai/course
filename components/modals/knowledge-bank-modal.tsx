@@ -60,7 +60,7 @@ export function KnowledgeBankModal({ isOpen, onClose, onAddDatasets }: Knowledge
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
         <DialogHeader className="flex flex-row items-center justify-between">
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 text-[var(--sidebar-foreground)]">
             <Database className="w-5 h-5 text-blue-500" />
             Knowledge Bank
           </DialogTitle>

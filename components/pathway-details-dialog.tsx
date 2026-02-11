@@ -33,11 +33,11 @@ export function PathwayDetailsDialog({ pathway, isOpen, onClose }: PathwayDetail
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg gap-3">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">{pathway.title}</DialogTitle>
+          <DialogTitle className="text-xl font-semibold text-[var(--sidebar-foreground)]">{pathway.title}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
+        <div className="space-y-4 pt-0">
           {pathway.description && <p className="text-sm text-gray-600">{pathway.description}</p>}
 
           <div className="space-y-2">

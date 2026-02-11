@@ -2,7 +2,6 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { usePathname } from "next/navigation"
 import { FloatingMicrophoneButton } from "@/components/accessibility/floating-microphone-button"
 import { FloatingAccessibilityButton } from "@/components/accessibility/floating-accessibility-button"
 import { useEffect, useState } from "react"
@@ -10,9 +9,6 @@ import { useEffect, useState } from "react"
 export function PlatformFooter() {
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(256) // default expanded width (w-64 = 256px)
-  const pathname = usePathname()
-  const isNotificationsPage = pathname === "/notifications"
-
   useEffect(() => {
     const checkChatState = () => {
       const chatOpen = getComputedStyle(document.documentElement).getPropertyValue("--chat-open").trim()
@@ -76,7 +72,7 @@ export function PlatformFooter() {
       </div>
 
       {!isChatOpen && (
-        <div className={`fixed bottom-6 right-6 flex flex-col gap-3 ${isNotificationsPage ? "hidden md:flex" : ""}`}>
+        <div className="fixed bottom-6 right-6 hidden md:flex flex-col gap-3 z-[99990]">
           <FloatingMicrophoneButton />
           <FloatingAccessibilityButton />
         </div>

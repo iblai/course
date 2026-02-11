@@ -65,6 +65,7 @@ export default function CourseSchedulePage() {
           showLogo={true}
           showBackButton={true}
           showModelSelector={true}
+          sidebarCollapsed={sidebarCollapsed}
         />
 
         <div className="flex flex-1 overflow-hidden">
@@ -73,10 +74,7 @@ export default function CourseSchedulePage() {
               <div className="flex-1 px-5 sm:px-2 py-4 sm:py-8 pb-[200px] md:pb-[200px] w-full sm:pl-8 sm:pr-8 md:pr-20 max-w-4xl mx-auto">
                 {/* Page header */}
                 <div className="mb-6 sm:mb-8">
-                  <h1
-                    className="text-xl sm:text-2xl font-semibold mb-1 bg-gradient-to-r from-[#00A3EC] to-[#6988FF] bg-clip-text text-transparent"
-                    style={{ color: "rgb(33,41,52)" }}
-                  >
+                  <h1 className="text-xl sm:text-2xl font-semibold mb-1 text-[var(--sidebar-foreground)]">
                     {courseTitle}
                   </h1>
                   <p className="text-sm mb-4" style={{ color: "rgb(113,121,133)" }}>
@@ -386,7 +384,7 @@ export default function CourseSchedulePage() {
                 </section>
               </div>
 
-              <div className="hidden md:flex fixed top-20 right-0 z-[100]">
+              <div className="fixed top-20 right-0 z-40 flex">
                 <ChatButton />
               </div>
             </div>

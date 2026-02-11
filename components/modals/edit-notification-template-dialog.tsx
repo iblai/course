@@ -45,12 +45,12 @@ export function EditNotificationTemplateDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] gap-3">
         <DialogHeader>
-          <DialogTitle>Edit Template</DialogTitle>
+          <DialogTitle className="text-[var(--sidebar-foreground)]">Edit Template</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-4 pt-0 pb-3">
           <div className="space-y-2">
             <Label htmlFor="template-name">Template Name</Label>
             <Input

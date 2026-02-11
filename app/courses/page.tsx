@@ -10,7 +10,7 @@ import { DocumentSidebar } from "@/components/document-sidebar"
 
 import { VoiceColumn } from "@/components/voice-column"
 import ChatButton from "@/components/chat-button"
-import { Calendar, Pencil, FileText, Eye, Trash2 } from "lucide-react"
+import { Calendar, Pencil, FileText, Eye, Trash2, Info } from "lucide-react"
 import { TooltipFlowbite, TooltipProvider } from "@/components/ui/tooltip-flowbite"
 import {
   Dialog,
@@ -235,7 +235,7 @@ function CoursesPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen overflow-y-auto bg-background">
       {/* Sidebar */}
       <SidebarLearner
         isCollapsed={isCollapsed}
@@ -256,18 +256,18 @@ function CoursesPageContent() {
           showLogo={true}
           showBackButton={true}
           showModelSelector={true}
+          sidebarCollapsed={isCollapsed}
         />
 
-        <div className="flex flex-1 overflow-hidden">
-          {/* Main Content - collapses when any sidebar is open */}
+        <div className="flex flex-1">
           <main
             className={cn(
-              "flex-1 flex flex-col transition-all duration-300 overflow-y-auto",
+              "flex-1 transition-all duration-300 pb-[200px] md:pb-[200px]",
               (isDocumentSidebarOpen || isAgentSidebarOpen || isVoiceSidebarOpen) && "md:mr-[380px]",
             )}
           >
             <div className="flex">
-              <div className="flex-1 px-5 sm:px-2 py-4 sm:py-8 pb-[200px] md:pb-[200px] w-full sm:pl-8 sm:pr-8 md:pr-20">
+              <div className="flex-1 px-5 sm:px-2 py-4 sm:py-8 w-full sm:pl-8 sm:pr-8 md:pr-20">
               {/* Page Title */}
               <div className="mb-4 sm:mb-6">
                 <h1 className="text-lg sm:text-xl font-semibold mb-1 sm:mb-2" style={{ color: "rgb(113,121,133)" }}>
@@ -328,6 +328,17 @@ function CoursesPageContent() {
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             <div className="flex items-center gap-2">
+                              <TooltipProvider>
+                                <TooltipFlowbite content="About Course" position="top">
+                                  <button
+                                    onClick={() => handleActionClick("viewAbout", course.id)}
+                                    className="w-8 h-8 flex items-center justify-center rounded transition-colors hover:bg-blue-100 cursor-pointer"
+                                    style={{ backgroundColor: "#F0F4F8" }}
+                                  >
+                                    <Info className="w-4 h-4" style={{ color: "#2563EB" }} strokeWidth={1.5} />
+                                  </button>
+                                </TooltipFlowbite>
+                              </TooltipProvider>
                               <TooltipProvider>
                                 <TooltipFlowbite content="Schedule and Detail" position="top">
                                   <button
@@ -446,6 +457,17 @@ function CoursesPageContent() {
                       </div>
                       <div className="flex items-center gap-3.5 sm:gap-1.5 flex-wrap">
                         <TooltipProvider>
+                          <TooltipFlowbite content="About Course" position="top">
+                            <button
+                              onClick={() => handleActionClick("viewAbout", course.id)}
+                              className="w-7 h-7 flex items-center justify-center rounded transition-colors hover:bg-blue-100 cursor-pointer"
+                              style={{ backgroundColor: "#F0F4F8" }}
+                            >
+                              <Info className="w-3.5 h-3.5" style={{ color: "#2563EB" }} strokeWidth={1.5} />
+                            </button>
+                          </TooltipFlowbite>
+                        </TooltipProvider>
+                        <TooltipProvider>
                           <TooltipFlowbite content="Schedule and Detail" position="top">
                             <button
                               onClick={() => handleActionClick("schedule", course.id)}
@@ -508,7 +530,7 @@ function CoursesPageContent() {
             </div>
 
               {/* Chat Button - sticky right side */}
-              <div className="hidden md:flex fixed top-20 right-0 z-[100]">
+              <div className="fixed top-20 right-2 sm:right-4 md:right-0 z-40 flex">
                 <ChatButton />
               </div>
             </div>
@@ -527,26 +549,26 @@ function CoursesPageContent() {
           if (!open) setCourseToDelete(null)
         }}
       >
-        <DialogContent className="sm:max-w-[480px]" maxWidth="480px">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-semibold" style={{ color: "rgb(33,41,52)" }}>
+        <DialogContent className="sm:max-w-[480px] p-3 sm:p-4 gap-3" maxWidth="480px">
+          <DialogHeader className="mb-0">
+            <DialogTitle className="text-xl font-semibold text-[var(--sidebar-foreground)]">
               Delete Course
             </DialogTitle>
-            <p className="text-sm text-gray-500 mt-1">This action cannot be undone</p>
+            <p className="text-sm text-gray-500 mt-0.5">This action cannot be undone</p>
           </DialogHeader>
-          <div className="py-4">
+          <div className="pt-0 pb-2 sm:pb-3">
             <p className="text-sm text-gray-700 leading-relaxed">
               Are you sure you want to delete the course{" "}
               <span className="font-semibold text-gray-900">{courseToDelete?.title}</span>?
             </p>
-            <p className="text-sm text-gray-600 mt-3">
+            <p className="text-sm text-gray-600 mt-2">
               Course ID:{" "}
-              <code className="inline-block mt-1 px-2 py-1 text-xs font-mono bg-gray-100 border border-gray-200 rounded text-gray-800">
+              <code className="inline-block mt-0.5 px-2 py-1 text-xs font-mono bg-gray-100 border border-gray-200 rounded text-gray-800">
                 {`course-v1:lorena+ibl_${courseToDelete?.id ?? ""}+2026_01`}
               </code>
             </p>
           </div>
-          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3">
+          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 pt-0">
             <Button
               variant="outline"
               onClick={() => setIsDeleteCourseDialogOpen(false)}

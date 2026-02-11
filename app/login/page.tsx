@@ -11,6 +11,7 @@ import { PricingSection } from "@/components/sections/pricing-section"
 import { WatchSection } from "@/components/sections/watch-section (3)"
 import { ScrollToTopButton } from "@/components/sections/scroll-to-top-button"
 import { GoogleIcon, AppleIcon } from "@/components/auth-icons/auth-icons"
+import { DollarSign, Globe, Users } from "lucide-react"
 
 const useAuthForm = () => {
   const [email, setEmail] = useState("")
@@ -85,7 +86,7 @@ const useSlides = () => {
     },
     {
       image: "/images/slide-3.png",
-      alt: "Engage with every learner live or on-demand",
+      alt: "Create, sell, and manage memberships on Wink",
     },
   ]
 
@@ -605,60 +606,77 @@ export default function AuthPage() {
             <div className="flex justify-center w-full flex-shrink-0 mt-4">
               <div className="flex items-center gap-3 rounded-[0.70rem] border-[0.25px] border-[rgba(115,185,255,0.3)] bg-[#F5F8FF] shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(115,185,255,0.23)] rounded-lg p-4 w-[30rem]">
                 <div className="flex-shrink-0">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                    {currentSlide === 0 && <CourseIcon />}
-                    {currentSlide === 1 && <MentorIcon />}
-                    {currentSlide === 2 && <DashboardIcon />}
+                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                    {currentSlide === 0 && <DollarSign className="w-5 h-5" strokeWidth={2} />}
+                    {currentSlide === 1 && <Globe className="w-5 h-5" strokeWidth={2} />}
+                    {currentSlide === 2 && <Users className="w-5 h-5" strokeWidth={2} />}
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-gray-600 leading-relaxed text-base">
-                    {currentSlide === 0 && "Monetize your expertise and deliver an impactful experience by"}
+                    {currentSlide === 0 && "Monetize your expertise and deliver an impactful experience"}
                     {currentSlide === 1 && "Run a smart educational business and scale it worldwide"}
-                    {currentSlide === 2 && "Engage with every learner live or on-demand"}
+                    {currentSlide === 2 && "Create, sell, and manage memberships on Wink"}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="w-full mt-4 flex-1 flex items-center justify-center min-h-0 overflow-hidden">
+            <div className="w-full mt-4 flex-1 flex flex-col min-h-0 overflow-hidden">
+              <div className="flex-1 flex items-start justify-center min-h-0 overflow-hidden">
               <div
-                className={`w-full max-w-4xl h-full flex items-center justify-center transition-opacity duration-200 ease-in-out ${
+                className={`w-full max-w-4xl h-full flex items-start justify-center transition-opacity duration-200 ease-in-out ${
                   fadeIn ? "opacity-100" : "opacity-0"
                 }`}
               >
-                <div className="w-full h-full flex items-center justify-center p-2">
-                  {currentSlide === 0 ? (
-                    <Image
-                      src="/images/slide-1.png"
-                      alt="Monetize your expertise and deliver an impactful experience"
-                      width={680}
-                      height={400}
-                      className="rounded-lg object-contain w-full h-full max-h-full"
-                      priority
-                      unoptimized
-                    />
-                  ) : currentSlide === 1 ? (
-                    <Image
-                      src="/images/slide-2.png"
-                      alt="Run a smart educational business and scale it worldwide"
-                      width={710}
-                      height={300}
-                      className="rounded-lg object-contain w-full h-full max-h-full"
-                      unoptimized
-                    />
-                  ) : (
-                    <Image
-                      src="/images/slide-3.png"
-                      alt="Engage with every learner live or on-demand"
-                      width={850}
-                      height={400}
-                      className="rounded-lg object-contain w-full h-full max-h-full"
-                      unoptimized
-                    />
-                  )}
+                <div className="w-full h-full flex items-start justify-center p-2 pt-14">
+                  <div
+                    className="relative w-fit h-fit max-w-full max-h-full cursor-pointer"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => changeSlide((currentSlide + 1) % slides.length)}
+                    onKeyDown={(e) => e.key === "Enter" && changeSlide((currentSlide + 1) % slides.length)}
+                  >
+                    <div className="absolute left-0 top-0 z-10 rounded-xl border border-blue-200/70 bg-white px-4 py-2.5 shadow-sm w-fit -translate-y-[calc(100%+0.5rem)]">
+                      <span className="text-sm font-medium text-gray-700">
+                        {currentSlide === 0 && "Design, Build, and Refine Courses"}
+                        {currentSlide === 1 && "Create Projects & Organize Folders"}
+                        {currentSlide === 2 && "Explore All Courses & Configure"}
+                      </span>
+                    </div>
+                    {currentSlide === 0 ? (
+                      <Image
+                        src="/images/slide-1.png"
+                        alt="Monetize your expertise and deliver an impactful experience"
+                        width={680}
+                        height={400}
+                        className="rounded-lg object-contain max-w-full max-h-full block"
+                        priority
+                        unoptimized
+                      />
+                    ) : currentSlide === 1 ? (
+                      <Image
+                        src="/images/slide-2.png"
+                        alt="Run a smart educational business and scale it worldwide"
+                        width={680}
+                        height={400}
+                        className="rounded-lg object-contain max-w-full max-h-full block"
+                        unoptimized
+                      />
+                    ) : (
+                      <Image
+                        src="/images/slide-3.png"
+                        alt="Create, sell, and manage memberships on Wink"
+                        width={680}
+                        height={400}
+                        className="rounded-lg object-contain max-w-full max-h-full block"
+                        unoptimized
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
+            </div>
             </div>
 
             <div className="flex justify-center gap-1 mt-3 flex-shrink-0 pb-2">
@@ -687,40 +705,74 @@ export default function AuthPage() {
             />
           </div>
 
+          <div className="flex justify-center w-full mb-6">
+            <div className="flex items-center gap-3 rounded-[0.70rem] border-[0.25px] border-[rgba(115,185,255,0.3)] bg-[#F5F8FF] shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(115,185,255,0.23)] rounded-lg p-4 w-full max-w-md">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                  {currentSlide === 0 && <DollarSign className="w-5 h-5" strokeWidth={2} />}
+                  {currentSlide === 1 && <Globe className="w-5 h-5" strokeWidth={2} />}
+                  {currentSlide === 2 && <Users className="w-5 h-5" strokeWidth={2} />}
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-gray-600 leading-relaxed text-sm sm:text-base">
+                  {currentSlide === 0 && "Monetize your expertise and deliver an impactful experience"}
+                  {currentSlide === 1 && "Run a smart educational business and scale it worldwide"}
+                  {currentSlide === 2 && "Create, sell, and manage memberships on Wink"}
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="flex justify-center w-full mb-8">
             <div
               className={`w-full max-w-3xl transition-opacity duration-200 ease-in-out ${fadeIn ? "opacity-100" : "opacity-0"}`}
             >
               <div className="w-full flex items-center justify-center">
-                {currentSlide === 0 ? (
-                  <Image
-                    src="/images/slide-1.png"
-                    alt="Monetize your expertise and deliver an impactful experience"
-                    width={680}
-                    height={400}
-                    className="rounded-lg object-contain w-full h-auto max-h-[500px]"
-                    priority
-                    unoptimized
-                  />
-                ) : currentSlide === 1 ? (
-                  <Image
-                    src="/images/slide-2.png"
-                    alt="Run a smart educational business and scale it worldwide"
-                    width={710}
-                    height={300}
-                    className="rounded-lg object-contain w-full h-auto max-h-[500px]"
-                    unoptimized
-                  />
-                ) : (
-                  <Image
-                    src="/images/slide-3.png"
-                    alt="Engage with every learner live or on-demand"
-                    width={850}
-                    height={400}
-                    className="rounded-lg object-contain w-full h-auto max-h-[500px]"
-                    unoptimized
-                  />
-                )}
+                <div
+                  className="relative w-fit max-w-full cursor-pointer"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => changeSlide((currentSlide + 1) % slides.length)}
+                  onKeyDown={(e) => e.key === "Enter" && changeSlide((currentSlide + 1) % slides.length)}
+                >
+                  <div className="rounded-xl border border-blue-200/70 bg-white px-4 py-2.5 shadow-sm w-fit mb-2">
+                    <span className="text-sm font-medium text-gray-700">
+                      {currentSlide === 0 && "Design, Build, and Refine Courses"}
+                      {currentSlide === 1 && "Create Projects & Organize Folders"}
+                      {currentSlide === 2 && "Explore All Courses & Configure"}
+                    </span>
+                  </div>
+                  {currentSlide === 0 ? (
+                    <Image
+                      src="/images/slide-1.png"
+                      alt="Monetize your expertise and deliver an impactful experience"
+                      width={680}
+                      height={400}
+                      className="rounded-lg object-contain w-full h-auto max-h-[500px] block"
+                      priority
+                      unoptimized
+                    />
+                  ) : currentSlide === 1 ? (
+                    <Image
+                      src="/images/slide-2.png"
+                      alt="Run a smart educational business and scale it worldwide"
+                      width={680}
+                      height={400}
+                      className="rounded-lg object-contain w-full h-auto max-h-[500px] block"
+                      unoptimized
+                    />
+                  ) : (
+                    <Image
+                      src="/images/slide-3.png"
+                      alt="Create, sell, and manage memberships on Wink"
+                      width={680}
+                      height={400}
+                      className="rounded-lg object-contain w-full h-auto max-h-[500px] block"
+                      unoptimized
+                    />
+                  )}
+                </div>
               </div>
             </div>
           </div>

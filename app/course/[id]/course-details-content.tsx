@@ -18,7 +18,8 @@ export default function CourseDetailsContent() {
   const searchParams = useSearchParams()
   const isLoggedIn = true
   const imageParam = searchParams.get("image")
-  const courseTitle = searchParams.get("title") || "Course Title"
+  const titleParam = searchParams.get("title")
+  const courseTitle = titleParam ? decodeURIComponent(titleParam) : "Course Title"
   const projectCourseImages = ["/images/course-1.png", "/images/course-2.png", "/images/course-3.png", "/images/course-4.png"]
   const defaultImageById = (courseId: string) => {
     const idx = parseInt(courseId, 10)
@@ -225,7 +226,7 @@ export default function CourseDetailsContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="h-screen overflow-y-auto bg-background">
         <SidebarLearner
           isCollapsed={sidebarCollapsed}
           onToggleCollapse={toggleSidebar}
@@ -246,6 +247,7 @@ export default function CourseDetailsContent() {
             showLogo={true}
             showBackButton={true}
             showModelSelector={true}
+            sidebarCollapsed={sidebarCollapsed}
           />
           <div className="flex-1 flex justify-center items-center">
             <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin"></div>
@@ -256,7 +258,7 @@ export default function CourseDetailsContent() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen overflow-y-auto bg-background">
       {/* Sidebar */}
       <SidebarLearner
         isCollapsed={sidebarCollapsed}
@@ -280,62 +282,52 @@ export default function CourseDetailsContent() {
           showLogo={true}
           showBackButton={true}
           showModelSelector={true}
+          sidebarCollapsed={sidebarCollapsed}
         />
 
-        <div className="flex-1 flex">
-          {/* Main Content */}
+        <div className="flex flex-1">
           <main
-            className={cn("flex-1 overflow-y-auto transition-all duration-300 md:pr-20", isAnySidebarOpen ? "mr-[380px]" : "")}
+            className={cn(
+              "flex-1 transition-all duration-300 pb-[200px] md:pb-[200px] min-w-0",
+              isAnySidebarOpen ? "md:mr-[380px]" : "",
+            )}
           >
-            <div
-              className="flex-1 overflow-y-auto pb-40"
-              style={{
-                scrollbarWidth: "none",
-                msOverflowStyle: "none",
-              }}
-            >
-              <style jsx>{`
-                div::-webkit-scrollbar {
-                  display: none;
-                }
-              `}</style>
-              <div className="border-b border-border p-6">
-                <div className="max-w-6xl mx-auto">
+            <div className="flex min-w-0">
+              <div className="flex-1 min-w-0 w-full pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:pl-8 sm:pr-8 md:pr-20 py-4 sm:py-8 max-w-6xl mx-auto overflow-x-hidden">
+                {/* Page header - sticky (same pattern as edit course page) */}
+                <div className="sticky top-0 z-10 pt-4 pb-4 mb-4 sm:mb-6 bg-background border-b border-border">
                   <h1 className="text-base md:text-lg font-semibold text-text-secondary">{course.title}</h1>
                 </div>
-              </div>
 
-              <div className="border-b border-border">
-                <div className="px-6">
-                  <div className="max-w-6xl mx-auto">
-                    <div className="flex space-x-8">
-                      <button
-                        onClick={() => setActiveTab("about")}
-                        className={`py-3 px-1 text-sm font-medium border-b-2 ${
-                          activeTab === "about"
-                            ? "border-brand-primary text-brand-primary"
-                            : "border-transparent text-text-secondary hover:border-gray-300"
-                        }`}
-                      >
-                        About
-                      </button>
-                      <button
-                        onClick={() => setActiveTab("syllabus")}
-                        className={`py-3 px-1 text-sm font-medium border-b-2 ${
-                          activeTab === "syllabus"
-                            ? "border-brand-primary text-brand-primary"
-                            : "border-transparent text-text-secondary hover:border-gray-300"
-                        }`}
-                      >
-                        Syllabus
-                      </button>
-                    </div>
+                {/* Sub tabs */}
+                <div className="border-b border-border mb-4 sm:mb-6">
+                  <div className="flex space-x-8">
+                    <button
+                      onClick={() => setActiveTab("about")}
+                      className={`py-3 px-1 text-sm font-medium border-b-2 ${
+                        activeTab === "about"
+                          ? "border-brand-primary text-brand-primary"
+                          : "border-transparent text-text-secondary hover:border-gray-300"
+                      }`}
+                    >
+                      About
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("syllabus")}
+                      className={`py-3 px-1 text-sm font-medium border-b-2 ${
+                        activeTab === "syllabus"
+                          ? "border-brand-primary text-brand-primary"
+                          : "border-transparent text-text-secondary hover:border-gray-300"
+                      }`}
+                    >
+                      Syllabus
+                    </button>
                   </div>
                 </div>
-              </div>
 
-              <div className="p-6 w-full min-h-full bg-accent-blue">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                {/* Content */}
+                <div className="p-6 w-full bg-accent-blue rounded-lg min-w-0">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mx-auto">
                   <div className="md:col-span-2">
                     {activeTab === "about" ? (
                       <div className="bg-white rounded-lg border border-border p-6">
@@ -443,19 +435,15 @@ export default function CourseDetailsContent() {
                   </div>
                 </div>
               </div>
+              </div>
+
+              <div className="fixed top-20 right-0 z-40 flex">
+                <ChatButton />
+              </div>
             </div>
 
-            {/* Footer */}
             <PlatformFooter />
           </main>
-
-          {/* Column 2: Fixed Chat Button */}
-          <div className="hidden md:block w-16 flex-shrink-0" />
-        </div>
-
-        {/* Chat Button */}
-        <div className="hidden md:flex fixed top-20 right-0 z-[100]">
-          <ChatButton />
         </div>
 
         {voiceSidebarOpen && (

@@ -101,7 +101,7 @@ export function AddSkillDialog({ open, onOpenChange, onAddSkill, type }: AddSkil
       >
         {/* Fixed Header */}
         <div className="rounded-tl-lg rounded-tr-lg px-4 sm:px-6 py-4 flex justify-between items-center flex-shrink-0">
-          <h2 className="text-lg font-medium" style={{ color: "var(--text-secondary)" }}>
+          <h2 className="text-lg font-medium text-[var(--sidebar-foreground)]">
             {getDialogTitle()}
           </h2>
           <button

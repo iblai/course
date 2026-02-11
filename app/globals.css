@@ -139,3 +139,246 @@
 .animate-fade-in {
   animation: fadeIn 0.5s ease-in;
 }
+
+/* Generating content – animated dots */
+@keyframes generating-dot {
+  0%, 80%, 100% { opacity: 0.3; }
+  40% { opacity: 1; }
+}
+
+.animate-generating-dots span {
+  animation: generating-dot 1.4s ease-in-out infinite both;
+}
+.animate-generating-dots span:nth-child(2) { animation-delay: 0.2s; }
+.animate-generating-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+/* Hide scrollbar while keeping scroll behavior */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Prevent datetime-local inputs from overflowing on mobile */
+@media (max-width: 640px) {
+  input[type="datetime-local"] {
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+}
+
+/* ========== Accessibility menu – UI changes ========== */
+/* Uses CSS variables and body classes set by accessibility context */
+
+/* Invert + Saturation: applied via variables on :root, single filter on body */
+body {
+  filter: var(--accessibility-invert, invert(0)) var(--accessibility-saturation, saturate(1));
+}
+/* Keep the accessibility menu panel readable (no invert/saturation) */
+.accessibility-toolbar-panel,
+.accessibility-toolbar-panel * {
+  filter: none !important;
+}
+body.accessibility-invert img:not(.accessibility-toolbar-panel img),
+body.accessibility-invert video:not(.accessibility-toolbar-panel video) {
+  filter: invert(1);
+}
+
+/* Bigger text – scale root so all rem-based text grows */
+html.accessibility-text-size {
+  font-size: calc(100% * var(--accessibility-font-size, 1)) !important;
+}
+
+/* Text spacing */
+body.accessibility-text-spacing {
+  letter-spacing: var(--accessibility-letter-spacing, normal);
+  word-spacing: var(--accessibility-word-spacing, normal);
+}
+body.accessibility-text-spacing * {
+  letter-spacing: inherit;
+  word-spacing: inherit;
+}
+
+/* Pause animations */
+body.accessibility-pause-animations,
+body.accessibility-pause-animations * {
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+}
+
+/* Line height */
+body.accessibility-line-height {
+  line-height: var(--accessibility-line-height, 1.5);
+}
+body.accessibility-line-height * {
+  line-height: inherit;
+}
+
+/* Custom cursor + size */
+body.accessibility-custom-cursor {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath fill='%23000' d='M4 4 L4 28 L12 22 L16 28 L20 26 L16 20 L26 20 Z'/%3E%3C/svg%3E") 4 4, auto;
+}
+body.accessibility-custom-cursor,
+body.accessibility-custom-cursor * {
+  cursor: inherit;
+}
+body.accessibility-custom-cursor {
+  --accessibility-cursor-size: 24px;
+}
+
+/* Highlight links */
+body.accessibility-highlight-links a[href] {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+  background: rgba(56, 161, 229, 0.15);
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+/* Hide images */
+body.accessibility-hide-images img {
+  visibility: hidden;
+  min-height: 24px;
+  background: var(--muted, #f3f4f6);
+}
+body.accessibility-hide-images [style*="background-image"] {
+  background: var(--muted, #f3f4f6) !important;
+  background-image: none !important;
+}
+
+/* Dyslexia-friendly font */
+body.accessibility-dyslexia-friendly {
+  font-family: "Comic Sans MS", "Chalkboard SE", "Verdana", sans-serif;
+}
+body.accessibility-dyslexia-friendly * {
+  font-family: inherit;
+}
+
+/* Legible font */
+body.accessibility-legible-font {
+  font-family: "Verdana", "Segoe UI", "Georgia", serif;
+}
+body.accessibility-legible-font * {
+  font-family: inherit;
+}
+
+/* Tooltips – make [title] more visible */
+body.accessibility-tooltips [title] {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+}
+
+/* Text align */
+body.accessibility-text-left { text-align: left; }
+body.accessibility-text-left * { text-align: inherit; }
+body.accessibility-text-center { text-align: center; }
+body.accessibility-text-center * { text-align: inherit; }
+body.accessibility-text-right { text-align: right; }
+body.accessibility-text-right * { text-align: inherit; }
+body.accessibility-text-justify { text-align: justify; }
+body.accessibility-text-justify * { text-align: inherit; }
+
+/* Dark contrast */
+body.accessibility-dark-contrast {
+  background: #0f0f0f !important;
+  color: #f5f5f5 !important;
+}
+body.accessibility-dark-contrast * {
+  background-color: inherit;
+  color: inherit;
+  border-color: #404040;
+}
+body.accessibility-dark-contrast a {
+  color: #93c5fd;
+}
+
+/* Light contrast */
+body.accessibility-light-contrast {
+  background: #ffffff !important;
+  color: #0f0f0f !important;
+}
+body.accessibility-light-contrast * {
+  background-color: inherit;
+  color: inherit;
+  border-color: #d4d4d4;
+}
+body.accessibility-light-contrast a {
+  color: #1d4ed8;
+}
+
+/* Keep accessibility menu panel readable (override contrast/filters) */
+.accessibility-toolbar-panel {
+  background: #fff !important;
+}
+
+/* datetime-local: aligned full-width pickers, same padding so calendar icons line up */
+input[type="datetime-local"] {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding-left: 0.75rem;
+  padding-right: 2.25rem;
+  display: block;
+}
+/* calendar icon: fixed size and position so all pickers align */
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+  margin-left: 0.25rem;
+  padding: 0;
+  opacity: 0.7;
+  cursor: pointer;
+}
+/* wrapper for date inputs: ensures full width and no overflow */
+.date-picker-wrap input[type="datetime-local"] {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+/* Mobile / iOS: full-width and consistent alignment */
+@media (max-width: 767px) {
+  input[type="datetime-local"] {
+    font-size: 14px;
+    padding-left: 0.75rem;
+    padding-right: 2.25rem;
+    text-overflow: ellipsis;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    display: block;
+  }
+  /* Safari mobile: reset native appearance so width/alignment work, then re-apply look */
+  @supports (-webkit-touch-callout: none) {
+    input[type="datetime-local"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: -webkit-fill-available;
+      max-width: 100%;
+      /* re-apply field look after stripping native appearance */
+      background-color: var(--background, #fff);
+      border: 1px solid var(--border);
+      border-radius: 0.375rem;
+      box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    }
+  }
+  input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-left: 0.25rem;
+  }
+}
+
+/* Fix Next.js dev overlay portal position (avoid left/top off-screen) */
+nextjs-portal {
+  left: 0 !important;
+  top: 0 !important;
+  position: fixed !important;
+}

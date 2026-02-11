@@ -30,14 +30,14 @@ export function EmailPreviewDialog({ isOpen, onOpenChange, email, onSend }: Emai
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] gap-3">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 text-[var(--sidebar-foreground)]">
             <Mail className="h-5 w-5" />
             Email Preview
           </DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 py-4">
+        <div className="space-y-4 pt-0 pb-3">
           <div className="border rounded-lg p-4 space-y-3 bg-gray-50">
             <div className="flex items-center gap-2 text-sm">
               <span className="font-medium text-gray-500 w-16">Subject:</span>

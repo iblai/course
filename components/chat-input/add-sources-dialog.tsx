@@ -5,9 +5,9 @@ import type React from "react"
 import { useState, useCallback, useEffect, useRef } from "react"
 import { createPortal } from "react-dom"
 import { Button } from "@/components/ui/button"
-import { Upload, Globe, Link2, ClipboardPaste, Plus, X, ArrowLeft, Smartphone } from "lucide-react"
+import { Upload, X, ArrowLeft, Globe } from "lucide-react"
 import Image from "next/image"
-import { Progress } from "../ui/progress"
+import { Progress } from "@/components/ui/progress"
 
 type DialogView = "main" | "website-urls" | "youtube-url" | "copied-text"
 
@@ -63,16 +63,26 @@ export function AddSourcesDialog({
     return parts.length > 1 ? parts.pop()?.toUpperCase() ?? "" : ""
   }
 
-  const addFilesToSources = useCallback((files: FileList | null) => {
-    if (!files?.length) return
-    const newSources: SelectedSource[] = Array.from(files).map((file) => ({
-      id: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
-      name: file.name,
-      type: getExtension(file.name) || "FILE",
-      file,
-    }))
-    setSelectedSources((prev) => [...prev, ...newSources])
-  }, [])
+  const addFilesToSources = useCallback(
+    (files: FileList | null, closeAfterAdd = false) => {
+      if (!files?.length) return
+      const newSources: SelectedSource[] = Array.from(files).map((file) => ({
+        id: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
+        name: file.name,
+        type: getExtension(file.name) || "FILE",
+        file,
+      }))
+      setSelectedSources((prev) => {
+        const combined = [...prev, ...newSources]
+        if (closeAfterAdd) {
+          onSourcesSelected?.(combined)
+          onOpenChange(false)
+        }
+        return combined
+      })
+    },
+    [onSourcesSelected, onOpenChange],
+  )
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -89,7 +99,7 @@ export function AddSourcesDialog({
       e.preventDefault()
       setIsDragOver(false)
       if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-        addFilesToSources(e.dataTransfer.files)
+        addFilesToSources(e.dataTransfer.files, true)
       }
     },
     [addFilesToSources],
@@ -100,7 +110,7 @@ export function AddSourcesDialog({
   }
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    addFilesToSources(e.target.files)
+    addFilesToSources(e.target.files, true)
     e.target.value = ""
   }
 
@@ -130,118 +140,67 @@ export function AddSourcesDialog({
     }
   }
 
+  const iconCls = "h-5 w-5 shrink-0 object-contain"
+  const itemIconCls = "h-4 w-4 shrink-0 object-contain"
+  const iconDir = "/icons/add-source-dialog"
+
   const sourceOptions = [
     {
       title: "Google Workspace",
-      icon: (
-        <svg className="h-5 w-5" viewBox="0 0 24 24">
-          <path
-            fill="#4285F4"
-            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-          />
-          <path
-            fill="#34A853"
-            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-          />
-          <path
-            fill="#FBBC05"
-            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-          />
-          <path
-            fill="#EA4335"
-            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-          />
-        </svg>
-      ),
+      icon: <Image src={`${iconDir}/google-workspace.svg`} alt="" width={20} height={20} className={iconCls} />,
       items: [
         {
           name: "Google Drive",
-          icon: <Image src="/icons/google-drive.svg" alt="Google Drive" width={16} height={16} />,
+          icon: <Image src={`${iconDir}/google-drive.svg`} alt="" width={16} height={16} className={itemIconCls} />,
           action: () => console.log("Google Drive clicked"),
         },
       ],
     },
     {
       title: "Microsoft OneDrive",
-      icon: (
-        <svg className="h-5 w-5" viewBox="0 0 24 24">
-          <path
-            fill="#0078D4"
-            d="M10.5 18.5h8.25a3.75 3.75 0 0 0 .75-7.43 5.25 5.25 0 0 0-9.97-1.57A4.5 4.5 0 0 0 4.5 14a4.5 4.5 0 0 0 4.5 4.5h1.5z"
-          />
-          <path
-            fill="#0364B8"
-            d="M10.5 18.5h8.25a3.75 3.75 0 0 0 .75-7.43 5.25 5.25 0 0 0-4.76-3.82 6 6 0 0 0-11.24 3 4.5 4.5 0 0 0 1.5 8.75h5.5z"
-          />
-          <path
-            fill="#1490DF"
-            d="M6.75 18.5h12a3.75 3.75 0 0 0 .75-7.43A5.25 5.25 0 0 0 9.75 9a6 6 0 0 0-5.54 3.66A4.5 4.5 0 0 0 6.75 18.5z"
-          />
-        </svg>
-      ),
+      icon: <Image src={`${iconDir}/onedrive.svg`} alt="" width={20} height={20} className={iconCls} />,
       items: [
         {
           name: "OneDrive",
-          icon: (
-            <svg className="h-4 w-4" viewBox="0 0 24 24">
-              <path
-                fill="currentColor"
-                d="M10.5 18.5h8.25a3.75 3.75 0 0 0 .75-7.43 5.25 5.25 0 0 0-9.97-1.57A4.5 4.5 0 0 0 4.5 14a4.5 4.5 0 0 0 4.5 4.5h1.5z"
-              />
-            </svg>
-          ),
+          icon: <Image src={`${iconDir}/onedrive-item.svg`} alt="" width={16} height={16} className={itemIconCls} />,
           action: () => console.log("OneDrive clicked"),
         },
       ],
     },
     {
       title: "Upload from phone",
-      icon: <Smartphone className="h-5 w-5 text-muted-foreground" />,
+      icon: <Image src={`${iconDir}/smartphone.svg`} alt="" width={20} height={20} className={iconCls} />,
       items: [
         {
           name: "Scan QR Code",
-          icon: (
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="3" width="7" height="7" />
-              <rect x="14" y="3" width="7" height="7" />
-              <rect x="3" y="14" width="7" height="7" />
-              <rect x="14" y="14" width="3" height="3" />
-              <rect x="18" y="14" width="3" height="3" />
-              <rect x="14" y="18" width="3" height="3" />
-              <rect x="18" y="18" width="3" height="3" />
-            </svg>
-          ),
+          icon: <Image src={`${iconDir}/qr-code.svg`} alt="" width={16} height={16} className={itemIconCls} />,
           action: () => console.log("Scan QR Code clicked"),
         },
       ],
     },
     {
       title: "Link",
-      icon: <Link2 className="h-5 w-5 text-muted-foreground" />,
+      icon: <Image src={`${iconDir}/link.svg`} alt="" width={20} height={20} className={iconCls} />,
       items: [
         {
           name: "Website",
-          icon: <Globe className="h-4 w-4" />,
+          icon: <Image src={`${iconDir}/globe.svg`} alt="" width={16} height={16} className={itemIconCls} />,
           action: () => setCurrentView("website-urls"),
         },
         {
           name: "YouTube",
-          icon: (
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-            </svg>
-          ),
+          icon: <Image src={`${iconDir}/youtube.svg`} alt="" width={16} height={16} className={itemIconCls} />,
           action: () => setCurrentView("youtube-url"),
         },
       ],
     },
     {
       title: "Paste text",
-      icon: <ClipboardPaste className="h-5 w-5 text-muted-foreground" />,
+      icon: <Image src={`${iconDir}/clipboard.svg`} alt="" width={20} height={20} className={iconCls} />,
       items: [
         {
           name: "Copied text",
-          icon: <ClipboardPaste className="h-4 w-4" />,
+          icon: <Image src={`${iconDir}/clipboard.svg`} alt="" width={16} height={16} className={itemIconCls} />,
           action: () => setCurrentView("copied-text"),
         },
       ],
@@ -325,6 +284,7 @@ export function AddSourcesDialog({
         </div>
         <div className="px-4 sm:px-6 py-4 border-t border-border bg-muted/50 rounded-b-lg flex justify-end">
           <Button
+            type="button"
             onClick={handleInsertYoutubeUrl}
             disabled={!youtubeUrlInput.trim()}
             className="bg-muted text-muted-foreground hover:bg-muted/80 disabled:opacity-50"
@@ -480,24 +440,8 @@ export function AddSourcesDialog({
               <h2 className="text-lg sm:text-xl font-semibold text-slate-600">Add sources</h2>
             </div>
             <p className="text-sm text-muted-foreground">Get started by selecting sources</p>
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex sm:hidden text-[#38A1E5] border-[#38A1E5]/30 hover:bg-[#38A1E5]/5 w-fit bg-transparent"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add to knowledge bank
-            </Button>
           </div>
           <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              className="hidden sm:flex text-[#38A1E5] border-[#38A1E5]/30 hover:bg-[#38A1E5]/5 bg-transparent"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add to knowledge bank
-            </Button>
             <button onClick={handleClose} className="text-muted-foreground hover:text-foreground transition-colors">
               <X className="h-5 w-5" />
             </button>
@@ -527,8 +471,10 @@ export function AddSourcesDialog({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             {sourceOptions.map((option) => (
               <div key={option.title} className="border border-border rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  {option.icon}
+                <div className="flex items-center gap-2 mb-3 min-h-[1.5rem]">
+                  <span className="flex shrink-0 items-center justify-center text-[#38A1E5] [&>svg]:h-5 [&>svg]:w-5 [&>svg]:text-[#38A1E5] [&>img]:h-5 [&>img]:w-5 [&>img]:object-contain [&>img]:[filter:brightness(0)_saturate(100%)_invert(67%)_sepia(52%)_saturate(1023%)_hue-rotate(182deg)_brightness(95%)_contrast(91%)]">
+                    {option.icon}
+                  </span>
                   <span className="font-medium text-slate-600">{option.title}</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -538,7 +484,9 @@ export function AddSourcesDialog({
                       onClick={item.action}
                       className="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm bg-[#38A1E5]/10 text-[#38A1E5] hover:bg-[#38A1E5]/20 transition-colors"
                     >
-                      {item.icon}
+                      <span className="flex shrink-0 items-center justify-center text-[#38A1E5] [&>svg]:h-4 [&>svg]:w-4 [&>svg]:text-[#38A1E5] [&>img]:h-4 [&>img]:w-4 [&>img]:object-contain [&>img]:[filter:brightness(0)_saturate(100%)_invert(67%)_sepia(52%)_saturate(1023%)_hue-rotate(182deg)_brightness(95%)_contrast(91%)]">
+                        {item.icon}
+                      </span>
                       {item.name}
                     </button>
                   ))}

@@ -72,7 +72,7 @@ export function FAQSection() {
       <div className="max-w-7xl mx-auto w-full">
         {/* Header */}
         <div className="mb-16">
-          <h1 className="text-5xl font-bold text-[#3D4F5F] mb-6 lg:text-5xl">Frequently asked questions</h1>
+          <h1 className="text-3xl font-bold text-[#3D4F5F] mb-6 mr-5 lg:text-5xl lg:mr-0">Frequently asked questions</h1>
         </div>
 
         {/* FAQ Content - Two Column Layout */}

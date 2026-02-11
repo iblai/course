@@ -57,7 +57,7 @@ export function AddApiKeyDialog({ isOpen, onOpenChange, onSubmit = () => {} }: A
       <DialogContent className="w-[85vw] max-w-5xl lg:max-w-md max-h-[80vh] p-0 flex flex-col">
         {/* Fixed Header */}
         <DialogHeader className="px-6 py-4 border-b border-gray-200 flex-shrink-0">
-          <DialogTitle>Add API Key</DialogTitle>
+          <DialogTitle className="text-[var(--sidebar-foreground)]">Add API Key</DialogTitle>
         </DialogHeader>
 
         {/* Scrollable Content */}

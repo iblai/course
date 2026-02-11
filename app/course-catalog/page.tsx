@@ -177,6 +177,7 @@ function CourseCatalogContent() {
           showLogo={true}
           showBackButton={true}
           showModelSelector={true}
+          sidebarCollapsed={isCollapsed}
         />
 
         <div className="flex flex-1">
@@ -248,7 +249,7 @@ function CourseCatalogContent() {
               </div>
 
               {/* Chat Button - sticky right side */}
-              <div className="hidden md:flex fixed top-20 right-0 z-[100]">
+              <div className="fixed top-20 right-0 z-40 flex">
                 <ChatButton />
               </div>
             </div>

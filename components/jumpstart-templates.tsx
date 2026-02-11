@@ -53,15 +53,15 @@ export function JumpstartTemplates({
 
   return (
     <>
-      <div className="w-full max-w-6xl mx-auto px-4">
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-2">
+      <div className="w-full max-w-6xl mx-auto px-2 sm:px-4 min-w-0">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-nowrap sm:overflow-x-auto sm:scrollbar-hide sm:pb-1 sm:justify-center">
           {templates.map((template) => (
             <div
               key={template.id}
-              className="cursor-pointer hover:shadow-md transition-all duration-200 bg-gradient-to-br from-[#F5F8FF] to-[#EEF4FF] border border-[#D0E0FF] rounded-lg p-3 flex flex-col h-full min-h-[92px]"
+              className="cursor-pointer hover:shadow-md transition-all duration-200 bg-gradient-to-br from-[#F5F8FF] to-[#EEF4FF] border border-[#D0E0FF] rounded-lg p-3 flex flex-col flex-shrink-0 w-full sm:w-[180px] sm:min-w-[180px] min-h-0 sm:min-h-[92px]"
               onClick={() => onTemplateSelect?.(template.question)}
             >
-              <p className="text-sm text-gray-700 italic leading-relaxed mb-auto">{template.question}</p>
+              <p className="text-sm text-gray-700 italic leading-relaxed mb-auto line-clamp-3">{template.question}</p>
               <div className="flex items-center justify-start mt-2.5 pt-2.5 border-t border-gray-200">{template.icon}</div>
             </div>
           ))}

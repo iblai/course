@@ -116,7 +116,7 @@ Section, Subsection, and Unit must contain ONLY descriptive titles (no explanati
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen overflow-y-auto bg-background">
       {/* Sidebar */}
       <SidebarLearner
         isCollapsed={sidebarCollapsed}
@@ -141,13 +141,13 @@ Section, Subsection, and Unit must contain ONLY descriptive titles (no explanati
           showLogo={true}
           showBackButton={true}
           showModelSelector={true}
+          sidebarCollapsed={sidebarCollapsed}
         />
 
-        <div className="flex flex-1 overflow-hidden">
-          {/* Main Content */}
-          <main className="flex-1 flex flex-col transition-all duration-300 overflow-y-auto">
+        <div className="flex flex-1">
+          <main className="flex-1 transition-all duration-300 pb-[200px] md:pb-[200px]">
             <div className="flex">
-              <div className="flex-1 px-5 sm:px-2 py-4 sm:py-8 pb-[200px] md:pb-[200px] w-full sm:pl-8 sm:pr-8 md:pr-20">
+              <div className="flex-1 px-5 sm:px-2 py-4 sm:py-8 w-full sm:pl-8 sm:pr-8 md:pr-20">
               {/* Page Header */}
               <div className="mb-4 sm:mb-6">
                 <h1 className="text-lg sm:text-xl font-semibold mb-1 sm:mb-2" style={{ color: "rgb(113,121,133)" }}>
@@ -183,7 +183,7 @@ Section, Subsection, and Unit must contain ONLY descriptive titles (no explanati
               </div>
 
               {/* Content Area */}
-              <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4 md:p-6 mb-4 sm:mb-6">
+              <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 md:mr-5">
                 {activeTab === "instructions" ? (
                   <div>
                     <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4" style={{ color: "rgb(113,121,133)" }}>
@@ -235,7 +235,7 @@ Section, Subsection, and Unit must contain ONLY descriptive titles (no explanati
             </div>
 
               {/* Chat Button - sticky right side */}
-              <div className="hidden md:flex fixed top-20 right-0 z-[100]">
+              <div className="fixed top-20 right-0 z-40 flex">
                 <ChatButton />
               </div>
             </div>
@@ -248,17 +248,17 @@ Section, Subsection, and Unit must contain ONLY descriptive titles (no explanati
 
       {/* Restore Default Dialog */}
       <Dialog open={isRestoreDialogOpen} onOpenChange={setIsRestoreDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] gap-3">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold mb-2" style={{ color: "rgb(113,121,133)" }}>
+            <DialogTitle className="text-xl font-semibold mb-0.5 text-[var(--sidebar-foreground)]">
               Restore Default {activeTab === "instructions" ? "Instructions" : "System Prompt"}
             </DialogTitle>
-            <p className="text-sm text-gray-600 mb-4">This action cannot be undone</p>
-            <p className="text-sm text-gray-700 leading-relaxed">
+            <p className="text-sm text-gray-600 mt-0.5">This action cannot be undone</p>
+            <p className="text-sm text-gray-700 leading-relaxed mt-0">
               Are you sure you want to restore the default {activeTab === "instructions" ? "instructions template" : "system prompt"}? This will replace the current {activeTab === "instructions" ? "instructions" : "system prompt"} with the default version.
             </p>
           </DialogHeader>
-          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 mt-6">
+          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 pt-0">
             <Button
               variant="outline"
               onClick={() => setIsRestoreDialogOpen(false)}

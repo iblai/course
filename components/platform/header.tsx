@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Menu, ChevronDown, LogOut } from "lucide-react"
+import { Menu, ChevronDown, LogOut, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { TooltipFlowbite, TooltipProvider } from "@/components/ui/tooltip-flowbite"
@@ -10,9 +10,9 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { AccountDialog } from "@/components/account-dialog"
 
 interface HeaderProps {
   onMenuClick?: () => void
@@ -24,6 +24,8 @@ interface HeaderProps {
   showLogo?: boolean
   showBackButton?: boolean
   showModelSelector?: boolean
+  /** When true, sidebar is collapsed (narrow). Used for fixed header left offset on desktop. */
+  sidebarCollapsed?: boolean
 }
 
 export function Header({
@@ -36,9 +38,11 @@ export function Header({
   showLogo = false,
   showBackButton = false,
   showModelSelector = false,
+  sidebarCollapsed,
 }: HeaderProps) {
   const router = useRouter()
   const [isLLMModalOpen, setIsLLMModalOpen] = useState(false)
+  const [isAccountDialogOpen, setIsAccountDialogOpen] = useState(false)
   const [selectedLLM, setSelectedLLM] = useState<{ name: string; icon: string }>({
     name: "GPT-50",
     icon: "/logos/openai.svg",
@@ -58,22 +62,29 @@ export function Header({
     router.push("/login")
   }
 
+  const leftClass = sidebarCollapsed === undefined ? "" : sidebarCollapsed ? "md:left-16" : "md:left-64"
+
   return (
-      <header className="sticky top-0 z-40 bg-card border-b" style={{ borderColor: "#D0E0FF" }}>
-        <div className="flex items-center justify-between px-4 py-3.5">
+    <>
+      <header
+        className={`fixed top-0 left-0 right-0 z-40 bg-card border-b ${leftClass}`}
+        style={{ borderColor: "#D0E0FF" }}
+      >
+        <div className="flex items-center justify-between gap-2 px-4 py-3.5 overflow-visible">
         {/* Left Section - same vertical padding as sidebar top section */}
-        <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">
+        <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1 overflow-visible">
           {/* Mobile Menu */}
           <Button variant="ghost" size="icon" className="md:hidden shrink-0 h-8 w-8" onClick={onMenuClick || onMobileMenuToggle}>
             <Menu className="w-5 h-5" />
           </Button>
 
-          {/* Model Selector */}
+          {/* Model Selector - always visible when showModelSelector is true */}
           {showModelSelector && (
             <TooltipProvider>
               <TooltipFlowbite content="LLM Selection" position="bottom">
                 <button
-                  className="flex items-center gap-2 text-sm font-medium text-[#646464] hover:text-[#484848] transition-colors md:ml-4"
+                  type="button"
+                  className="flex shrink-0 items-center gap-2 text-sm font-medium text-[#646464] hover:text-[#484848] transition-colors md:ml-4"
                   onClick={() => setIsLLMModalOpen(true)}
                 >
                   <div className="flex items-center justify-center w-6 h-6 bg-white rounded-full flex-shrink-0">
@@ -101,6 +112,15 @@ export function Header({
 
           {/* Right Section - Actions */}
           <div className="flex items-center gap-3 shrink-0">
+            {/* Mobile: Chat button (opens chat panel) */}
+            <button
+              type="button"
+              onClick={() => document.dispatchEvent(new CustomEvent("open-chat"))}
+              className="md:hidden w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors flex-shrink-0"
+              aria-label="Open chat"
+            >
+              <Image src="/images/toolsAI-logo.png" alt="Chat" width={22} height={22} className="w-5 h-5 object-contain" />
+            </button>
             {isLoggedIn ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -119,9 +139,13 @@ export function Header({
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel className="font-normal">
-                    <p className="text-sm font-medium text-gray-900">{userName}</p>
-                  </DropdownMenuLabel>
+                  <DropdownMenuItem
+                    onClick={() => setIsAccountDialogOpen(true)}
+                    className="cursor-pointer"
+                  >
+                    <User className="mr-2 h-4 w-4" />
+                    Profile
+                  </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={handleLogout}
                     className="text-[#00A3EC] focus:text-[#00A3EC] cursor-pointer"
@@ -134,6 +158,17 @@ export function Header({
             ) : null}
           </div>
         </div>
+
+        <AccountDialog
+          open={isAccountDialogOpen}
+          onOpenChange={setIsAccountDialogOpen}
+          onSave={(info) => {
+            console.log("Account saved:", info)
+          }}
+        />
       </header>
+      {/* Spacer so content below doesn't sit under the fixed header */}
+      <div className="h-14 flex-shrink-0" aria-hidden />
+    </>
   )
 }

@@ -48,7 +48,7 @@ export function SendNotificationDialog({ open, onOpenChange, onNotificationSent 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[calc(100%-2rem)] max-w-[500px] mx-auto p-4 sm:p-6 max-h-[90vh] overflow-y-auto gap-2">
         <DialogHeader className="mb-0">
-          <DialogTitle className="text-base sm:text-lg">Send Notification</DialogTitle>
+          <DialogTitle className="text-base sm:text-lg text-[var(--sidebar-foreground)]">Send Notification</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-3 sm:space-y-4">

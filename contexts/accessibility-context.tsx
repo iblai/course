@@ -12,6 +12,7 @@ interface AccessibilitySettings {
   hideImages: boolean
   dyslexiaFont: "normal" | "dyslexia" | "legible"
   customCursor: boolean
+  cursorSize: "normal" | "large" | "extra-large"
   tooltips: boolean
   lineHeight: boolean
   textAlign: "normal" | "left" | "center" | "right" | "justify"
@@ -36,6 +37,7 @@ const defaultSettings: AccessibilitySettings = {
   hideImages: false,
   dyslexiaFont: "normal",
   customCursor: false,
+  cursorSize: "normal",
   tooltips: false,
   lineHeight: false,
   textAlign: "normal",
@@ -50,8 +52,15 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
   const [isToolbarOpen, setIsToolbarOpen] = useState(false)
 
   useEffect(() => {
-    setSettings(defaultSettings)
-    localStorage.removeItem("accessibility-settings")
+    try {
+      const stored = localStorage.getItem("accessibility-settings")
+      if (stored) {
+        const parsed = JSON.parse(stored) as Partial<AccessibilitySettings>
+        setSettings({ ...defaultSettings, ...parsed })
+      }
+    } catch {
+      setSettings(defaultSettings)
+    }
   }, [])
 
   useEffect(() => {
@@ -71,7 +80,7 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
       larger: "1.4",
     }
     root.style.setProperty("--accessibility-font-size", fontSizeMap[settings.textSize])
-    document.body.classList.toggle("accessibility-text-size", settings.textSize !== "normal")
+    root.classList.toggle("accessibility-text-size", settings.textSize !== "normal")
 
     const spacingMap = {
       none: { letter: "normal", word: "normal" },
@@ -107,6 +116,8 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
     document.body.classList.toggle("accessibility-saturation", settings.saturation !== "normal")
 
     document.body.classList.toggle("accessibility-custom-cursor", settings.customCursor)
+    const cursorSizeMap = { normal: "16", large: "24", "extra-large": "32" }
+    root.style.setProperty("--accessibility-cursor-size", `${cursorSizeMap[settings.cursorSize]}px`)
 
     const body = document.body
     body.classList.toggle("accessibility-highlight-links", settings.highlightLinks)

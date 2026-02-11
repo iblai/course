@@ -1089,7 +1089,7 @@ export function AddResourceModal({ isOpen, onClose, keepParentOpen = false }: Ad
             <div className="lg:hidden">
               <DialogHeader className="px-3 py-2 border-b border-gray-200">
                 <div className="flex items-center justify-between">
-                  <DialogTitle className="text-base font-semibold text-gray-700">
+                  <DialogTitle className="text-base font-semibold text-[var(--sidebar-foreground)]">
                     Add Resources
                   </DialogTitle>
                   <button onClick={handleClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
@@ -1115,7 +1115,7 @@ export function AddResourceModal({ isOpen, onClose, keepParentOpen = false }: Ad
             {/* Desktop Sidebar */}
             <div className="hidden lg:flex bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex-col w-56 min-w-[224px] flex-shrink-0">
               <DialogHeader className="p-4 border-b border-gray-200 dark:border-gray-800 flex-shrink-0 h-[73px] flex justify-between items-center">
-                <DialogTitle className="text-lg font-semibold text-gray-700">
+                <DialogTitle className="text-lg font-semibold text-[var(--sidebar-foreground)]">
                   Add Resources
                 </DialogTitle>
                 <button onClick={handleClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
@@ -1194,11 +1194,11 @@ export function AddResourceModal({ isOpen, onClose, keepParentOpen = false }: Ad
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={!!fileToDelete} onOpenChange={cancelDelete}>
-        <DialogContent className="max-w-sm mx-4 sm:mx-auto">
+        <DialogContent className="max-w-sm mx-4 sm:mx-auto gap-3">
           <DialogHeader>
-            <DialogTitle>Delete File</DialogTitle>
+            <DialogTitle className="text-[var(--sidebar-foreground)]">Delete File</DialogTitle>
           </DialogHeader>
-          <div className="py-4">
+          <div className="pt-0 pb-2">
             <p className="text-gray-600">Are you sure you want to delete this file? This action cannot be undone.</p>
           </div>
           <div className="flex justify-end gap-3">

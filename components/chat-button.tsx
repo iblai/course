@@ -1,8 +1,25 @@
 "use client"
 
 import { usePathname } from "next/navigation"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { X } from "lucide-react"
+
+declare global {
+  interface Window {
+    SpeechRecognition: new () => SpeechRecognitionInstance
+    webkitSpeechRecognition: new () => SpeechRecognitionInstance
+  }
+}
+interface SpeechRecognitionInstance {
+  continuous: boolean
+  interimResults: boolean
+  lang: string
+  start: () => void
+  stop: () => void
+  onresult: (event: { results: { [key: number]: { [key: number]: { transcript: string } } } }) => void
+  onerror: () => void
+  onend: () => void
+}
 import Image from "next/image"
 import { ChatTab } from "./chat-tabs/chat-tab"
 import { AssessmentsTab } from "./chat-tabs/assessments-tab"
@@ -14,6 +31,7 @@ import { CreateTab } from "./chat-tabs/create-tab"
 import { ChatPromptBox } from "./chat-prompt-box"
 import { createContext, useContext } from "react"
 import { useAccessibility } from "@/contexts/accessibility-context"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 // Create a context to share the chat state with other components
 export const ChatContext = createContext<{
@@ -42,10 +60,39 @@ export function ChatButton({ isMobile = false, isSmallScreen = false }: ChatButt
   const [isDocumentSidebarOpen, setIsDocumentSidebarOpen] = useState(false)
   const [isAgentSidebarOpen, setIsAgentSidebarOpen] = useState(false)
   const [isVoiceSidebarOpen, setIsVoiceSidebarOpen] = useState(false)
+  const [isListening, setIsListening] = useState(false)
+  const [visualViewportHeight, setVisualViewportHeight] = useState(0)
+  const [visualViewportOffsetTop, setVisualViewportOffsetTop] = useState(0)
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null)
   const pathname = usePathname()
+  const isMobileView = useIsMobile()
   const isCanvasView = pathname?.includes("/canvas") || pathname?.includes("/artifact")
   const isChatInterface = pathname?.includes("/chat")
   const { isToolbarOpen: isAccessibilityOpen } = useAccessibility()
+
+  // Listen for open-chat event (e.g. from header mobile button)
+  useEffect(() => {
+    const handleOpenChat = () => setIsOpen(true)
+    document.addEventListener("open-chat", handleOpenChat)
+    return () => document.removeEventListener("open-chat", handleOpenChat)
+  }, [])
+
+  // Track visual viewport so mobile chat panel (and prompt box) stays above the keyboard
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.visualViewport) return
+    const vv = window.visualViewport
+    const update = () => {
+      setVisualViewportHeight(vv.height)
+      setVisualViewportOffsetTop(vv.offsetTop)
+    }
+    update()
+    vv.addEventListener("resize", update)
+    vv.addEventListener("scroll", update)
+    return () => {
+      vv.removeEventListener("resize", update)
+      vv.removeEventListener("scroll", update)
+    }
+  }, [])
 
   const handlePromptClick = (prompt: string) => {
     setInputValue(prompt)
@@ -57,6 +104,68 @@ export function ChatButton({ isMobile = false, isSmallScreen = false }: ChatButt
       setInputValue("")
     }
   }
+
+  const stopDictation = () => {
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop()
+      } catch (_) {}
+      recognitionRef.current = null
+    }
+    setIsListening(false)
+  }
+
+  const handleDictationClick = () => {
+    if (isListening) {
+      stopDictation()
+      return
+    }
+    const SpeechRecognition =
+      typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition)
+    if (!SpeechRecognition) {
+      if (typeof window !== "undefined") {
+        alert("Your browser does not support speech recognition. Please try Chrome or Edge.")
+      }
+      return
+    }
+    setIsListening(true)
+    const recognition = new SpeechRecognition()
+    recognition.continuous = true
+    recognition.interimResults = true
+    recognition.lang = "en-US"
+    recognition.onresult = (event: { results: { [key: number]: { [key: number]: { transcript: string } } } }) => {
+      let finalTranscript = ""
+      for (let i = 0; i < event.results.length; i++) {
+        finalTranscript += event.results[i][0].transcript
+      }
+      setInputValue(finalTranscript)
+    }
+    recognition.onerror = () => {
+      stopDictation()
+    }
+    recognition.onend = () => {
+      setIsListening(false)
+      recognitionRef.current = null
+    }
+    try {
+      recognition.start()
+      recognitionRef.current = recognition
+    } catch (_) {
+      setIsListening(false)
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop()
+        } catch (_) {}
+        recognitionRef.current = null
+      }
+      setIsListening(false)
+    }
+  }, [])
 
   // Set a CSS variable when the chat state changes
   useEffect(() => {
@@ -140,8 +249,102 @@ export function ChatButton({ isMobile = false, isSmallScreen = false }: ChatButt
     }
   }
 
-  if (isSmallScreen || isMobile || isCanvasView || isChatInterface) {
+  if (isCanvasView || isChatInterface) {
     return null
+  }
+
+  // Mobile: full-screen chat panel when open (triggered by header button or open-chat event)
+  if (isSmallScreen || isMobile || isMobileView) {
+    if (!isOpen) return null
+    return (
+      <div
+        className="fixed left-0 right-0 z-40 bg-[#FAFBFC] overflow-hidden flex flex-col pb-[env(safe-area-inset-bottom)] md:hidden w-full h-full"
+        style={
+          visualViewportHeight > 0
+            ? { top: visualViewportOffsetTop, height: visualViewportHeight }
+            : undefined
+        }
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-white flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <Image src="/images/toolsAI-logo.png" alt="Chat assistant" width={32} height={32} className="h-8 w-8" />
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center bg-gray-200 rounded-[4px] p-0.5 py-1.5 px-1.5">
+              <button
+                className={`py-1 px-2 rounded-[4px] transition-all text-xs font-medium ${userRole === "instructor" ? "bg-white shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+                onClick={() => setUserRole("instructor")}
+              >
+                Instructor
+              </button>
+              <button
+                className={`py-1 px-2 rounded-[4px] text-xs transition-all ${userRole === "learner" ? "bg-white shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+                onClick={() => setUserRole("learner")}
+              >
+                Learner
+              </button>
+            </div>
+            <button onClick={() => setIsOpen(false)} className="hover:bg-gray-100 rounded p-1" aria-label="Close chat">
+              <X className="h-5 w-5 text-gray-400" />
+            </button>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex overflow-x-auto border-b border-gray-200 flex-shrink-0 bg-white">
+          {userRole === "instructor" ? (
+            <div className="flex w-full">
+              {["chat", "assessments", "content", "communication"].map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setActiveTab(tab as typeof activeTab)}
+                  className="flex-1 min-w-0 py-3 font-medium text-xs border-b-2 text-center whitespace-nowrap px-3"
+                  style={{
+                    borderBottomColor: activeTab === tab ? "var(--chat-tab-active)" : "transparent",
+                    color: activeTab === tab ? "var(--chat-tab-active)" : "var(--chat-tab-inactive)",
+                  }}
+                >
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="flex w-full">
+              {(["chat", "summarize", "practice", "create"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setActiveTab(tab)}
+                  className="flex-1 min-w-0 py-3 font-medium text-xs border-b-2 text-center whitespace-nowrap px-3"
+                  style={{
+                    borderBottomColor: activeTab === tab ? "var(--chat-tab-active)" : "transparent",
+                    color: activeTab === tab ? "var(--chat-tab-active)" : "var(--chat-tab-inactive)",
+                  }}
+                >
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">{renderTabContent()}</div>
+
+        {/* Prompt Box */}
+        <div className="flex-shrink-0 border-t border-gray-100 bg-white pb-2">
+          <ChatPromptBox
+            inputValue={inputValue}
+            onInputChange={setInputValue}
+            onSubmit={handleSubmit}
+            onVoiceClick={handleDictationClick}
+            isListening={isListening}
+          />
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -149,7 +352,7 @@ export function ChatButton({ isMobile = false, isSmallScreen = false }: ChatButt
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className={`w-14 flex items-center justify-center rounded-lg bg-white shadow-[0_0_10px_rgba(0,0,0,0.1)] hover:shadow-[0_0_15px_rgba(0,0,0,0.2)] z-[100] h-28 mt-6 ${isDocumentSidebarOpen || isAgentSidebarOpen || isVoiceSidebarOpen || isAccessibilityOpen ? "!hidden" : ""}`}
+          className={`hidden md:flex w-14 items-center justify-center rounded-lg bg-white shadow-[0_0_10px_rgba(0,0,0,0.1)] hover:shadow-[0_0_15px_rgba(0,0,0,0.2)] z-40 h-28 mt-6 ${isDocumentSidebarOpen || isAgentSidebarOpen || isVoiceSidebarOpen || isAccessibilityOpen ? "!hidden" : ""}`}
           aria-label="Open chat assistant"
         >
           <Image src="/images/toolsAI-logo.png" alt="Chat assistant" width={32} height={32} className="h-8 w-8" />
@@ -157,7 +360,7 @@ export function ChatButton({ isMobile = false, isSmallScreen = false }: ChatButt
       )}
 
       {isOpen && (
-        <div className="fixed top-[65px] right-0 bottom-16 w-[380px] border-l border-gray-200 bg-[#FAFBFC] z-[100] overflow-hidden flex flex-col pb-[env(safe-area-inset-bottom)]">
+        <div className="fixed top-[65px] right-0 bottom-16 w-[380px] border-l border-gray-200 bg-[#FAFBFC] z-40 overflow-hidden flex flex-col pb-[env(safe-area-inset-bottom)] hidden md:flex">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-white">
             <div className="flex items-center gap-2">
@@ -280,7 +483,13 @@ export function ChatButton({ isMobile = false, isSmallScreen = false }: ChatButt
 
           {/* Prompt Box */}
           <div className="flex-shrink-0 border-t border-gray-100 bg-white pb-2">
-            <ChatPromptBox inputValue={inputValue} onInputChange={setInputValue} onSubmit={handleSubmit} />
+            <ChatPromptBox
+            inputValue={inputValue}
+            onInputChange={setInputValue}
+            onSubmit={handleSubmit}
+            onVoiceClick={handleDictationClick}
+            isListening={isListening}
+          />
           </div>
         </div>
       )}

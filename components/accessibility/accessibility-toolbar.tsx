@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { createPortal } from "react-dom"
 import { Button } from "@/components/ui/button"
 import { useAccessibility } from "@/contexts/accessibility-context"
 import {
@@ -195,11 +196,10 @@ export function AccessibilityToolbar() {
     updateSetting("customCursor", !settings.customCursor)
   }
 
-  return (
-    <>
-      <div className="fixed top-0 right-0 h-full w-80 bg-white z-[9999] shadow-2xl flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 bg-gradient-to-r from-[#38A1E5] to-[#7284FF] text-white flex-shrink-0">
+  const toolbarContent = (
+    <div className="accessibility-toolbar-panel fixed top-0 right-0 h-full w-80 bg-white shadow-2xl flex flex-col" style={{ zIndex: 2147483646 }}>
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3.5 bg-gradient-to-r from-[#38A1E5] to-[#7284FF] text-white flex-shrink-0">
           <h2 className="text-lg font-semibold">Accessibility Menu</h2>
           <Button
             onClick={() => setIsToolbarOpen(false)}
@@ -330,7 +330,9 @@ export function AccessibilityToolbar() {
             Reset All Accessibility Settings
           </Button>
         </div>
-      </div>
-    </>
+    </div>
   )
+
+  if (typeof document === "undefined") return null
+  return createPortal(toolbarContent, document.body)
 }

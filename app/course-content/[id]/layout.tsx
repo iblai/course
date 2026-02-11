@@ -10,6 +10,7 @@ import { Header } from "@/components/platform/header"
 
 import { VoiceColumn } from "@/components/voice-column"
 import ChatButton from "@/components/chat-button"
+import { PlatformFooter } from "@/components/platform/platform-footer"
 import { cn } from "@/lib/utils"
 
 export default function CourseContentLayout({
@@ -144,7 +145,7 @@ export default function CourseContentLayout({
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--background)" }}>
+    <div className="h-screen overflow-y-auto bg-background">
       {!isMobile && (
         <SidebarLearner
           isCollapsed={isCollapsed}
@@ -177,6 +178,7 @@ export default function CourseContentLayout({
           showLogo={true}
           showBackButton={true}
           showModelSelector={true}
+          sidebarCollapsed={isCollapsed}
         />
 
         <div className="flex flex-1 min-h-0 relative overflow-hidden">
@@ -456,13 +458,13 @@ export default function CourseContentLayout({
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto md:pr-20" style={{ backgroundColor: "var(--card-bg)" }}>
+            <div className="flex-1 overflow-y-auto md:pr-20 pb-[200px] md:pb-[200px]" style={{ backgroundColor: "var(--card-bg)" }}>
               {children}
             </div>
           </div>
 
           {/* Chat Button - sticky right side */}
-          <div className="hidden md:flex fixed top-20 right-0 z-[100]">
+          <div className="fixed top-20 right-0 z-40 flex">
             <ChatButton />
           </div>
           </div>
@@ -474,6 +476,8 @@ export default function CourseContentLayout({
           </div>
         )}
         </div>
+
+        <PlatformFooter />
       </div>
 
       <style jsx global>{`

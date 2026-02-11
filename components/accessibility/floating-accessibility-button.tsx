@@ -10,10 +10,12 @@ export function FloatingAccessibilityButton() {
   return (
     <>
       <Button
+        type="button"
         onClick={() => setIsToolbarOpen(!isToolbarOpen)}
         className="h-14 w-14 rounded-full bg-[#5bc5f2] hover:bg-[#3db8ed] shadow-lg transition-all duration-200 hover:scale-105"
         size="icon"
         aria-label="Open Accessibility Menu"
+        aria-expanded={isToolbarOpen}
       >
         <Image
           src="/icons/accessibility-icon.svg"

@@ -35,11 +35,11 @@ export function EditPromptDialog({ isOpen, onOpenChange, prompt, onSave }: EditP
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] gap-3">
         <DialogHeader>
-          <DialogTitle>{prompt ? "Edit Prompt" : "Create Prompt"}</DialogTitle>
+          <DialogTitle className="text-[var(--sidebar-foreground)]">{prompt ? "Edit Prompt" : "Create Prompt"}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 py-4">
+        <div className="space-y-4 pt-0 pb-3">
           <div className="space-y-2">
             <Label htmlFor="prompt-name">Prompt Name</Label>
             <Input

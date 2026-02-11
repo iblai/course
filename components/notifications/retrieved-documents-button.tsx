@@ -36,7 +36,7 @@ export function RetrievedDocumentsButton() {
         >
           {/* Header */}
           <DialogHeader className="pl-6 pr-4 py-4 border-b border-gray-200 bg-white flex-shrink-0 sticky top-0 z-10 flex flex-row items-center justify-between">
-            <DialogTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+            <DialogTitle className="text-xl font-semibold text-[var(--sidebar-foreground)] flex items-center gap-2">
               <FileText className="h-5 w-5 text-blue-600" />
               Retrieved Documents
             </DialogTitle>

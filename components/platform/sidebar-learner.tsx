@@ -1,29 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { flushSync } from "react-dom"
 import { useRouter, usePathname } from "next/navigation"
-import {
-  ChevronRight,
-  ChevronDown,
-  ChevronLeft,
-  BookOpen,
-  Users,
-  Star,
-  HelpCircle,
-  Tag,
-  SquarePen,
-  User,
-  Mail,
-  FolderPlus,
-  Pin,
-  PinOff,
-  Folder,
-  MoreVertical,
-  Pencil,
-  Download,
-  Trash2,
-  Clock,
-} from "lucide-react"
+const SIDEBAR_ICONS = "/icons/sidebar"
+const PROJECT_STORAGE_KEY = "project-data"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
@@ -48,6 +29,14 @@ interface SidebarLearnerProps {
   onMobileClose?: () => void
   showAdminButtons?: boolean
   isLoggedIn?: boolean
+  /** Recent user message previews from current chat (e.g. when on /chat with messages) */
+  recentChatPreviews?: string[]
+  /** Called when user renames a chat preview by index */
+  onRenameChat?: (index: number, newName: string) => void
+  /** Called when user deletes a chat by index */
+  onDeleteChat?: (index: number) => void
+  /** Called when user pins a chat by index */
+  onPinChat?: (index: number) => void
 }
 
 const courseData = [
@@ -68,6 +57,10 @@ export function SidebarLearner({
   onMobileClose,
   showAdminButtons = true,
   isLoggedIn = false,
+  recentChatPreviews,
+  onRenameChat,
+  onDeleteChat,
+  onPinChat,
 }: SidebarLearnerProps) {
   const [expandedItems, setExpandedItems] = useState<string[]>(["projects"])
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false)
@@ -109,6 +102,12 @@ export function SidebarLearner({
   useEffect(() => {
     if (pathname === "/courses" && !expandedItems.includes("courses")) {
       setExpandedItems((prev) => [...prev, "courses"])
+    }
+    if (pathname === "/chat" && !expandedItems.includes("chats")) {
+      setExpandedItems((prev) => [...prev, "chats"])
+    }
+    if (pathname?.startsWith("/project/") && !expandedItems.includes("projects")) {
+      setExpandedItems((prev) => [...prev, "projects"])
     }
   }, [pathname])
 
@@ -157,31 +156,31 @@ export function SidebarLearner({
     {
       id: "all-courses",
       label: "All Courses",
-      icon: "/images/courses.svg",
+      icon: `${SIDEBAR_ICONS}/courses.svg`,
       href: "/courses",
     },
     {
       id: "course-catalog",
       label: "Course Catalog",
-      icon: "/images/course-catalog.svg",
+      icon: `${SIDEBAR_ICONS}/course-catalog.svg`,
       href: "/course-catalog",
     },
     {
       id: "configure",
       label: "Configure",
-      icon: "/images/configure.svg",
+      icon: `${SIDEBAR_ICONS}/configure.svg`,
       href: "/customize",
     },
     {
       id: "users",
       label: "Users",
-      icon: "/images/users.svg",
+      icon: `${SIDEBAR_ICONS}/users.svg`,
       href: "/users",
     },
     {
       id: "invite-user",
       label: "Invite User",
-      icon: Mail,
+      icon: `${SIDEBAR_ICONS}/mail.svg`,
       href: "#",
     },
   ]
@@ -189,7 +188,7 @@ export function SidebarLearner({
   const projectsItem = {
     id: "projects",
     label: "New Project",
-    icon: FolderPlus,
+    icon: `${SIDEBAR_ICONS}/folder-plus.svg`,
     children: projectsData.map((project) => ({
       id: `project-${project.id}`,
       label: project.label,
@@ -199,7 +198,7 @@ export function SidebarLearner({
   const pinnedItem = {
     id: "pinned",
     label: "Pinned",
-    icon: Pin,
+    icon: `${SIDEBAR_ICONS}/pin.svg`,
     children: pinnedData.map((pinned) => ({
       id: `pinned-${pinned.id}`,
       label: pinned.label,
@@ -209,7 +208,7 @@ export function SidebarLearner({
   const recentItem = {
     id: "recent",
     label: "Recent",
-    icon: Clock,
+    icon: `${SIDEBAR_ICONS}/clock.svg`,
     children: recentData.map((recent) => ({
       id: `recent-${recent.id}`,
       label: recent.label,
@@ -220,17 +219,31 @@ export function SidebarLearner({
     childId.replace(`${section}-`, "")
 
   const handleRenameConfirm = (newName: string) => {
+    if (renameDialog.section === "chat") {
+      onRenameChat?.(parseInt(renameDialog.itemId, 10), newName)
+      return
+    }
     const dataId = getDataId(renameDialog.itemId, renameDialog.section)
     if (renameDialog.section === "pinned") {
       setPinnedData((prev) => prev.map((p) => (p.id === dataId ? { ...p, label: newName } : p)))
     } else if (renameDialog.section === "project") {
       setProjectsData((prev) => prev.map((p) => (p.id === dataId ? { ...p, label: newName } : p)))
+      try {
+        const key = `${PROJECT_STORAGE_KEY}-${dataId}`
+        const raw = sessionStorage.getItem(key)
+        const data = raw ? { ...JSON.parse(raw), name: newName } : { name: newName, mentors: [] }
+        sessionStorage.setItem(key, JSON.stringify(data))
+      } catch (_) {}
     } else {
       setRecentData((prev) => prev.map((r) => (r.id === dataId ? { ...r, label: newName } : r)))
     }
   }
 
   const handleDeleteConfirm = () => {
+    if (deleteDialog.section === "chat") {
+      onDeleteChat?.(parseInt(deleteDialog.itemId, 10))
+      return
+    }
     const dataId = getDataId(deleteDialog.itemId, deleteDialog.section)
     if (deleteDialog.section === "pinned") {
       setPinnedData((prev) => prev.filter((p) => p.id !== dataId))
@@ -278,7 +291,7 @@ export function SidebarLearner({
                       router.push("/")
                     }}
                   >
-                    <SquarePen className="w-4 h-4" />
+                    <img src={`${SIDEBAR_ICONS}/square-pen.svg`} alt="" className="w-4 h-4 flex-shrink-0" aria-hidden />
                   </Button>
                 </div>
               </TooltipFlowbite>
@@ -296,7 +309,7 @@ export function SidebarLearner({
                 router.push("/")
               }}
             >
-              <SquarePen className="w-4 h-4" />
+              <img src={`${SIDEBAR_ICONS}/square-pen.svg`} alt="" className="w-4 h-4 flex-shrink-0" aria-hidden />
               <span>New Course</span>
             </Button>
           )}
@@ -319,6 +332,7 @@ export function SidebarLearner({
                 )}
                 onClick={() => {
                   if (item.id === "invite-user") {
+                    onMobileClose?.()
                     setInviteDialogOpen(true)
                   } else if (item.href) {
                     if (!isLoggedIn && item.id === "instructors") {
@@ -330,7 +344,6 @@ export function SidebarLearner({
                 }}
               >
                 {item.icon && (
-                  typeof item.icon === "string" ? (
                     <img
                       src={item.icon}
                       alt={item.label}
@@ -347,10 +360,7 @@ export function SidebarLearner({
                           : {}
                       }
                     />
-                  ) : (
-                    <item.icon className="w-5 h-5 flex-shrink-0 p-0" />
-                  )
-                )}
+                  )}
                 {!isCollapsed && <span className="flex-1 text-left">{item.label}</span>}
               </Button>
             </div>
@@ -367,9 +377,134 @@ export function SidebarLearner({
           )
         })}
 
-        {/* Separator before Projects */}
+        {/* Separator before Chats / Projects */}
         {!isCollapsed && (
           <div className="my-2 border-t" style={{ borderColor: "#D0E0FF" }} />
+        )}
+
+        {/* Chats Section */}
+        {!isCollapsed && (
+          <div key="chats" className="mb-1">
+            <Button
+              variant="ghost"
+              className={cn(
+                "w-full justify-start gap-2 pl-[11px] rounded-lg border",
+                expandedItems.includes("chats") || pathname === "/chat"
+                  ? "bg-[#e0f2fe] text-blue-600 border-blue-200/60"
+                  : "hover:bg-blue-50 hover:text-[#020817] text-[rgb(113,121,133)] border-transparent"
+              )}
+              onClick={() => {
+                router.push("/chat?new=1")
+                if (!expandedItems.includes("chats")) setExpandedItems((prev) => [...prev, "chats"])
+              }}
+            >
+              <img
+                src={`${SIDEBAR_ICONS}/chat.svg`}
+                alt=""
+                className="w-5 h-5 flex-shrink-0"
+                style={
+                  expandedItems.includes("chats") || pathname === "/chat"
+                    ? { filter: "brightness(0) saturate(100%) invert(27%) sepia(96%) saturate(1352%) hue-rotate(202deg) brightness(98%) contrast(96%)" }
+                    : {}
+                }
+                aria-hidden
+              />
+              <span className="flex-1 text-left">Chats</span>
+              <img
+                src={expandedItems.includes("chats") || pathname === "/chat" ? `${SIDEBAR_ICONS}/chevron-down.svg` : `${SIDEBAR_ICONS}/chevron-right.svg`}
+                alt=""
+                className="w-4 h-4 flex-shrink-0"
+                aria-hidden
+              />
+            </Button>
+            {(expandedItems.includes("chats") || pathname === "/chat") && (
+              <div className="ml-6 mt-1 relative">
+                <div className="absolute left-0 top-0 bottom-0 w-px bg-gray-200" />
+                {recentChatPreviews && recentChatPreviews.length > 0 ? (
+                  <ul className="pl-4 py-1 space-y-0.5 text-left list-none">
+                    {recentChatPreviews.map((preview, i) => (
+                      <li key={i} className="group flex items-center gap-1 min-w-0 rounded-md hover:bg-gray-50/80">
+                        <span className="flex-1 text-sm text-[rgb(113,121,133)] truncate min-w-0 py-1" title={preview}>
+                          {preview}
+                        </span>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className={cn(
+                                "h-7 w-7 shrink-0 rounded-md text-[rgb(113,121,133)] hover:bg-gray-200 hover:text-[#020817]",
+                                "opacity-100 pointer-events-auto md:opacity-0 md:pointer-events-none md:group-hover:opacity-100 md:group-hover:pointer-events-auto",
+                                "transition-opacity data-[state=open]:opacity-100 data-[state=open]:pointer-events-auto"
+                              )}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <img src={`${SIDEBAR_ICONS}/more-vertical.svg`} alt="" className="h-4 w-4 flex-shrink-0" aria-hidden />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem
+                              onClick={() => {
+                                onMobileClose?.()
+                                setRenameDialog({
+                                  open: true,
+                                  section: "chat",
+                                  itemId: String(i),
+                                  label: preview,
+                                })
+                              }}
+                            >
+                              <img src={`${SIDEBAR_ICONS}/pencil.svg`} alt="" className="h-4 w-4 flex-shrink-0" aria-hidden />
+                              Rename chat
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => onPinChat?.(i)}>
+                              <img src={`${SIDEBAR_ICONS}/pin.svg`} alt="" className="h-4 w-4 flex-shrink-0" aria-hidden />
+                              Pin chat
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                onMobileClose?.()
+                                setDeleteDialog({
+                                  open: true,
+                                  section: "chat",
+                                  itemId: String(i),
+                                  label: preview,
+                                })
+                              }}
+                            >
+                              <img src={`${SIDEBAR_ICONS}/trash-2.svg`} alt="" className="h-4 w-4 flex-shrink-0" aria-hidden />
+                              Delete chat
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="pl-4 py-1 text-sm text-gray-500 italic text-left">No chat history</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {isCollapsed && (
+          <TooltipProvider>
+            <TooltipFlowbite content="Chats" position="right">
+              <div className="flex justify-center items-center">
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "justify-center items-center w-10 h-10 p-0 rounded-lg mx-auto",
+                    expandedItems.includes("chats") || pathname === "/chat" ? "bg-[#e0f2fe] text-blue-600" : "text-[rgb(113,121,133)] hover:bg-blue-50 hover:text-[#020817]"
+                  )}
+                  onClick={() => router.push("/chat?new=1")}
+                >
+                  <img src={`${SIDEBAR_ICONS}/chat.svg`} alt="Chats" className="w-5 h-5 flex-shrink-0" aria-hidden />
+                </Button>
+              </div>
+            </TooltipFlowbite>
+          </TooltipProvider>
         )}
 
         {/* Projects Section */}
@@ -396,7 +531,6 @@ export function SidebarLearner({
                 }}
               >
                 {item.icon && (
-                  typeof item.icon === "string" ? (
                     <img
                       src={item.icon}
                       alt={item.label}
@@ -413,19 +547,16 @@ export function SidebarLearner({
                           : {}
                       }
                     />
-                  ) : (
-                    <item.icon className="w-5 h-5 flex-shrink-0 p-0" />
-                  )
-                )}
+                  )}
                 {!isCollapsed && (
                   <>
                     <span className="flex-1 text-left">{item.label}</span>
                     {item.children &&
                       item.children.length > 0 &&
                       (item.id === "projects" || expandedItems.includes(item.id) ? (
-                        <ChevronDown className="w-4 h-4" />
+                        <img src={`${SIDEBAR_ICONS}/chevron-down.svg`} alt="" className="w-4 h-4 flex-shrink-0" aria-hidden />
                       ) : (
-                        <ChevronRight className="w-4 h-4" />
+                        <img src={`${SIDEBAR_ICONS}/chevron-right.svg`} alt="" className="w-4 h-4 flex-shrink-0" aria-hidden />
                       ))}
                   </>
                 )}
@@ -445,13 +576,49 @@ export function SidebarLearner({
               {(item.id === "projects" || expandedItems.includes(item.id)) && item.children && item.children.length > 0 && (
                 <div className="ml-6 mt-1 space-y-1 relative">
                   <div className="absolute left-0 top-0 bottom-0 w-px bg-gray-200"></div>
-                  {item.children.map((child) => (
+                  {item.children.map((child) => {
+                    const projectId = child.id.replace(/^project-/, "")
+                    const isActiveProject = pathname === `/project/${projectId}`
+                    return (
                     <div
                       key={child.id}
-                      className="group flex items-center gap-2 rounded-md pl-4 pr-1 py-0.5 hover:bg-gray-100 min-h-8"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => {
+                        try {
+                          const key = `${PROJECT_STORAGE_KEY}-${projectId}`
+                          const existing = sessionStorage.getItem(key)
+                          if (!existing) {
+                            sessionStorage.setItem(
+                              key,
+                              JSON.stringify({ name: child.label, mentors: [] }),
+                            )
+                          }
+                        } catch (_) {}
+                        router.push(`/project/${projectId}`)
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          try {
+                            const key = `${PROJECT_STORAGE_KEY}-${projectId}`
+                            const existing = sessionStorage.getItem(key)
+                            if (!existing) {
+                              sessionStorage.setItem(
+                                key,
+                                JSON.stringify({ name: child.label, mentors: [] }),
+                              )
+                            }
+                          } catch (_) {}
+                          router.push(`/project/${projectId}`)
+                        }
+                      }}
+                      className={cn(
+                        "group flex items-center gap-2 rounded-md pl-4 pr-1 py-0.5 hover:bg-gray-100 min-h-8 cursor-pointer",
+                        isActiveProject && "bg-blue-50 text-blue-600"
+                      )}
                     >
                       <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted overflow-hidden">
-                        <Folder className="h-3 w-3 text-muted-foreground" />
+                        <img src={`${SIDEBAR_ICONS}/folder.svg`} alt="" className="h-3 w-3 flex-shrink-0 opacity-70" aria-hidden />
                       </div>
                       <span className="flex-1 truncate text-sm text-[rgb(113,121,133)] group-hover:text-[#020817]">
                         {child.label}
@@ -463,45 +630,72 @@ export function SidebarLearner({
                             size="icon"
                             className={cn(
                               "h-7 w-7 shrink-0 rounded-md text-[rgb(113,121,133)] hover:bg-gray-200 hover:text-[#020817]",
-                              "opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto",
+                              "opacity-100 pointer-events-auto md:opacity-0 md:pointer-events-none md:group-hover:opacity-100 md:group-hover:pointer-events-auto",
                               "transition-opacity data-[state=open]:opacity-100 data-[state=open]:pointer-events-auto"
                             )}
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <MoreVertical className="h-4 w-4" />
+                            <img src={`${SIDEBAR_ICONS}/more-vertical.svg`} alt="" className="h-4 w-4 flex-shrink-0" aria-hidden />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48">
                           <DropdownMenuItem
-                            onClick={() =>
-                              setRenameDialog({
+                            onPointerDown={(e) => {
+                              e.preventDefault()
+                              const payload = {
                                 open: true,
-                                section: "project",
+                                section: "project" as const,
                                 itemId: child.id,
                                 label: child.label,
-                              })
-                            }
+                              }
+                              flushSync(() => setRenameDialog(payload))
+                              setTimeout(() => onMobileClose?.(), 100)
+                            }}
+                            onSelect={() => {
+                              const payload = {
+                                open: true,
+                                section: "project" as const,
+                                itemId: child.id,
+                                label: child.label,
+                              }
+                              setRenameDialog(payload)
+                              setTimeout(() => onMobileClose?.(), 100)
+                            }}
                           >
-                            <Pencil className="h-4 w-4" />
+                            <img src={`${SIDEBAR_ICONS}/pencil.svg`} alt="" className="h-4 w-4 flex-shrink-0" aria-hidden />
                             Rename Project
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() =>
-                              setDeleteDialog({
+                            onPointerDown={(e) => {
+                              e.preventDefault()
+                              const payload = {
                                 open: true,
-                                section: "project",
+                                section: "project" as const,
                                 itemId: child.id,
                                 label: child.label,
-                              })
-                            }
+                              }
+                              flushSync(() => setDeleteDialog(payload))
+                              setTimeout(() => onMobileClose?.(), 100)
+                            }}
+                            onSelect={() => {
+                              const payload = {
+                                open: true,
+                                section: "project" as const,
+                                itemId: child.id,
+                                label: child.label,
+                              }
+                              setDeleteDialog(payload)
+                              setTimeout(() => onMobileClose?.(), 100)
+                            }}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <img src={`${SIDEBAR_ICONS}/trash-2.svg`} alt="" className="h-4 w-4 flex-shrink-0" aria-hidden />
                             Delete Project
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
-                  ))}
+                  )
+                  })}
                 </div>
               )}
             </div>
@@ -530,7 +724,6 @@ export function SidebarLearner({
                 }}
               >
                 {item.icon && (
-                  typeof item.icon === "string" ? (
                     <img
                       src={item.icon}
                       alt={item.label}
@@ -547,19 +740,16 @@ export function SidebarLearner({
                           : {}
                       }
                     />
-                  ) : (
-                    <item.icon className="w-5 h-5 flex-shrink-0 p-0" />
-                  )
-                )}
+                  )}
                 {!isCollapsed && (
                   <>
                     <span className="flex-1 text-left">{item.label}</span>
                     {item.children &&
                       item.children.length > 0 &&
                       (expandedItems.includes(item.id) ? (
-                        <ChevronDown className="w-4 h-4" />
+                        <img src={`${SIDEBAR_ICONS}/chevron-down.svg`} alt="" className="w-4 h-4 flex-shrink-0" aria-hidden />
                       ) : (
-                        <ChevronRight className="w-4 h-4" />
+                        <img src={`${SIDEBAR_ICONS}/chevron-right.svg`} alt="" className="w-4 h-4 flex-shrink-0" aria-hidden />
                       ))}
                   </>
                 )}
@@ -585,7 +775,7 @@ export function SidebarLearner({
                       className="group flex items-center gap-2 rounded-md pl-4 pr-1 py-0.5 hover:bg-gray-100 min-h-8"
                     >
                       <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted overflow-hidden">
-                        <User className="h-3 w-3 text-muted-foreground" />
+                        <img src={`${SIDEBAR_ICONS}/user.svg`} alt="" className="h-3 w-3 flex-shrink-0 opacity-70" aria-hidden />
                       </div>
                       <span className="flex-1 truncate text-sm text-[rgb(113,121,133)] group-hover:text-[#020817]">
                         {child.label}
@@ -597,47 +787,49 @@ export function SidebarLearner({
                             size="icon"
                             className={cn(
                               "h-7 w-7 shrink-0 rounded-md text-[rgb(113,121,133)] hover:bg-gray-200 hover:text-[#020817]",
-                              "opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto",
+                              "opacity-100 pointer-events-auto md:opacity-0 md:pointer-events-none md:group-hover:opacity-100 md:group-hover:pointer-events-auto",
                               "transition-opacity data-[state=open]:opacity-100 data-[state=open]:pointer-events-auto"
                             )}
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <MoreVertical className="h-4 w-4" />
+                            <img src={`${SIDEBAR_ICONS}/more-vertical.svg`} alt="" className="h-4 w-4 flex-shrink-0" aria-hidden />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48">
                           <DropdownMenuItem
-                            onClick={() =>
+                            onClick={() => {
+                              onMobileClose?.()
                               setRenameDialog({
                                 open: true,
                                 section: "pinned",
                                 itemId: child.id,
                                 label: child.label,
                               })
-                            }
+                            }}
                           >
-                            <Pencil className="h-4 w-4" />
+                            <img src={`${SIDEBAR_ICONS}/pencil.svg`} alt="" className="h-4 w-4 flex-shrink-0" aria-hidden />
                             Rename Chat
                           </DropdownMenuItem>
                           <DropdownMenuItem>
-                            <PinOff className="h-4 w-4" />
+                            <img src={`${SIDEBAR_ICONS}/pin-off.svg`} alt="" className="h-4 w-4 flex-shrink-0" aria-hidden />
                             Unpin
                           </DropdownMenuItem>
                           <DropdownMenuItem>
-                            <Download className="h-4 w-4" />
+                            <img src={`${SIDEBAR_ICONS}/download.svg`} alt="" className="h-4 w-4 flex-shrink-0" aria-hidden />
                             Export
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() =>
+                            onClick={() => {
+                              onMobileClose?.()
                               setDeleteDialog({
                                 open: true,
                                 section: "pinned",
                                 itemId: child.id,
                                 label: child.label,
                               })
-                            }
+                            }}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <img src={`${SIDEBAR_ICONS}/trash-2.svg`} alt="" className="h-4 w-4 flex-shrink-0" aria-hidden />
                             Delete Chat
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -674,7 +866,6 @@ export function SidebarLearner({
                 }}
               >
                 {item.icon && (
-                  typeof item.icon === "string" ? (
                     <img
                       src={item.icon}
                       alt={item.label}
@@ -691,19 +882,16 @@ export function SidebarLearner({
                           : {}
                       }
                     />
-                  ) : (
-                    <item.icon className="w-5 h-5 flex-shrink-0 p-0" />
-                  )
-                )}
+                  )}
                 {!isCollapsed && (
                   <>
                     <span className="flex-1 text-left">{item.label}</span>
                     {item.children &&
                       item.children.length > 0 &&
                       (expandedItems.includes(item.id) ? (
-                        <ChevronDown className="w-4 h-4" />
+                        <img src={`${SIDEBAR_ICONS}/chevron-down.svg`} alt="" className="w-4 h-4 flex-shrink-0" aria-hidden />
                       ) : (
-                        <ChevronRight className="w-4 h-4" />
+                        <img src={`${SIDEBAR_ICONS}/chevron-right.svg`} alt="" className="w-4 h-4 flex-shrink-0" aria-hidden />
                       ))}
                   </>
                 )}
@@ -729,7 +917,7 @@ export function SidebarLearner({
                       className="group flex items-center gap-2 rounded-md pl-4 pr-1 py-0.5 hover:bg-gray-100 min-h-8"
                     >
                       <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted overflow-hidden">
-                        <User className="h-3 w-3 text-muted-foreground" />
+                        <img src={`${SIDEBAR_ICONS}/user.svg`} alt="" className="h-3 w-3 flex-shrink-0 opacity-70" aria-hidden />
                       </div>
                       <span className="flex-1 truncate text-sm text-[rgb(113,121,133)] group-hover:text-[#020817]">
                         {child.label}
@@ -741,26 +929,27 @@ export function SidebarLearner({
                             size="icon"
                             className={cn(
                               "h-7 w-7 shrink-0 rounded-md text-[rgb(113,121,133)] hover:bg-gray-200 hover:text-[#020817]",
-                              "opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto",
+                              "opacity-100 pointer-events-auto md:opacity-0 md:pointer-events-none md:group-hover:opacity-100 md:group-hover:pointer-events-auto",
                               "transition-opacity data-[state=open]:opacity-100 data-[state=open]:pointer-events-auto"
                             )}
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <MoreVertical className="h-4 w-4" />
+                            <img src={`${SIDEBAR_ICONS}/more-vertical.svg`} alt="" className="h-4 w-4 flex-shrink-0" aria-hidden />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48">
                           <DropdownMenuItem
-                            onClick={() =>
+                            onClick={() => {
+                              onMobileClose?.()
                               setRenameDialog({
                                 open: true,
                                 section: "recent",
                                 itemId: child.id,
                                 label: child.label,
                               })
-                            }
+                            }}
                           >
-                            <Pencil className="h-4 w-4" />
+                            <img src={`${SIDEBAR_ICONS}/pencil.svg`} alt="" className="h-4 w-4 flex-shrink-0" aria-hidden />
                             Rename Chat
                           </DropdownMenuItem>
                           <DropdownMenuItem
@@ -769,24 +958,25 @@ export function SidebarLearner({
                               setRecentData((prev) => prev.filter((r) => `recent-${r.id}` !== child.id))
                             }}
                           >
-                            <Pin className="h-4 w-4" />
+                            <img src={`${SIDEBAR_ICONS}/pin.svg`} alt="" className="h-4 w-4 flex-shrink-0" aria-hidden />
                             Pin
                           </DropdownMenuItem>
                           <DropdownMenuItem>
-                            <Download className="h-4 w-4" />
+                            <img src={`${SIDEBAR_ICONS}/download.svg`} alt="" className="h-4 w-4 flex-shrink-0" aria-hidden />
                             Export
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() =>
+                            onClick={() => {
+                              onMobileClose?.()
                               setDeleteDialog({
                                 open: true,
                                 section: "recent",
                                 itemId: child.id,
                                 label: child.label,
                               })
-                            }
+                            }}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <img src={`${SIDEBAR_ICONS}/trash-2.svg`} alt="" className="h-4 w-4 flex-shrink-0" aria-hidden />
                             Delete Chat
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -811,7 +1001,7 @@ export function SidebarLearner({
                     variant="ghost"
                     className="justify-center items-center w-10 h-10 p-0 rounded-lg mx-auto text-[rgb(113,121,133)] hover:bg-blue-50 hover:text-[#020817]"
                   >
-                    <Tag className="w-4 h-4" />
+                    <img src={`${SIDEBAR_ICONS}/tag.svg`} alt="" className="w-4 h-4 flex-shrink-0" aria-hidden />
                   </Button>
                 </Link>
               </div>
@@ -822,7 +1012,7 @@ export function SidebarLearner({
                 variant="ghost"
                 className="w-full justify-start gap-2 text-[rgb(113,121,133)] hover:bg-blue-50 hover:text-[#020817]"
               >
-                <Tag className="w-4 h-4" />
+                <img src={`${SIDEBAR_ICONS}/tag.svg`} alt="" className="w-4 h-4 flex-shrink-0" aria-hidden />
                 Pricing
               </Button>
             </Link>
@@ -835,7 +1025,7 @@ export function SidebarLearner({
                     variant="ghost"
                     className="justify-center items-center w-10 h-10 p-0 rounded-lg mx-auto text-[rgb(113,121,133)] hover:bg-blue-50 hover:text-[#020817]"
                   >
-                    <HelpCircle className="w-4 h-4" />
+                    <img src={`${SIDEBAR_ICONS}/help-circle.svg`} alt="" className="w-4 h-4 flex-shrink-0" aria-hidden />
                   </Button>
                 </Link>
               </div>
@@ -846,7 +1036,7 @@ export function SidebarLearner({
                 variant="ghost"
                 className="w-full justify-start gap-2 text-[rgb(113,121,133)] hover:bg-blue-50 hover:text-[#020817]"
               >
-                <HelpCircle className="w-4 h-4" />
+                <img src={`${SIDEBAR_ICONS}/help-circle.svg`} alt="" className="w-4 h-4 flex-shrink-0" aria-hidden />
                 FAQ
               </Button>
             </Link>
@@ -859,10 +1049,10 @@ export function SidebarLearner({
   return (
     <>
       {isMobileOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
+        <div className="fixed inset-0 z-40 md:hidden">
           <div className="fixed inset-0 bg-black/50" onClick={onMobileClose}></div>
           <TooltipProvider>
-            <div id="mobile-sidebar" className="fixed left-0 top-0 h-[100dvh] w-64 bg-white shadow-lg overflow-hidden">
+            <div id="mobile-sidebar" className="fixed left-0 top-0 h-[100dvh] w-64 z-40 bg-white shadow-lg overflow-hidden">
               <SidebarContent isMobile={true} />
             </div>
           </TooltipProvider>
@@ -872,7 +1062,7 @@ export function SidebarLearner({
       <aside
         data-sidebar="true"
         className={cn(
-          "hidden md:flex flex-col border-r bg-white transition-all duration-300 fixed top-0 left-0 h-screen z-40 overflow-visible",
+          "hidden md:flex flex-col border-r bg-white transition-all duration-300 fixed top-0 left-0 h-screen z-50 overflow-visible",
           isCollapsed ? "w-16" : "w-64",
         )}
         style={{ borderColor: "#D0E0FF" }}
@@ -883,9 +1073,9 @@ export function SidebarLearner({
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
-            <ChevronRight className="w-4 h-4 text-gray-600" />
+            <img src={`${SIDEBAR_ICONS}/chevron-right.svg`} alt="" className="w-4 h-4 flex-shrink-0 text-gray-600" aria-hidden />
           ) : (
-            <ChevronLeft className="w-4 h-4 text-gray-600" />
+            <img src={`${SIDEBAR_ICONS}/chevron-left.svg`} alt="" className="w-4 h-4 flex-shrink-0 text-gray-600" aria-hidden />
           )}
         </button>
 
@@ -916,8 +1106,24 @@ export function SidebarLearner({
         isOpen={createProjectModalOpen}
         onClose={() => setCreateProjectModalOpen(false)}
         onCreateProject={(projectName, selectedMentors) => {
-          setProjectsData((prev) => [...prev, { id: String(Date.now()), label: projectName }])
+          const newId = String(Date.now())
+          setProjectsData((prev) => [...prev, { id: newId, label: projectName }])
           setCreateProjectModalOpen(false)
+          try {
+            sessionStorage.setItem(
+              `project-data-${newId}`,
+              JSON.stringify({
+                name: projectName,
+                mentors: selectedMentors.map((m) => ({
+                  id: m.id,
+                  title: m.title,
+                  description: m.description,
+                  avatar: m.avatar,
+                })),
+              }),
+            )
+          } catch (_) {}
+          router.push(`/project/${newId}`)
         }}
       />
     </>

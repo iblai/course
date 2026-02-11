@@ -241,7 +241,7 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen overflow-y-auto bg-background">
       {/* Sidebar */}
       <SidebarLearner
         isCollapsed={sidebarCollapsed}
@@ -266,13 +266,13 @@ export default function UsersPage() {
           showLogo={true}
           showBackButton={true}
           showModelSelector={true}
+          sidebarCollapsed={sidebarCollapsed}
         />
 
-        <div className="flex flex-1 overflow-hidden">
-          {/* Main Content */}
-          <main className="flex-1 flex flex-col transition-all duration-300 overflow-y-auto">
+        <div className="flex flex-1">
+          <main className="flex-1 transition-all duration-300 pb-[200px] md:pb-[200px]">
             <div className="flex">
-              <div className="flex-1 px-5 sm:px-2 py-4 sm:py-8 pb-[200px] md:pb-[200px] w-full sm:pl-8 sm:pr-8 md:pr-20">
+              <div className="flex-1 px-5 sm:px-2 py-4 sm:py-8 w-full sm:pl-8 sm:pr-8 md:pr-20">
               {/* Page Header */}
               <div className="mb-4 sm:mb-6">
                 <h1 className="text-lg sm:text-xl font-semibold mb-4" style={{ color: "rgb(113,121,133)" }}>
@@ -504,7 +504,7 @@ export default function UsersPage() {
             </div>
 
               {/* Chat Button - sticky right side */}
-              <div className="hidden md:flex fixed top-20 right-0 z-[100]">
+              <div className="fixed top-20 right-0 z-40 flex">
                 <ChatButton />
               </div>
             </div>
@@ -523,11 +523,11 @@ export default function UsersPage() {
           if (!open) setCreateFormErrors({})
         }}
       >
-        <DialogContent className="sm:max-w-[420px]" maxWidth="420px">
+        <DialogContent className="sm:max-w-[420px] gap-3" maxWidth="420px">
           <DialogHeader>
-            <DialogTitle>Create New User</DialogTitle>
+            <DialogTitle className="text-[var(--sidebar-foreground)]">Create New User</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="space-y-4 pt-0 pb-3">
             <div className="space-y-2">
               <Label htmlFor="create-username">
                 Username <span className="text-red-500">*</span>
@@ -647,11 +647,11 @@ export default function UsersPage() {
 
       {/* Edit User Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[420px]" maxWidth="420px">
+        <DialogContent className="sm:max-w-[420px] gap-3" maxWidth="420px">
           <DialogHeader>
-            <DialogTitle>Edit User</DialogTitle>
+            <DialogTitle className="text-[var(--sidebar-foreground)]">Edit User</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="space-y-4 pt-0 pb-3">
             <div className="space-y-2">
               <Label htmlFor="edit-username">Username</Label>
               <Input
@@ -745,14 +745,14 @@ export default function UsersPage() {
 
       {/* Delete User Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="sm:max-w-[420px]" maxWidth="420px">
+        <DialogContent className="sm:max-w-[420px] gap-3" maxWidth="420px">
           <DialogHeader>
-            <DialogTitle>Delete User</DialogTitle>
-            <p className="text-sm text-gray-600 mt-2">
+            <DialogTitle className="text-[var(--sidebar-foreground)]">Delete User</DialogTitle>
+            <p className="text-sm text-gray-600 mt-0.5">
               Select deletion method for user {selectedUser?.username}:
             </p>
           </DialogHeader>
-          <div className="py-4">
+          <div className="pt-0 pb-3">
             <RadioGroup value={deleteMethod} onValueChange={setDeleteMethod} className="space-y-4">
               {/* Soft Delete Option */}
               <div

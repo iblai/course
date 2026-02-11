@@ -47,11 +47,11 @@ export function ScheduleTaskDialog({ isOpen, onOpenChange, onSchedule }: Schedul
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] gap-3">
         <DialogHeader>
-          <DialogTitle>Schedule Task</DialogTitle>
+          <DialogTitle className="text-[var(--sidebar-foreground)]">Schedule Task</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 py-4">
+        <div className="space-y-4 pt-0 pb-3">
           <div className="space-y-2">
             <Label htmlFor="task-name">Task Name</Label>
             <Input

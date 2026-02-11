@@ -3,10 +3,10 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, Check, ChevronLeft, ChevronRight } from "lucide-react"
+import { Search, Check, ChevronLeft, ChevronRight, X } from "lucide-react"
 import { mentorsByCategory, type Mentor } from "@/data/mentors"
 import { MentorCategories } from "@/components/mentor-categories"
 
@@ -144,22 +144,37 @@ export function CreateProjectModal({ isOpen, onClose, onCreateProject }: CreateP
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        className="max-w-4xl w-[95vw] p-0 gap-0"
+        className="max-w-4xl w-[95vw] p-0 sm:p-0 gap-0"
         style={{
           height: "85vh",
           maxHeight: "85vh",
           display: "flex",
           flexDirection: "column",
         }}
+        hideCloseButton
+        noPadding
       >
-        {/* Header */}
-        <DialogHeader className="px-6 py-4 border-b border-gray-200 bg-white flex-shrink-0">
-          <DialogTitle className="text-xl font-semibold text-gray-900">New Project</DialogTitle>
-        </DialogHeader>
+        {/* Header - same layout as Add sources: flex row with title + close in header */}
+        <div className="flex items-start justify-between p-4 sm:p-6 border-b border-border bg-background flex-shrink-0">
+          <div className="flex flex-col gap-2">
+            <DialogTitle className="sr-only">New Project</DialogTitle>
+            <h2 className="text-lg sm:text-xl font-semibold text-[var(--sidebar-foreground)]">New Project</h2>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Close"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
 
         {/* Scrollable Content */}
         <div className="flex-1 flex flex-col min-h-0">
-          <div className="px-6 pt-2 space-y-4 flex-shrink-0">
+          <div className="p-4 sm:p-6 space-y-4 flex-shrink-0">
             {/* Project Name Input */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Project Name</label>
@@ -199,7 +214,7 @@ export function CreateProjectModal({ isOpen, onClose, onCreateProject }: CreateP
               </div>
             </div>
           </div>
-          <div className="flex-1 px-6 pb-0 min-h-0 flex flex-col">
+          <div className="flex-1 px-4 sm:px-6 pb-0 min-h-0 flex flex-col">
             <div className="flex-1 flex flex-col min-h-0">
               {/* Agents Grid - Scrollable area */}
               <div className="flex-1 pb-4 overflow-y-auto min-h-0">
@@ -244,7 +259,7 @@ export function CreateProjectModal({ isOpen, onClose, onCreateProject }: CreateP
               </div>
 
               {totalPages > 1 && (
-                <div className="px-2 py-3 border-t border-gray-200 bg-white flex items-center justify-between flex-shrink-0 sticky bottom-0">
+                <div className="px-4 sm:px-6 py-3 border-t border-border bg-background flex items-center justify-between flex-shrink-0 sticky bottom-0">
                   <div className="text-sm text-gray-700">
                     Showing {startIndex + 1} to {Math.min(endIndex, filteredMentors.length)} of {filteredMentors.length}{" "}
                     agents
@@ -278,7 +293,7 @@ export function CreateProjectModal({ isOpen, onClose, onCreateProject }: CreateP
           </div>
         </div>
 
-        <div className="flex-shrink-0 px-6 py-4 border-t border-gray-200 bg-white flex justify-end gap-3 sticky bottom-0">
+        <div className="flex-shrink-0 px-4 sm:px-6 py-4 border-t border-border bg-muted/50 rounded-b-lg flex justify-end gap-3 sticky bottom-0">
           <Button variant="outline" onClick={handleCancel} className="px-6 bg-transparent">
             Cancel
           </Button>
