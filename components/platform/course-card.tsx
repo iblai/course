@@ -9,9 +9,7 @@ interface CourseCardProps {
 }
 
 export function CourseCard({ id, title, image, type, isLoggedIn = false }: CourseCardProps) {
-  const href = isLoggedIn
-    ? `/course/${id}?loggedIn=true&image=${encodeURIComponent(image)}&title=${encodeURIComponent(title)}`
-    : "/login"
+  const href = isLoggedIn ? `/course/${id}` : "/login"
 
   return (
     <Link href={href} className="group">

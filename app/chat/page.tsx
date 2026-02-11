@@ -8,7 +8,8 @@ import { Header } from "@/components/platform/header"
 import { PlatformFooter } from "@/components/platform/platform-footer"
 import { AddSourcesDialog, type SelectedSource } from "@/components/chat-input/add-sources-dialog"
 import { ChatInputForm } from "@/components/chat-input-form"
-import { TooltipProvider } from "@/components/ui/tooltip-flowbite"
+import { LoadingMessage } from "@/components/loading-message"
+import { TooltipProvider, TooltipFlowbite } from "@/components/ui/tooltip-flowbite"
 import { Copy, Volume2, Reply, FileStack, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -160,7 +161,7 @@ export default function ChatPage() {
         <div className="flex flex-1 min-h-0">
           <div className="flex flex-1 min-h-0 items-center justify-center px-4 sm:px-6 py-6 sm:py-12 w-full max-w-full overflow-x-hidden sm:pl-8 sm:pr-8 md:pr-20">
             <div className="w-full max-w-6xl min-w-0">
-              <div className="w-full max-w-2xl mx-auto min-w-0">
+              <div className="w-full max-w-2xl mx-auto min-w-0 mt-[55px]">
                 <h2 className="text-center text-base sm:text-lg md:text-xl font-medium mb-6 sm:mb-8 bg-gradient-to-r from-[#00A3EC] to-[#6988FF] bg-clip-text text-transparent px-1">
                   How may I help you today?
                 </h2>
@@ -191,62 +192,57 @@ export default function ChatPage() {
               msg.role === "user" ? (
                 <div key={msg.id} className="flex justify-end mb-4">
                   <div className="rounded-xl px-4 py-2.5 max-w-[85%] sm:max-w-[75%] bg-gray-100">
-                    <p className="text-sm text-slate-800">{msg.content}</p>
+                    <p className="text-xs text-slate-800">{msg.content}</p>
                   </div>
                 </div>
               ) : (
                 <div key={msg.id} className="mb-6">
                   <div
-                    className="text-sm leading-relaxed prose prose-sm max-w-none pb-2"
+                    className="text-xs leading-relaxed prose prose-sm max-w-none pb-2"
                     style={{ color: "rgb(113,121,133)" }}
                     dangerouslySetInnerHTML={{ __html: formatAssistantMessage(msg.content) }}
                   />
                   <div className="flex items-center gap-0.5 mt-1.5 pt-1 text-gray-400">
-                    <button
-                      type="button"
-                      className="p-1.5 hover:bg-gray-100 hover:text-gray-600 rounded-md transition-colors"
-                      aria-label={copiedMessageId === msg.id ? "Copied" : "Copy"}
-                      onClick={async () => {
-                        try {
-                          await navigator.clipboard.writeText(msg.content)
-                          setCopiedMessageId(msg.id)
-                          setTimeout(() => setCopiedMessageId(null), 2000)
-                        } catch (_) {}
-                      }}
-                    >
-                      {copiedMessageId === msg.id ? (
-                        <Check className="h-4 w-4 text-green-600" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                    </button>
-                    <button type="button" className="p-1.5 hover:bg-gray-100 hover:text-gray-600 rounded-md transition-colors" aria-label="Read aloud">
-                      <Volume2 className="h-4 w-4" />
-                    </button>
-                    <button
-                      type="button"
-                      className="p-1.5 hover:bg-gray-100 hover:text-gray-600 rounded-md transition-colors"
-                      aria-label="Reply to message"
-                      onClick={() => setReplyingTo({ id: msg.id, content: msg.content })}
-                    >
-                      <Reply className="h-4 w-4" />
-                    </button>
+                    <TooltipFlowbite content={copiedMessageId === msg.id ? "Copied" : "Copy"} position="top">
+                      <button
+                        type="button"
+                        className="p-1.5 hover:bg-gray-100 hover:text-gray-600 rounded-md transition-colors"
+                        aria-label={copiedMessageId === msg.id ? "Copied" : "Copy"}
+                        onClick={async () => {
+                          try {
+                            await navigator.clipboard.writeText(msg.content)
+                            setCopiedMessageId(msg.id)
+                            setTimeout(() => setCopiedMessageId(null), 2000)
+                          } catch (_) {}
+                        }}
+                      >
+                        {copiedMessageId === msg.id ? (
+                          <Check className="h-4 w-4 text-[#00A3EC]" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </button>
+                    </TooltipFlowbite>
+                    <TooltipFlowbite content="Read aloud" position="top">
+                      <button type="button" className="p-1.5 hover:bg-gray-100 hover:text-gray-600 rounded-md transition-colors" aria-label="Read aloud">
+                        <Volume2 className="h-4 w-4" />
+                      </button>
+                    </TooltipFlowbite>
+                    <TooltipFlowbite content="Reply to message" position="top">
+                      <button
+                        type="button"
+                        className="p-1.5 hover:bg-gray-100 hover:text-gray-600 rounded-md transition-colors"
+                        aria-label="Reply to message"
+                        onClick={() => setReplyingTo({ id: msg.id, content: msg.content })}
+                      >
+                        <Reply className="h-4 w-4" />
+                      </button>
+                    </TooltipFlowbite>
                   </div>
                 </div>
               )
             )}
-            {isAssistantTyping && (
-              <div className="flex gap-1 mb-4">
-                <span className="sr-only">Assistant is typing</span>
-                {[0, 1, 2].map((i) => (
-                  <div
-                    key={i}
-                    className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"
-                    style={{ animationDelay: `${i * 0.15}s` }}
-                  />
-                ))}
-              </div>
-            )}
+            {isAssistantTyping && <LoadingMessage mentorName="agentAI" />}
             <div ref={messagesEndRef} />
           </div>
         </div>
@@ -284,30 +280,25 @@ export default function ChatPage() {
     </TooltipProvider>
   )
 
-  const userMessageIndices = messages.reduce<number[]>((acc, m, i) => {
-    if (m.role === "user") acc.push(i)
-    return acc
-  }, [])
-  const recentChatPreviews = userMessageIndices.map((_, i) => {
-    const msg = messages[userMessageIndices[i]]
-    const fallback = msg ? (msg.content.length > 50 ? msg.content.slice(0, 50).trim() + "…" : msg.content) : ""
-    return chatTitleByIndex[i] ?? fallback
-  })
+  // One sidebar item per chat (current conversation), not per message
+  const firstUserMessage = messages.find((m) => m.role === "user")
+  const currentChatPreview =
+    chatTitleByIndex[0] ??
+    (firstUserMessage
+      ? firstUserMessage.content.length > 50
+        ? firstUserMessage.content.slice(0, 50).trim() + "…"
+        : firstUserMessage.content
+      : "")
+  const recentChatPreviews = hasMessages ? [currentChatPreview] : []
 
   const handleRenameChat = (index: number, newName: string) => {
-    setChatTitleByIndex((prev) => ({ ...prev, [index]: newName }))
+    if (index !== 0) return
+    setChatTitleByIndex((prev) => ({ ...prev, 0: newName }))
   }
   const handleDeleteChat = (index: number) => {
-    const startIndex = userMessageIndices[index]
-    if (startIndex === undefined) return
-    setMessages((prev) => prev.slice(0, startIndex))
-    setChatTitleByIndex((prev) => {
-      const next = { ...prev }
-      userMessageIndices.forEach((_, i) => {
-        if (i >= index) delete next[i]
-      })
-      return next
-    })
+    if (index !== 0) return
+    setMessages([])
+    setChatTitleByIndex({})
   }
   const handlePinChat = (_index: number) => {
     // Optional: add to pinned list or show toast

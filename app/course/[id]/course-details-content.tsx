@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Image from "next/image"
-import { useRouter, useSearchParams, useParams } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import { SidebarLearner } from "@/components/platform/sidebar-learner"
 import { Header } from "@/components/platform/header"
 import { PlatformFooter } from "@/components/platform/platform-footer"
@@ -10,25 +10,14 @@ import { ChatButton } from "@/components/chat-button"
 import { VoiceColumn } from "@/components/voice-column"
 import { Clock, Calendar, Award, Globe, Play, Plus, Minus, DollarSign } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { getCourseMetadata } from "@/lib/course-metadata"
 
 export default function CourseDetailsContent() {
   const params = useParams()
   const id = params.id as string
   const router = useRouter()
-  const searchParams = useSearchParams()
   const isLoggedIn = true
-  const imageParam = searchParams.get("image")
-  const titleParam = searchParams.get("title")
-  const courseTitle = titleParam ? decodeURIComponent(titleParam) : "Course Title"
-  const projectCourseImages = ["/images/course-1.png", "/images/course-2.png", "/images/course-3.png", "/images/course-4.png"]
-  const defaultImageById = (courseId: string) => {
-    const idx = parseInt(courseId, 10)
-    if (Number.isNaN(idx) || idx < 1) return projectCourseImages[0]
-    return projectCourseImages[(idx - 1) % projectCourseImages.length]
-  }
-  const courseImage = imageParam
-    ? decodeURIComponent(imageParam)
-    : defaultImageById(id)
+  const { title: courseTitle, image: courseImage } = getCourseMetadata(id)
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -252,6 +241,7 @@ export default function CourseDetailsContent() {
           <div className="flex-1 flex justify-center items-center">
             <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin"></div>
           </div>
+          <PlatformFooter />
         </div>
       </div>
     )

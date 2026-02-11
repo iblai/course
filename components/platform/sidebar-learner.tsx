@@ -257,7 +257,7 @@ export function SidebarLearner({
   const SidebarContent = ({ isMobile = false }: { isMobile?: boolean }) => (
     <div className={cn("flex flex-col h-full", isMobile && "pb-[env(safe-area-inset-bottom)]")}>
       <div className="px-4 py-3.5 border-b" style={{ borderColor: "#D0E0FF" }}>
-        <Link href="/" className="flex items-center gap-3">
+        <Link href="/home" className="flex items-center gap-3">
           <Image
             src="/images/skillsAI-logo.webp"
             alt="ibl.ai Wink"
@@ -283,12 +283,12 @@ export function SidebarLearner({
                     variant="outline"
                     className={cn(
                       "justify-center items-center w-10 h-10 p-0 border-gray-300 rounded-lg mx-auto",
-                      pathname === "/"
+                      pathname === "/home"
                         ? "bg-blue-50 text-blue-600 border-blue-200"
                         : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
                     )}
                     onClick={() => {
-                      router.push("/")
+                      router.push("/home")
                     }}
                   >
                     <img src={`${SIDEBAR_ICONS}/square-pen.svg`} alt="" className="w-4 h-4 flex-shrink-0" aria-hidden />
@@ -301,12 +301,12 @@ export function SidebarLearner({
               variant="outline"
               className={cn(
                 "w-full justify-start gap-3 border-gray-300 rounded-lg py-2.5",
-                pathname === "/"
+                pathname === "/home"
                   ? "bg-blue-50 text-blue-600 border-blue-200"
                   : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
               )}
               onClick={() => {
-                router.push("/")
+                router.push("/home")
               }}
             >
               <img src={`${SIDEBAR_ICONS}/square-pen.svg`} alt="" className="w-4 h-4 flex-shrink-0" aria-hidden />

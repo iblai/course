@@ -8,9 +8,10 @@ import { PlatformFooter } from "@/components/platform/platform-footer"
 import { ProjectView } from "@/components/project-view"
 import { AddSourcesDialog, type SelectedSource } from "@/components/chat-input/add-sources-dialog"
 import { ChatInputForm } from "@/components/chat-input-form"
+import { LoadingMessage } from "@/components/loading-message"
 import { TooltipProvider, TooltipFlowbite } from "@/components/ui/tooltip-flowbite"
 import ChatButton from "@/components/chat-button"
-import { Copy, Volume2, Reply } from "lucide-react"
+import { Copy, Volume2, Reply, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const PROJECT_STORAGE_KEY = "project-data"
@@ -58,10 +59,58 @@ export default function ProjectPage() {
   const [isAssistantTyping, setIsAssistantTyping] = useState(false)
   const [isAddSourcesDialogOpen, setIsAddSourcesDialogOpen] = useState(false)
   const [selectedAttachments, setSelectedAttachments] = useState<SelectedSource[]>([])
+  const [chatTitleByIndex, setChatTitleByIndex] = useState<Record<number, string>>({})
+  const [replyingTo, setReplyingTo] = useState<{ id: string; content: string } | null>(null)
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null)
+  const [inputBarBottom, setInputBarBottom] = useState(56)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const hasMessages = messages.length > 0
+
+  // On mobile: position input bar above keyboard when keyboard is visible (same as chat page)
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.visualViewport) return
+    const vv = window.visualViewport
+    const update = () => {
+      const bottom =
+        vv.height > 0 && vv.height < window.innerHeight - 80
+          ? window.innerHeight - vv.height
+          : 56
+      setInputBarBottom(bottom)
+    }
+    update()
+    vv.addEventListener("resize", update)
+    vv.addEventListener("scroll", update)
+    return () => {
+      vv.removeEventListener("resize", update)
+      vv.removeEventListener("scroll", update)
+    }
+  }, [])
+
+  // One sidebar item per chat (current conversation), not per message
+  const firstUserMessage = messages.find((m) => m.role === "user")
+  const currentChatPreview =
+    chatTitleByIndex[0] ??
+    (firstUserMessage
+      ? firstUserMessage.content.length > 50
+        ? firstUserMessage.content.slice(0, 50).trim() + "…"
+        : firstUserMessage.content
+      : "")
+  const recentChatPreviews = hasMessages ? [currentChatPreview] : []
+
+  const handleRenameChat = (index: number, newName: string) => {
+    if (index !== 0) return
+    setChatTitleByIndex((prev) => ({ ...prev, 0: newName }))
+  }
+  const handleDeleteChat = (index: number) => {
+    if (index !== 0) return
+    setMessages([])
+    setChatTitleByIndex({})
+  }
+  const handlePinChat = (_index: number) => {
+    // Optional: add to pinned list or show toast
+  }
 
   useEffect(() => {
     if (typeof window === "undefined" || !id) return
@@ -98,6 +147,7 @@ export default function ProjectPage() {
     }
     setMessages((prev) => [...prev, userMessage])
     setInputValue("")
+    setReplyingTo(null)
     setIsAssistantTyping(true)
     setTimeout(() => {
       const assistantMessage: ChatMessage = {
@@ -120,14 +170,40 @@ export default function ProjectPage() {
 
   if (!ready) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#00A3EC] border-t-transparent rounded-full animate-spin" />
+      <div className="h-screen overflow-y-auto bg-background">
+        <SidebarLearner
+          isCollapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+          isMobileOpen={mobileMenuOpen}
+          onMobileClose={() => setMobileMenuOpen(false)}
+          showAdminButtons={true}
+          isLoggedIn={true}
+        />
+        <div
+          className={cn(
+            "flex flex-col min-h-screen transition-all duration-300",
+            sidebarCollapsed ? "md:ml-16" : "md:ml-64",
+          )}
+        >
+          <Header
+            onMobileMenuToggle={() => setMobileMenuOpen(true)}
+            isLoggedIn={true}
+            showLogo={true}
+            showBackButton={true}
+            showModelSelector={true}
+            sidebarCollapsed={sidebarCollapsed}
+          />
+          <div className="flex flex-1 flex justify-center items-center">
+            <div className="w-8 h-8 border-4 border-[#00A3EC] border-t-transparent rounded-full animate-spin" />
+          </div>
+          <PlatformFooter />
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen overflow-y-auto bg-background">
       <SidebarLearner
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -135,6 +211,10 @@ export default function ProjectPage() {
         onMobileClose={() => setMobileMenuOpen(false)}
         showAdminButtons={true}
         isLoggedIn={true}
+        recentChatPreviews={recentChatPreviews}
+        onRenameChat={handleRenameChat}
+        onDeleteChat={handleDeleteChat}
+        onPinChat={handlePinChat}
       />
 
       <div
@@ -152,16 +232,16 @@ export default function ProjectPage() {
           sidebarCollapsed={sidebarCollapsed}
         />
 
-        <div
-          className={cn(
-            "flex flex-1 min-h-0 flex-col overflow-hidden",
-            hasMessages && "pb-[56px]",
-          )}
-        >
-          <main className="flex-1 min-h-0 flex flex-col transition-all duration-300 overflow-hidden">
+        <div className="flex flex-1">
+          <main
+            className={cn(
+              "flex-1 transition-all duration-300 pb-[200px] md:pb-[200px]",
+              hasMessages && "pb-[56px]",
+            )}
+          >
+            <div className="flex">
+              <div className="flex-1 pt-0 pb-6 px-4 md:px-8 w-full max-w-4xl mx-auto">
             {!hasMessages ? (
-              <div className="flex-1 min-h-0 overflow-y-auto">
-                <div className="py-6 px-4 md:px-8">
                   <ProjectView
                     projectName={projectName}
                     projectSlug={projectSlug}
@@ -178,30 +258,41 @@ export default function ProjectPage() {
                     isListening={isListening}
                     onVoiceClick={handleDictationClick}
                   />
-                </div>
-              </div>
             ) : (
-              <>
-                <div className="flex-1 min-h-0 overflow-y-auto">
-                  <div className="w-full max-w-3xl mx-auto py-6 pb-6 px-4 md:px-6">
+                    <div className="w-full max-w-3xl mx-auto py-6 pb-6 px-4 md:px-6">
                     {messages.map((msg) =>
                       msg.role === "user" ? (
                         <div key={msg.id} className="flex justify-end mb-4">
                           <div className="rounded-xl px-4 py-2.5 max-w-[85%] sm:max-w-[75%] bg-gray-100">
-                            <p className="text-sm text-slate-800">{msg.content}</p>
+                            <p className="text-xs text-slate-800">{msg.content}</p>
                           </div>
                         </div>
                       ) : (
                         <div key={msg.id} className="mb-6">
                           <div
-                            className="text-sm leading-relaxed prose prose-sm max-w-none pb-[15px]"
+                            className="text-xs leading-relaxed prose prose-sm max-w-none pb-[15px]"
                             style={{ color: "rgb(113,121,133)" }}
                             dangerouslySetInnerHTML={{ __html: formatAssistantMessage(msg.content) }}
                           />
                           <div className="flex items-center gap-0.5 mt-3 pt-2 text-gray-400">
-                            <TooltipFlowbite content="Copy" position="top">
-                              <button type="button" className="p-1.5 hover:bg-gray-100 hover:text-gray-600 rounded-md transition-colors" aria-label="Copy">
-                                <Copy className="h-4 w-4" />
+                            <TooltipFlowbite content={copiedMessageId === msg.id ? "Copied" : "Copy"} position="top">
+                              <button
+                                type="button"
+                                className="p-1.5 hover:bg-gray-100 hover:text-gray-600 rounded-md transition-colors"
+                                aria-label={copiedMessageId === msg.id ? "Copied" : "Copy"}
+                                onClick={async () => {
+                                  try {
+                                    await navigator.clipboard.writeText(msg.content)
+                                    setCopiedMessageId(msg.id)
+                                    setTimeout(() => setCopiedMessageId(null), 2000)
+                                  } catch (_) {}
+                                }}
+                              >
+                                {copiedMessageId === msg.id ? (
+                                  <Check className="h-4 w-4 text-[#00A3EC]" />
+                                ) : (
+                                  <Copy className="h-4 w-4" />
+                                )}
                               </button>
                             </TooltipFlowbite>
                             <TooltipFlowbite content="Read aloud" position="top">
@@ -210,7 +301,12 @@ export default function ProjectPage() {
                               </button>
                             </TooltipFlowbite>
                             <TooltipFlowbite content="Reply to message" position="top">
-                              <button type="button" className="p-1.5 hover:bg-gray-100 hover:text-gray-600 rounded-md transition-colors" aria-label="Reply to message">
+                              <button
+                                type="button"
+                                className="p-1.5 hover:bg-gray-100 hover:text-gray-600 rounded-md transition-colors"
+                                aria-label="Reply to message"
+                                onClick={() => setReplyingTo({ id: msg.id, content: msg.content })}
+                              >
                                 <Reply className="h-4 w-4" />
                               </button>
                             </TooltipFlowbite>
@@ -218,27 +314,16 @@ export default function ProjectPage() {
                         </div>
                       ),
                     )}
-                    {isAssistantTyping && (
-                      <div className="flex gap-1 mb-4">
-                        <span className="sr-only">Assistant is typing</span>
-                        {[0, 1, 2].map((i) => (
-                          <div
-                            key={i}
-                            className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"
-                            style={{ animationDelay: `${i * 0.15}s` }}
-                          />
-                        ))}
-                      </div>
-                    )}
+                    {isAssistantTyping && <LoadingMessage mentorName="agentAI" />}
                     <div ref={messagesEndRef} />
-                  </div>
-                </div>
-              </>
+                    </div>
             )}
 
             {/* Chat Button - sticky right side (same as other pages) */}
             <div className="fixed top-20 right-0 z-40 flex">
               <ChatButton />
+            </div>
+              </div>
             </div>
           </main>
         </div>
@@ -247,12 +332,12 @@ export default function ProjectPage() {
           <TooltipProvider>
             <div
               className={cn(
-                "fixed right-0 z-20 bg-white/95 backdrop-blur px-4 pb-2 transition-[left] duration-300",
-                sidebarCollapsed ? "left-0 md:left-16" : "left-0 md:left-64",
+                "fixed right-0 left-0 z-20 bg-white/95 backdrop-blur px-3 sm:px-4 pb-2 pt-2 transition-[left] duration-300",
+                sidebarCollapsed ? "md:left-16" : "md:left-64",
               )}
-              style={{ borderColor: "#F1F2F3", bottom: 56 }}
+              style={{ borderColor: "#F1F2F3", bottom: inputBarBottom }}
             >
-              <div className="w-full max-w-3xl mx-auto">
+              <div className="w-full max-w-3xl mx-auto min-w-0">
                 <ChatInputForm
                   value={inputValue}
                   onChange={setInputValue}
@@ -263,6 +348,8 @@ export default function ProjectPage() {
                   isListening={isListening}
                   selectedAttachments={selectedAttachments}
                   onRemoveAttachment={(id) => setSelectedAttachments((prev) => prev.filter((s) => s.id !== id))}
+                  replyingTo={replyingTo}
+                  onClearReply={() => setReplyingTo(null)}
                   compact
                   fileInputRef={fileInputRef}
                 />

@@ -160,9 +160,12 @@ export function CustomCourseModal({ isOpen, onClose, messages }: CustomCourseMod
           </div>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto">
+        {/* Content - scrollable */}
+        <div className="flex-1 overflow-y-auto min-h-0">
           <CustomCourseContent />
+        </div>
+        {/* Footer - fixed to bottom of modal */}
+        <div className="flex-shrink-0">
           <PlatformFooter />
         </div>
       </div>

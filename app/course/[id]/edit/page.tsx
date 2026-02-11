@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useParams, useSearchParams } from "next/navigation"
+import { useParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { SidebarLearner } from "@/components/platform/sidebar-learner"
@@ -30,6 +30,7 @@ import {
 import { TooltipFlowbite, TooltipProvider } from "@/components/ui/tooltip-flowbite"
 import { RotateCw, Pencil, Trash2, Plus, ChevronDown, ChevronRight, FileText, Upload, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { getCourseMetadata } from "@/lib/course-metadata"
 import { toast } from "sonner"
 
 const DATE_INPUT_CLASS =
@@ -48,9 +49,8 @@ type SectionItem = {
 
 export default function CourseEditPage() {
   const params = useParams()
-  const searchParams = useSearchParams()
   const id = params.id as string
-  const courseTitle = searchParams.get("title") || "Course"
+  const courseTitle = getCourseMetadata(id).title
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -408,10 +408,10 @@ export default function CourseEditPage() {
           sidebarCollapsed={sidebarCollapsed}
         />
 
-        <div className="flex flex-1">
-          <main className="flex-1 transition-all duration-300 pb-[200px] md:pb-[200px] min-w-0">
-            <div className="flex min-w-0">
-              <div className="flex-1 min-w-0 w-full pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:pl-8 sm:pr-8 md:pr-20 py-4 sm:py-8 max-w-4xl mx-auto overflow-x-hidden">
+        <div className="flex flex-1 min-h-0 min-w-0">
+          <main className="flex-1 flex flex-col min-h-0 min-w-0 transition-all duration-300 pb-[200px] md:pb-[200px] overflow-x-hidden">
+            <div className="flex flex-1 min-h-0 min-w-0">
+              <div className="flex-1 min-h-0 min-w-0 w-full pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:pl-8 sm:pr-8 md:pr-20 py-4 sm:py-8 max-w-4xl mx-auto overflow-x-hidden">
                 {/* Page header - sticky */}
                 <div className="sticky top-0 z-10 pt-4 pb-4 mb-4 sm:mb-8 bg-background border-b border-gray-100">
                   <h1 className="text-lg sm:text-2xl font-semibold mb-1 text-[var(--sidebar-foreground)] break-words">
@@ -429,7 +429,7 @@ export default function CourseEditPage() {
                         View About Page
                       </Button>
                     </Link>
-                    <Link href={`/course/${id}/schedule${courseTitle ? `?title=${encodeURIComponent(courseTitle)}` : ""}`} className="w-full sm:w-auto">
+                    <Link href={`/course/${id}/schedule`} className="w-full sm:w-auto">
                       <Button
                         variant="outline"
                         className="w-full sm:w-auto border-[#2563EB] text-[#2563EB] hover:bg-blue-50 text-sm"
@@ -470,7 +470,7 @@ export default function CourseEditPage() {
                       <Button
                         variant="outline"
                         onClick={() => setIsOutlineOpen(true)}
-                        className="flex-1 sm:flex-none min-w-0 text-xs sm:text-sm border-[#2563EB] text-[#2563EB] hover:bg-blue-50"
+                        className="flex-1 sm:flex-none min-w-0 text-xs sm:text-sm border-[#2563EB] text-[#2563EB] hover:bg-blue-50 px-[29px]"
                       >
                         <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2 shrink-0" />
                         See course outline
@@ -634,11 +634,12 @@ export default function CourseEditPage() {
                 </section>
               </div>
 
-              <div className="fixed top-20 right-0 z-40 flex">
+              <div className="fixed top-20 right-2 sm:right-4 md:right-0 z-40 flex">
                 <ChatButton />
               </div>
             </div>
 
+            {/* Footer - fixed to bottom (PlatformFooter uses fixed positioning) */}
             <PlatformFooter />
           </main>
         </div>

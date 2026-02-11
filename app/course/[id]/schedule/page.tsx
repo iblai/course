@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useParams, useSearchParams } from "next/navigation"
+import { useParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { SidebarLearner } from "@/components/platform/sidebar-learner"
@@ -13,12 +13,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
+import { getCourseMetadata } from "@/lib/course-metadata"
 
 export default function CourseSchedulePage() {
   const params = useParams()
-  const searchParams = useSearchParams()
   const id = params.id as string
-  const courseTitle = searchParams.get("title") || "Course"
+  const courseTitle = getCourseMetadata(id).title
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)

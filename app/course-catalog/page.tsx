@@ -144,7 +144,7 @@ function CourseCatalogContent() {
     if (!isLoggedIn) {
       router.push("/login")
     } else {
-      window.location.href = `/course/${course.id}?loggedIn=true&image=${encodeURIComponent(course.image)}&title=${encodeURIComponent(course.title)}`
+      router.push(`/course/${course.id}`)
     }
   }
 

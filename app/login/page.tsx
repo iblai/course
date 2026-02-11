@@ -329,7 +329,7 @@ export default function AuthPage() {
           if (prev <= 1) {
             clearInterval(timer)
             localStorage.setItem("isAuthenticated", "true")
-            router.push("/")
+            router.push("/home")
             return 0
           }
           return prev - 1

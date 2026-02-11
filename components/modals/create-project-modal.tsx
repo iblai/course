@@ -144,17 +144,15 @@ export function CreateProjectModal({ isOpen, onClose, onCreateProject }: CreateP
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        className="max-w-4xl w-[95vw] p-0 sm:p-0 gap-0"
+        className="max-w-4xl w-[95vw] p-0 sm:p-0 gap-0 overflow-hidden flex flex-col"
         style={{
           height: "85vh",
           maxHeight: "85vh",
-          display: "flex",
-          flexDirection: "column",
         }}
         hideCloseButton
         noPadding
       >
-        {/* Header - same layout as Add sources: flex row with title + close in header */}
+        {/* Header - fixed, does not scroll */}
         <div className="flex items-start justify-between p-4 sm:p-6 border-b border-border bg-background flex-shrink-0">
           <div className="flex flex-col gap-2">
             <DialogTitle className="sr-only">New Project</DialogTitle>
@@ -172,9 +170,9 @@ export function CreateProjectModal({ isOpen, onClose, onCreateProject }: CreateP
           </div>
         </div>
 
-        {/* Scrollable Content */}
-        <div className="flex-1 flex flex-col min-h-0">
-          <div className="p-4 sm:p-6 space-y-4 flex-shrink-0">
+        {/* Scrollable body only - header and footer stay fixed on mobile */}
+        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
+          <div className="p-4 sm:p-6 space-y-4 pb-0">
             {/* Project Name Input */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Project Name</label>
@@ -213,87 +211,86 @@ export function CreateProjectModal({ isOpen, onClose, onCreateProject }: CreateP
                 <MentorCategories onFiltersChange={handleFiltersChange} />
               </div>
             </div>
-          </div>
-          <div className="flex-1 px-4 sm:px-6 pb-0 min-h-0 flex flex-col">
-            <div className="flex-1 flex flex-col min-h-0">
-              {/* Agents Grid - Scrollable area */}
-              <div className="flex-1 pb-4 overflow-y-auto min-h-0">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {currentMentors.map((mentor) => {
-                    const isSelected = selectedMentors.some((m) => m.id === mentor.id)
-                    return (
-                      <div
-                        key={mentor.id}
-                        onClick={() => toggleMentorSelection(mentor)}
-                        className={`flex items-center gap-3 p-2 rounded-lg border cursor-pointer transition-all ${
-                          isSelected
-                            ? "border-[#00A3EC] bg-blue-50"
-                            : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                        }`}
-                      >
-                        <img
-                          src={mentor.avatar || "/placeholder.svg"}
-                          alt={mentor.title}
-                          className="w-10 h-10 rounded-full object-cover flex-shrink-0"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-gray-900 text-sm truncate">{mentor.title}</h4>
-                          <p className="text-xs text-gray-600 line-clamp-2">{mentor.description}</p>
-                        </div>
-                        {isSelected && (
-                          <div className="flex-shrink-0">
-                            <div className="w-5 h-5 bg-[#00A3EC] rounded-full flex items-center justify-center">
-                              <Check className="w-3 h-3 text-white" />
-                            </div>
-                          </div>
-                        )}
+
+            {/* Agents Grid */}
+            <div className="px-0 pb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {currentMentors.map((mentor) => {
+                  const isSelected = selectedMentors.some((m) => m.id === mentor.id)
+                  return (
+                    <div
+                      key={mentor.id}
+                      onClick={() => toggleMentorSelection(mentor)}
+                      className={`flex items-center gap-3 p-2 rounded-lg border cursor-pointer transition-all ${
+                        isSelected
+                          ? "border-[#00A3EC] bg-blue-50"
+                          : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                      }`}
+                    >
+                      <img
+                        src={mentor.avatar || "/placeholder.svg"}
+                        alt={mentor.title}
+                        className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-gray-900 text-sm truncate">{mentor.title}</h4>
+                        <p className="text-xs text-gray-600 line-clamp-2">{mentor.description}</p>
                       </div>
-                    )
-                  })}
-                  {currentMentors.length === 0 && (
-                    <div className="col-span-full flex items-center justify-center py-8 text-gray-500">
-                      No agents found matching your search.
+                      {isSelected && (
+                        <div className="flex-shrink-0">
+                          <div className="w-5 h-5 bg-[#00A3EC] rounded-full flex items-center justify-center">
+                            <Check className="w-3 h-3 text-white" />
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  )
+                })}
+                {currentMentors.length === 0 && (
+                  <div className="col-span-full flex items-center justify-center py-8 text-gray-500">
+                    No agents found matching your search.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {totalPages > 1 && (
+              <div className="px-0 py-3 border-t border-border bg-background flex items-center justify-between flex-shrink-0">
+                <div className="text-sm text-gray-700">
+                  Showing {startIndex + 1} to {Math.min(endIndex, filteredMentors.length)} of {filteredMentors.length}{" "}
+                  agents
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="h-8 w-8 p-0"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm text-gray-700 px-2">
+                    <span className="sm:hidden">{currentPage}/{totalPages}</span>
+                    <span className="hidden sm:inline">Page {currentPage} of {totalPages}</span>
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                    className="h-8 w-8 p-0"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
-
-              {totalPages > 1 && (
-                <div className="px-4 sm:px-6 py-3 border-t border-border bg-background flex items-center justify-between flex-shrink-0 sticky bottom-0">
-                  <div className="text-sm text-gray-700">
-                    Showing {startIndex + 1} to {Math.min(endIndex, filteredMentors.length)} of {filteredMentors.length}{" "}
-                    agents
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                      disabled={currentPage === 1}
-                      className="h-8 w-8 p-0"
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <span className="text-sm text-gray-700 px-2">
-                      Page {currentPage} of {totalPages}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                      disabled={currentPage === totalPages}
-                      className="h-8 w-8 p-0"
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
+            )}
           </div>
         </div>
 
-        <div className="flex-shrink-0 px-4 sm:px-6 py-4 border-t border-border bg-muted/50 rounded-b-lg flex justify-end gap-3 sticky bottom-0">
+        {/* Footer - fixed, does not scroll */}
+        <div className="flex-shrink-0 px-4 sm:px-6 py-4 border-t border-border bg-muted/50 rounded-b-lg flex justify-end gap-3">
           <Button variant="outline" onClick={handleCancel} className="px-6 bg-transparent">
             Cancel
           </Button>

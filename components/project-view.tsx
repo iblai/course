@@ -9,21 +9,11 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
-  MoreVertical,
   MoreHorizontal,
-  Share,
-  Edit3,
-  Folder,
-  RotateCcw,
   Trash2,
   FileText,
   FileImage,
@@ -47,7 +37,6 @@ interface ProjectViewProps {
   onPhoneCallClick: () => void
   onToolSelection?: (toolType: string) => void
   selectedToolType?: string
-  onChatSelect?: (chatId: string, chatTitle: string) => void
   /** Prompt box: same as chat page when provided */
   value: string
   onChange: (value: string) => void
@@ -58,14 +47,6 @@ interface ProjectViewProps {
   fileInputRef?: React.RefObject<HTMLInputElement | null>
   isListening?: boolean
   onVoiceClick?: () => void
-}
-
-interface ChatItem {
-  id: string
-  title: string
-  subtitle?: string
-  timestamp: string
-  slug: string
 }
 
 interface ProjectFile {
@@ -92,7 +73,6 @@ export function ProjectView({
   onPhoneCallClick,
   onToolSelection,
   selectedToolType = "",
-  onChatSelect,
   value: inputValue,
   onChange: setInputValue,
   placeholder = "Ask anything",
@@ -107,10 +87,6 @@ export function ProjectView({
   const [isInstructionsModalOpen, setIsInstructionsModalOpen] = useState(false)
   const [projectFiles, setProjectFiles] = useState<ProjectFile[]>([])
   const [projectInstructions, setProjectInstructions] = useState("")
-  const [editingChatId, setEditingChatId] = useState<string | null>(null)
-  const [editingTitle, setEditingTitle] = useState("")
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
-  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null)
   const [isAddMentorModalOpen, setIsAddMentorModalOpen] = useState(false)
 
   const [projectMentors, setProjectMentors] = useState<ProjectMentor[]>(initialProjectMentors)
@@ -119,76 +95,6 @@ export function ProjectView({
     console.log("[v0] ProjectView received mentors:", initialProjectMentors)
     setProjectMentors(initialProjectMentors)
   }, [initialProjectMentors])
-
-  // Mock projects data (same as sidebar) - get chats for current project
-  const projects = [
-    {
-      id: "1",
-      title: "Web Development Bootcamp",
-      slug: "web-development-bootcamp",
-      chats: [
-        { id: "chat-1", title: "HTML Basics", slug: "html-basics", timestamp: "2 hours ago" },
-        { id: "chat-2", title: "CSS Fundamentals", slug: "css-fundamentals", timestamp: "1 day ago" },
-        { id: "chat-3", title: "JavaScript Introduction", slug: "javascript-introduction", timestamp: "2 days ago" },
-      ],
-    },
-    {
-      id: "2",
-      title: "Data Science Fundamentals",
-      slug: "data-science-fundamentals",
-      chats: [
-        { id: "chat-4", title: "Python for Data Science", slug: "python-for-data-science", timestamp: "3 hours ago" },
-        { id: "chat-5", title: "Data Visualization", slug: "data-visualization", timestamp: "1 day ago" },
-      ],
-    },
-    {
-      id: "3",
-      title: "AI for Business Leaders",
-      slug: "ai-for-business-leaders",
-      chats: [
-        { id: "chat-6", title: "AI Strategy", slug: "ai-strategy", timestamp: "4 hours ago" },
-        { id: "chat-7", title: "Implementation Planning", slug: "implementation-planning", timestamp: "2 days ago" },
-      ],
-    },
-    {
-      id: "4",
-      title: "Course - Generative AI For coding",
-      slug: "course-generative-ai-for-coding",
-      chats: [
-        {
-          id: "1",
-          title: "Lesson on AI Tools",
-          slug: "lesson-on-ai-tools",
-          timestamp: "2 hours ago",
-        },
-        {
-          id: "2",
-          title: "LLMs for Code Lesson",
-          slug: "llms-for-code-lesson",
-          subtitle: "no the pdf is missing a lot content as we have in canvas",
-          timestamp: "1 day ago",
-        },
-        {
-          id: "3",
-          title: "Generative AI for Coding",
-          slug: "generative-ai-for-coding",
-          subtitle: "I need the separate pdf for each of the lessons",
-          timestamp: "2 days ago",
-        },
-      ],
-    },
-  ]
-
-  // Find current project and its chats
-  const currentProject = projects.find((p) => p.slug === projectSlug)
-  const chats = currentProject?.chats || []
-
-  // Mock projects for move functionality
-  const otherProjects = [
-    { id: "1", name: "Web Development Bootcamp" },
-    { id: "2", name: "Data Science Fundamentals" },
-    { id: "3", name: "AI for Business Leaders" },
-  ]
 
   const handleAddFiles = () => {
     setIsFilesModalOpen(true)
@@ -206,54 +112,6 @@ export function ProjectView({
 
   const handleFilesChange = (files: ProjectFile[]) => {
     setProjectFiles(files)
-  }
-
-  const handleChatClick = (chatId: string) => {
-    if (editingChatId === chatId) return // Don't navigate if editing
-
-    const selectedChat = chats.find((chat) => chat.id === chatId)
-    if (selectedChat && onChatSelect) {
-      onChatSelect(chatId, selectedChat.title)
-    }
-  }
-
-  const handleRenameChat = (chatId: string, currentTitle: string) => {
-    setEditingChatId(chatId)
-    setEditingTitle(currentTitle)
-  }
-
-  const handleSaveRename = (chatId: string) => {
-    // Update chat title in the list
-    const updatedChats = chats.map((chat) => (chat.id === chatId ? { ...chat, title: editingTitle } : chat))
-    // In a real app, you would update the state or make an API call here
-    setEditingChatId(null)
-    setEditingTitle("")
-  }
-
-  const handleCancelRename = () => {
-    setEditingChatId(null)
-    setEditingTitle("")
-  }
-
-  const handleMoveToProject = (chatId: string, projectId: string) => {
-    console.log(`Moving chat ${chatId} to project ${projectId}`)
-    // TODO: Implement move functionality
-  }
-
-  const handleRemoveFromProject = (chatId: string) => {
-    console.log(`Removing chat ${chatId} from project`)
-    // TODO: Implement remove from project functionality
-  }
-
-  const handleDeleteChat = (chatId: string) => {
-    // Remove chat from the list
-    // In a real app, you would update the state or make an API call here
-    setShowDeleteConfirm(null)
-  }
-
-  const handleShareChat = (chatId: string) => {
-    console.log(`Sharing chat ${chatId}`)
-    // TODO: Implement share functionality
   }
 
   const handleAddMentor = () => {
@@ -508,140 +366,6 @@ export function ProjectView({
               </div>
             )}
           </div>
-
-          {/* Recents Section */}
-          {chats.length > 0 && (
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold text-[var(--sidebar-foreground)]">Recents</h2>
-              <div className="space-y-0">
-                {chats.map((chat, index) => (
-                  <div key={chat.id}>
-                    <div
-                      className={`cursor-pointer hover:bg-[#F0F1F0] transition-colors group px-4 py-4 ${
-                        chats.length === 1
-                          ? "hover:rounded-lg"
-                          : index === 0
-                            ? "hover:rounded-t-lg"
-                            : index === chats.length - 1
-                              ? "hover:rounded-b-lg"
-                              : ""
-                      }`}
-                      onClick={() => handleChatClick(chat.id)}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="flex-1 min-w-0">
-                          {editingChatId === chat.id ? (
-                            <div className="flex items-center gap-2">
-                              <Input
-                                value={editingTitle}
-                                onChange={(e) => setEditingTitle(e.target.value)}
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter") {
-                                    handleSaveRename(chat.id)
-                                  } else if (e.key === "Escape") {
-                                    handleCancelRename()
-                                  }
-                                }}
-                                onBlur={() => handleSaveRename(chat.id)}
-                                className="flex-1"
-                                autoFocus
-                              />
-                            </div>
-                          ) : (
-                            <>
-                              <h3 className="font-medium text-[var(--sidebar-foreground)] mb-1">{chat.title}</h3>
-                              {chat.subtitle && (
-                                <p className="text-sm text-[var(--sidebar-foreground)] mb-2 line-clamp-2">{chat.subtitle}</p>
-                              )}
-                              <p className="text-xs text-[var(--muted-foreground)]">{chat.timestamp}</p>
-                            </>
-                          )}
-                        </div>
-                        <div
-                          className={`transition-opacity ${
-                            openDropdownId === chat.id ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                          }`}
-                        >
-                          <DropdownMenu onOpenChange={(open) => setOpenDropdownId(open ? chat.id : null)}>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-56">
-                              <DropdownMenuItem
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleShareChat(chat.id)
-                                }}
-                              >
-                                <Share className="mr-2 h-4 w-4" />
-                                Share
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleRenameChat(chat.id, chat.title)
-                                }}
-                              >
-                                <Edit3 className="mr-2 h-4 w-4" />
-                                Rename
-                              </DropdownMenuItem>
-                              <DropdownMenuSub>
-                                <DropdownMenuSubTrigger>
-                                  <Folder className="mr-2 h-4 w-4" />
-                                  Move to project
-                                </DropdownMenuSubTrigger>
-                                <DropdownMenuSubContent>
-                                  {otherProjects.map((project) => (
-                                    <DropdownMenuItem
-                                      key={project.id}
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        handleMoveToProject(chat.id, project.id)
-                                      }}
-                                    >
-                                      {project.name}
-                                    </DropdownMenuItem>
-                                  ))}
-                                </DropdownMenuSubContent>
-                              </DropdownMenuSub>
-                              <DropdownMenuItem
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleRemoveFromProject(chat.id)
-                                }}
-                              >
-                                <RotateCcw className="mr-2 h-4 w-4" />
-                                Remove from {projectName}
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setShowDeleteConfirm(chat.id)
-                                }}
-                                className="text-red-600 focus:text-red-600"
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </div>
-                    </div>
-                    {index < chats.length - 1 && <div className="border-b border-gray-200" />}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
@@ -671,25 +395,6 @@ export function ProjectView({
         existingMentors={projectMentors}
       />
 
-      {/* Delete Confirmation Dialog */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-sm mx-4">
-            <h3 className="text-lg font-semibold text-[var(--sidebar-foreground)] mb-2">Delete chat?</h3>
-            <p className="text-[var(--sidebar-foreground)] mb-4">
-              Are you sure you want to delete this chat? This action cannot be undone.
-            </p>
-            <div className="flex gap-3 justify-end">
-              <Button variant="outline" onClick={() => setShowDeleteConfirm(null)}>
-                Cancel
-              </Button>
-              <Button variant="destructive" onClick={() => handleDeleteChat(showDeleteConfirm)}>
-                Delete
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

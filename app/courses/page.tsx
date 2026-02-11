@@ -201,25 +201,15 @@ function CoursesPageContent() {
 
   const handleActionClick = (action: string, courseId: number) => {
     if (action === "viewAbout") {
-      const course = courses.find((c) => c.id === courseId)
-      const title = course ? encodeURIComponent(course.title) : ""
-      const image = course?.thumbnail ? encodeURIComponent(course.thumbnail) : ""
-      const query = new URLSearchParams()
-      if (title) query.set("title", title)
-      if (image) query.set("image", image)
-      router.push(`/course/${courseId}${query.toString() ? `?${query.toString()}` : ""}`)
+      router.push(`/course/${courseId}`)
       return
     }
     if (action === "schedule") {
-      const course = courses.find((c) => c.id === courseId)
-      const title = course ? encodeURIComponent(course.title) : ""
-      router.push(`/course/${courseId}/schedule${title ? `?title=${title}` : ""}`)
+      router.push(`/course/${courseId}/schedule`)
       return
     }
     if (action === "edit") {
-      const course = courses.find((c) => c.id === courseId)
-      const title = course ? encodeURIComponent(course.title) : ""
-      router.push(`/course/${courseId}/edit${title ? `?title=${title}` : ""}`)
+      router.push(`/course/${courseId}/edit`)
       return
     }
     if (action === "delete") {

@@ -149,7 +149,7 @@ export function TooltipFlowbite({ content, children, position = "top", className
   ) : null
 
   return (
-    <div ref={triggerRef} className="relative inline-block" onMouseEnter={showTooltip} onMouseLeave={hideTooltip} onClick={handleClick}>
+    <div ref={triggerRef} className="relative inline-flex items-center justify-center" onMouseEnter={showTooltip} onMouseLeave={hideTooltip} onClick={handleClick}>
       {children}
       {tooltipContent}
     </div>

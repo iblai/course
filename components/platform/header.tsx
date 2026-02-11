@@ -111,12 +111,12 @@ export function Header({
           />
 
           {/* Right Section - Actions */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center justify-center gap-3 shrink-0 self-stretch">
             {/* Mobile: Chat button (opens chat panel) */}
             <button
               type="button"
               onClick={() => document.dispatchEvent(new CustomEvent("open-chat"))}
-              className="md:hidden w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors flex-shrink-0"
+              className="md:hidden w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors flex-shrink-0 self-center"
               aria-label="Open chat"
             >
               <Image src="/images/toolsAI-logo.png" alt="Chat" width={22} height={22} className="w-5 h-5 object-contain" />
@@ -128,7 +128,7 @@ export function Header({
                     <DropdownMenuTrigger asChild>
                       <button
                         type="button"
-                        className="w-8 h-8 rounded-full overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex-shrink-0"
+                        className="w-8 h-8 rounded-full overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex-shrink-0 flex items-center justify-center self-center"
                         aria-label="Profile menu"
                       >
                         <Image

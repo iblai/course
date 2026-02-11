@@ -1,7 +1,6 @@
 "use client"
 
 import { useRef } from "react"
-import Image from "next/image"
 import { Textarea } from "@/components/ui/textarea"
 import { TooltipFlowbite, TooltipProvider } from "@/components/ui/tooltip-flowbite"
 import { cn } from "@/lib/utils"
@@ -67,13 +66,11 @@ export function ChatInputForm({
       style={{ borderColor: "#F1F2F3" }}
     >
       {replyingTo && (
-        <div className="flex items-center gap-2 px-4 pt-3 pb-1 min-h-0 shrink-0">
+        <div className="flex items-center gap-2 pl-2.5 pr-2.5 pt-3 pb-2.5 min-h-0 shrink-0">
           <div className="relative flex items-start gap-2 rounded-md bg-gray-100/90 border border-gray-200/80 py-2 pl-2 pr-8 min-w-0 max-w-full flex-1">
-            <Image src="/images/toolsAI-logo.png" alt="" width={20} height={20} className="h-5 w-5 shrink-0 mt-0.5" />
             <div className="flex flex-col min-w-0 text-left flex-1">
-              <span className="text-xs font-medium text-slate-600">
-                <span style={{ color: "#1e3a5f" }}>mentor</span>
-                <span className="text-[#2563EB]">AI</span>
+              <span className="text-xs font-medium bg-gradient-to-r from-[#00A3EC] to-[#6988FF] bg-clip-text text-transparent">
+                agentAI
               </span>
               <p className="text-sm text-slate-700 line-clamp-2 break-words mt-0.5" title={replyingTo.content}>
                 {replyingTo.content}
@@ -93,7 +90,7 @@ export function ChatInputForm({
         </div>
       )}
       {selectedAttachments.length > 0 && (
-        <div className="flex items-center gap-2 px-4 pt-3 pb-1 overflow-x-auto flex-nowrap scrollbar-hide min-h-0 shrink-0">
+        <div className="flex items-center gap-2 pl-2.5 pr-2.5 pt-3 pb-2.5 overflow-x-auto flex-nowrap scrollbar-hide min-h-0 shrink-0">
           {selectedAttachments.map((source) => (
             <div
               key={source.id}
