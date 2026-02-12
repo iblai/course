@@ -54,7 +54,7 @@ export function JumpstartTemplates({
   return (
     <>
       <div className="w-full max-w-6xl mx-auto px-2 sm:px-4 min-w-0">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
           {templates.map((template) => (
             <div
               key={template.id}
