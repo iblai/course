@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { SidebarLearner } from "@/components/platform/sidebar-learner"
@@ -38,19 +38,41 @@ const DATE_INPUT_CLASS =
 const DATE_FIELD_WRAPPER_CLASS = "space-y-1.5 min-w-0 w-full max-w-full overflow-hidden"
 const DATE_INPUT_INNER_CLASS = "min-w-0 w-full max-w-full overflow-hidden"
 
+type ContentBlock = {
+  id: string
+  title: string
+  type: "html" | "video" | "quiz"
+  html?: string
+  videoId?: string
+  quiz?: { question: string; choices: string[]; correctIndex: number }
+}
+
+type UnitItem = {
+  id: string
+  name: string
+  blocks: ContentBlock[]
+}
+
+type SubsectionItem = {
+  id: string
+  name: string
+  units?: UnitItem[]
+}
+
 type SectionItem = {
   id: string
   name: string
   displayName: string
   startDate: string
   dueDate: string
-  subsections: { id: string; name: string }[]
+  subsections: SubsectionItem[]
 }
 
 export default function CourseEditPage() {
   const params = useParams()
+  const searchParams = useSearchParams()
   const id = params.id as string
-  const courseTitle = getCourseMetadata(id).title
+  const courseTitle = searchParams.get("name") || getCourseMetadata(id).title
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -77,24 +99,87 @@ export default function CourseEditPage() {
   const [sections, setSections] = useState<SectionItem[]>([
     {
       id: "sec-1",
-      name: "Greenland's Early History",
-      displayName: "1 Greenland's Early History",
+      name: "AI-Driven Market Analysis",
+      displayName: "1 AI-Driven Market Analysis",
       startDate: "2030-01-01T00:30",
       dueDate: "",
       subsections: [
-        { id: "sub-1-1", name: "Norse Settlements" },
-        { id: "sub-1-2", name: "Colonial Period" },
+        {
+          id: "sub-1-1",
+          name: "1.1 Understanding AI Technologies",
+          units: [
+            {
+              id: "unit-1-1-1",
+              name: "1.1.1 Basics of Artificial Intelligence",
+              blocks: [
+                {
+                  id: "block-1",
+                  title: "Defining Artificial Intelligence",
+                  type: "html",
+                  html: "<strong>What is Artificial Intelligence?</strong><p>Artificial Intelligence (AI) refers to the simulation of human intelligence in machines that are programmed to think and learn like humans. These systems can perform tasks that typically require human intelligence, such as visual perception, speech recognition, decision-making, and language translation.</p><p>AI relies on algorithms and machine learning models that improve through experience and data. From recommendation systems to autonomous vehicles, AI is transforming how we live and work.</p>",
+                },
+                {
+                  id: "block-2",
+                  title: "Introduction to AI Concepts",
+                  type: "video",
+                  videoId: "dQw4w9WgXcQ",
+                },
+              ],
+            },
+            {
+              id: "unit-1-1-2",
+              name: "1.1.2 Key AI Technologies",
+              blocks: [
+                {
+                  id: "block-3",
+                  title: "Overview of AI Technologies",
+                  type: "html",
+                  html: "<strong>Major AI Technologies</strong><p>AI technologies fall into several key categories: machine learning (including deep learning), natural language processing (NLP), computer vision, and robotics. Each of these areas enables machines to perform specific intelligent tasks.</p><p>The field is evolving rapidly, with new techniques and applications emerging regularly. Understanding these core technologies is essential for leveraging AI in business.</p>",
+                },
+                {
+                  id: "block-4",
+                  title: "AI Technologies Quiz",
+                  type: "quiz",
+                  quiz: {
+                    question: "Which of the following is a key component of AI technologies?",
+                    choices: ["Cryptography", "Data Mining", "Machine Learning", "Web Development"],
+                    correctIndex: 2,
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: "sub-1-2",
+          name: "1.2 AI in Strategic Business Growth",
+          units: [
+            {
+              id: "unit-1-2-1",
+              name: "1.2.1 AI-Driven Business Models",
+              blocks: [
+                {
+                  id: "block-5",
+                  title: "Business Models Enhanced by AI",
+                  type: "html",
+                  html: "<strong>How AI transforms business</strong><p>AI enables new business models and enhances existing ones through automation, personalization, and data-driven decision-making.</p>",
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
     {
       id: "sec-2",
-      name: "U.S. Involvement",
-      displayName: "2 U.S. Involvement",
+      name: "Advanced AI Applications in Business",
+      displayName: "2 Advanced AI Applications in Business",
       startDate: "",
       dueDate: "",
       subsections: [],
     },
   ])
+  const [selectedSectionId, setSelectedSectionId] = useState<string | null>("sec-1")
   const [isAddSectionOpen, setIsAddSectionOpen] = useState(false)
   const [isAddingSection, setIsAddingSection] = useState(false)
   const [isAddSubsectionOpen, setIsAddSubsectionOpen] = useState(false)
@@ -119,6 +204,7 @@ export default function CourseEditPage() {
   const [isUpdatingCertificate, setIsUpdatingCertificate] = useState(false)
   const [generatingSectionId, setGeneratingSectionId] = useState<string | null>(null)
   const [generatingSubsectionId, setGeneratingSubsectionId] = useState<string | null>(null)
+  const [generatingUnitId, setGeneratingUnitId] = useState<string | null>(null)
   const [isEditSubsectionOpen, setIsEditSubsectionOpen] = useState(false)
   const [editingSubsectionId, setEditingSubsectionId] = useState<string | null>(null)
   const [editingSubsectionParentId, setEditingSubsectionParentId] = useState<string | null>(null)
@@ -127,6 +213,14 @@ export default function CourseEditPage() {
   const [editSubsectionHasScore, setEditSubsectionHasScore] = useState<"Yes" | "No">("No")
   const [editSubsectionFormat, setEditSubsectionFormat] = useState("")
   const [editSubsectionShowCorrectness, setEditSubsectionShowCorrectness] = useState<"Always" | "Never" | "Past due">("Always")
+  const [editingBlock, setEditingBlock] = useState<{
+    sectionId: string
+    subsectionId: string
+    unitId: string
+    block: ContentBlock
+  } | null>(null)
+  const [editBlockDisplayName, setEditBlockDisplayName] = useState("")
+  const [editBlockHtml, setEditBlockHtml] = useState("")
 
   const successToastStyle = {
     duration: 3000,
@@ -212,12 +306,12 @@ export default function CourseEditPage() {
     const name = sectionName.trim()
     if (!name || isAddingSection) return
     setIsAddingSection(true)
-    // Brief delay to show adding animation
+    const newId = `sec-${Date.now()}`
     setTimeout(() => {
       setSections((prev) => [
         ...prev,
         {
-          id: `sec-${Date.now()}`,
+          id: newId,
           name,
           displayName: `${prev.length + 1} ${name}`,
           startDate: "",
@@ -225,6 +319,7 @@ export default function CourseEditPage() {
           subsections: [],
         },
       ])
+      setSelectedSectionId(newId)
       setSectionName("")
       setIsAddSectionOpen(false)
       setIsAddingSection(false)
@@ -284,6 +379,15 @@ export default function CourseEditPage() {
     }, 1500)
   }
 
+  const handleGenerateUnitContent = (unitId: string) => {
+    setGeneratingUnitId(unitId)
+    // TODO: wire to API to auto-generate unit content
+    setTimeout(() => {
+      setGeneratingUnitId(null)
+      toast.success("Unit content generation started.", successToastStyle)
+    }, 1500)
+  }
+
   const openEditSubsection = (sectionId: string, sub: { id: string; name: string }) => {
     setEditingSubsectionId(sub.id)
     setEditingSubsectionParentId(sectionId)
@@ -334,6 +438,54 @@ export default function CourseEditPage() {
     setIsEditSubsectionOpen(false)
     setEditingSubsectionId(null)
     setEditingSubsectionParentId(null)
+  }
+
+  const openEditBlock = (sectionId: string, subsectionId: string, unitId: string, block: ContentBlock) => {
+    setEditingBlock({ sectionId, subsectionId, unitId, block: { ...block } })
+    setEditBlockDisplayName(block.title)
+    setEditBlockHtml(block.type === "html" && block.html ? block.html : "")
+  }
+
+  const handleCloseEditBlock = () => {
+    setEditingBlock(null)
+    setEditBlockDisplayName("")
+    setEditBlockHtml("")
+  }
+
+  const handleSaveEditBlock = () => {
+    if (!editingBlock) return
+    const { sectionId, subsectionId, unitId, block } = editingBlock
+    setSections((prev) =>
+      prev.map((s) => {
+        if (s.id !== sectionId) return s
+        return {
+          ...s,
+          subsections: (s.subsections || []).map((sub) => {
+            if (sub.id !== subsectionId) return sub
+            return {
+              ...sub,
+              units: (sub.units || []).map((u) => {
+                if (u.id !== unitId) return u
+                return {
+                  ...u,
+                  blocks: u.blocks.map((b) =>
+                    b.id !== block.id
+                      ? b
+                      : {
+                          ...b,
+                          title: editBlockDisplayName.trim() || b.title,
+                          html: b.type === "html" ? (editBlockHtml || b.html) : b.html,
+                        }
+                  ),
+                }
+              }),
+            }
+          }),
+        }
+      })
+    )
+    toast.success("Block updated.", successToastStyle)
+    handleCloseEditBlock()
   }
 
   const runWithToast = (
@@ -412,226 +564,261 @@ export default function CourseEditPage() {
           <main className="flex-1 flex flex-col min-h-0 min-w-0 transition-all duration-300 pb-[200px] md:pb-[200px] overflow-x-hidden">
             <div className="flex flex-1 min-h-0 min-w-0">
               <div className="flex-1 min-h-0 min-w-0 w-full pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:pl-8 sm:pr-8 md:pr-20 py-4 sm:py-8 max-w-4xl mx-auto overflow-x-hidden">
-                {/* Page header - sticky */}
-                <div className="sticky top-0 z-10 pt-4 pb-4 mb-4 sm:mb-8 bg-background border-b border-gray-100">
-                  <h1 className="text-lg sm:text-2xl font-semibold mb-1 text-[var(--sidebar-foreground)] break-words">
+                {/* Page header: title, subtitle, Add Section */}
+                <div className="pt-4 pb-4 mb-4 sm:mb-6 border-b border-gray-100">
+                  <h1 className="text-xl sm:text-2xl font-semibold mb-1 text-[var(--sidebar-foreground)] break-words">
                     {courseTitle}
                   </h1>
-                  <p className="text-xs sm:text-sm mb-3 sm:mb-4" style={{ color: "rgb(113,121,133)" }}>
-                    Manage sections and subsections
+                  <p className="text-sm mb-4" style={{ color: "rgb(113,121,133)" }}>
+                    Edit course content
                   </p>
-                  <div className="flex flex-wrap gap-2">
-                    <Link href={`/course/${id}`} className="w-full sm:w-auto">
-                      <Button
-                        variant="outline"
-                        className="w-full sm:w-auto border-[#2563EB] text-[#2563EB] hover:bg-blue-50 text-sm"
-                      >
-                        View About Page
-                      </Button>
-                    </Link>
-                    <Link href={`/course/${id}/schedule`} className="w-full sm:w-auto">
-                      <Button
-                        variant="outline"
-                        className="w-full sm:w-auto border-[#2563EB] text-[#2563EB] hover:bg-blue-50 text-sm"
-                      >
-                        Schedule & details
-                      </Button>
-                    </Link>
+                  <div className="flex flex-wrap items-center gap-2">
                     <Button
-                      onClick={handlePublishChanges}
-                      disabled={isPublishing}
-                      className="w-full sm:w-auto bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white disabled:opacity-70 disabled:cursor-not-allowed text-sm"
+                      onClick={() => setIsAddSectionOpen(true)}
+                      className="bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white text-sm font-medium px-4 py-2"
                     >
-                      {isPublishing ? (
-                        <>
-                          <RotateCw className="w-4 h-4 mr-2 animate-spin" />
-                          Publishing...
-                        </>
-                      ) : (
-                        <>
-                          <Upload className="w-4 h-4 mr-2" />
-                          Publish changes
-                        </>
-                      )}
+                      Add Section
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsOutlineOpen(true)}
+                      className="border-[#2563EB] text-[#2563EB] hover:bg-blue-50 text-sm font-medium px-4 py-2"
+                    >
+                      <FileText className="w-4 h-4 mr-2" />
+                      Course Outline
                     </Button>
                   </div>
                 </div>
 
-                {/* Course structure */}
-                <section className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 sm:p-6 mb-4 sm:mb-6 min-w-0 overflow-hidden">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
-                    <div className="min-w-0">
-                      <h2 className="text-sm sm:text-base font-semibold" style={{ color: "rgb(113,121,133)" }}>
-                        Course structure
-                      </h2>
-                      <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Manage sections and subsections</p>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => setIsOutlineOpen(true)}
-                        className="flex-1 sm:flex-none min-w-0 text-xs sm:text-sm border-[#2563EB] text-[#2563EB] hover:bg-blue-50 px-[29px]"
+                {/* Section tabs */}
+                {sections.length > 0 && (
+                  <div className="flex border-b border-gray-200 mb-6 gap-0">
+                    {sections.map((section, index) => (
+                      <button
+                        key={section.id}
+                        type="button"
+                        onClick={() => setSelectedSectionId(section.id)}
+                        className={cn(
+                          "py-3 px-4 text-sm font-medium border-b-2 -mb-px transition-colors",
+                          selectedSectionId === section.id
+                            ? "border-[#2563EB] text-[#2563EB] bg-gray-100 rounded-t-[8px]"
+                            : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 border-gray-200 hover:border-gray-300"
+                        )}
                       >
-                        <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2 shrink-0" />
-                        See course outline
-                      </Button>
-                      <Button
-                        onClick={() => setIsAddSectionOpen(true)}
-                        className="flex-1 sm:flex-none min-w-0 text-xs sm:text-sm bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white"
-                      >
-                        <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2 shrink-0" />
-                        Add Section
-                      </Button>
-                    </div>
+                        {index + 1} {section.name}
+                      </button>
+                    ))}
                   </div>
+                )}
 
-                  <div className="border border-gray-200 rounded-lg overflow-hidden min-w-0">
-                    {sections.length === 0 ? (
-                      <div className="px-4 py-8 text-center text-sm text-gray-500">
-                        No sections yet. Click &quot;Add Section&quot; to create one.
-                      </div>
-                    ) : (
-                      <ul className="divide-y divide-gray-200 min-w-0">
-                        {sections.map((section, index) => (
-                          <li key={section.id} className="bg-white min-w-0">
-                            <div className="flex flex-wrap items-center justify-start gap-2 px-3 sm:px-4 py-3 hover:bg-gray-50/50">
-                              <button
-                                type="button"
-                                onClick={() => toggleSectionExpanded(section.id)}
-                                className="p-0.5 rounded hover:bg-gray-200 text-gray-500 shrink-0"
-                                aria-label={expandedSectionIds.has(section.id) ? "Collapse" : "Expand"}
-                              >
-                                {expandedSectionIds.has(section.id) ? (
-                                  <ChevronDown className="w-4 h-4" />
-                                ) : (
-                                  <ChevronRight className="w-4 h-4" />
-                                )}
-                              </button>
-                              <span className="flex-1 min-w-0 text-sm font-medium truncate" style={{ color: "rgb(113,121,133)" }}>
-                                {index + 1}. {section.displayName || section.name}
-                              </span>
-                              <div className="flex items-center justify-start gap-1 shrink-0">
+                {/* Hierarchical outline with content blocks (screenshot style) */}
+                <section className="min-w-0">
+                  {!selectedSectionId || sections.length === 0 ? (
+                    <div className="px-4 py-8 text-center text-sm text-gray-500 bg-white rounded-lg border border-gray-200">
+                      No sections yet. Click &quot;Add Section&quot; to create one.
+                    </div>
+                  ) : (
+                    (() => {
+                      const section = sections.find((s) => s.id === selectedSectionId)
+                      if (!section) return null
+                      return (
+                        <div className="space-y-5">
+                          {/* Section heading with refresh + edit */}
+                          <div className="flex items-center gap-2 pb-3 border-b border-gray-200">
+                            <h2 className="text-lg font-bold text-[var(--sidebar-foreground)]">
+                              {section.displayName || section.name}
+                            </h2>
+                            <TooltipProvider>
+                              <TooltipFlowbite content="Generate content" position="top">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-gray-500 hover:text-[#2563EB] hover:bg-blue-50"
+                                  onClick={() => handleGenerateSectionContent(section.id)}
+                                  disabled={generatingSectionId === section.id}
+                                  aria-label="Refresh content"
+                                >
+                                  <RotateCw className={cn("w-4 h-4", generatingSectionId === section.id && "animate-spin")} />
+                                </Button>
+                              </TooltipFlowbite>
+                              <TooltipFlowbite content="Edit section" position="top">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-gray-500 hover:text-[#2563EB] hover:bg-blue-50"
+                                  onClick={() => openEditSection(section)}
+                                  aria-label="Edit section"
+                                >
+                                  <Pencil className="w-4 h-4" />
+                                </Button>
+                              </TooltipFlowbite>
+                            </TooltipProvider>
+                          </div>
+
+                          {/* Subsections → Units → Content blocks */}
+                          {(section.subsections || []).map((sub) => (
+                            <div key={sub.id} className="pt-[5px] first:pt-2 border-b border-gray-100 last:border-b-0 pb-5 last:pb-0">
+                              <div className="flex items-center gap-2 mb-4">
+                                <h3 className="text-base font-semibold text-[var(--sidebar-foreground)]">
+                                  {sub.name}
+                                </h3>
                                 <TooltipProvider>
                                   <TooltipFlowbite content="Generate content" position="top">
                                     <Button
                                       variant="ghost"
                                       size="icon"
-                                      className="h-8 w-8 text-gray-600 hover:text-[#2563EB] hover:bg-blue-50"
-                                      onClick={() => handleGenerateSectionContent(section.id)}
-                                      disabled={generatingSectionId === section.id}
+                                      className="h-7 w-7 text-gray-500 hover:text-[#2563EB] hover:bg-blue-50"
+                                      onClick={() => handleGenerateSubsectionContent(sub.id)}
+                                      disabled={generatingSubsectionId === sub.id}
                                       aria-label="Generate content"
                                     >
-                                      <RotateCw className={cn("w-4 h-4", generatingSectionId === section.id && "animate-spin")} />
+                                      <RotateCw className={cn("w-4 h-4", generatingSubsectionId === sub.id && "animate-spin")} />
                                     </Button>
                                   </TooltipFlowbite>
-                                </TooltipProvider>
-                                <TooltipProvider>
-                                  <TooltipFlowbite content="Add subsection" position="top">
+                                  <TooltipFlowbite content="Edit subsection" position="top">
                                     <Button
                                       variant="ghost"
                                       size="icon"
-                                      className="h-8 w-8 text-gray-600 hover:text-[#2563EB] hover:bg-blue-50"
-                                      onClick={() => {
-                                        setSubsectionParentId(section.id)
-                                        setIsAddSubsectionOpen(true)
-                                      }}
-                                      aria-label="Add subsection"
-                                    >
-                                      <Plus className="w-4 h-4" />
-                                    </Button>
-                                  </TooltipFlowbite>
-                                </TooltipProvider>
-                                <TooltipProvider>
-                                  <TooltipFlowbite content="Edit section" position="top">
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-8 w-8 text-gray-600 hover:text-[#2563EB] hover:bg-blue-50"
-                                      onClick={() => openEditSection(section)}
-                                      aria-label="Edit section"
+                                      className="h-7 w-7 text-gray-500 hover:text-[#2563EB] hover:bg-blue-50"
+                                      onClick={() => openEditSubsection(section.id, sub)}
+                                      aria-label="Edit subsection"
                                     >
                                       <Pencil className="w-4 h-4" />
                                     </Button>
                                   </TooltipFlowbite>
                                 </TooltipProvider>
-                                <TooltipProvider>
-                                  <TooltipFlowbite content="Delete section" position="top">
+                              </div>
+                              {(sub.units || []).map((unit) => (
+                                <div key={unit.id} className="pl-3 sm:pl-5 ml-0 border-l-2 border-gray-200 mb-6 last:mb-0">
+                                  <div className="flex items-center gap-2 mb-3 mt-4 first:mt-0">
+                                    <h4 className="text-sm font-semibold text-gray-700">{unit.name}</h4>
+                                    <TooltipProvider>
+                                      <TooltipFlowbite content="Generate content" position="top">
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-6 w-6 text-gray-500 hover:text-[#2563EB] hover:bg-blue-50"
+                                          onClick={() => handleGenerateUnitContent(unit.id)}
+                                          disabled={generatingUnitId === unit.id}
+                                          aria-label="Generate content"
+                                        >
+                                          <RotateCw className={cn("w-3.5 h-3.5", generatingUnitId === unit.id && "animate-spin")} />
+                                        </Button>
+                                      </TooltipFlowbite>
+                                    </TooltipProvider>
+                                  </div>
+                                  {(unit.blocks || []).map((block) => (
+                                    <div key={block.id} className="mb-6 last:mb-0">
+                                      <div className="flex items-center gap-2 mb-1.5">
+                                        <span className="font-medium text-gray-800">{block.title}</span>
+                                        <TooltipProvider>
+                                          <TooltipFlowbite content="Edit block" position="top">
+                                            <Button
+                                              variant="ghost"
+                                              size="icon"
+                                              className="h-6 w-6 text-gray-500 hover:text-[#2563EB] hover:bg-blue-50"
+                                              aria-label="Edit block"
+                                              onClick={() => openEditBlock(section.id, sub.id, unit.id, block)}
+                                            >
+                                              <Pencil className="w-3.5 h-3.5" />
+                                            </Button>
+                                          </TooltipFlowbite>
+                                        </TooltipProvider>
+                                      </div>
+                                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm text-sm text-gray-800 leading-relaxed mt-1">
+                                        {block.type === "html" && block.html && (
+                                          <div
+                                            className="prose prose-sm max-w-none prose-p:leading-relaxed prose-p:my-2 first:prose-p:mt-0 last:prose-p:mb-0 prose-headings:font-semibold prose-headings:text-gray-900"
+                                            dangerouslySetInnerHTML={{ __html: block.html }}
+                                          />
+                                        )}
+                                        {block.type === "video" && block.videoId && (
+                                          <p className="font-medium text-gray-600">YouTube ID: {block.videoId}</p>
+                                        )}
+                                        {block.type === "quiz" && block.quiz && (
+                                          <div>
+                                            <p className="font-semibold text-gray-800 mb-1">Question:</p>
+                                            <p className="mb-2">{block.quiz.question}</p>
+                                            <p className="font-semibold text-gray-800 mb-1">Choices:</p>
+                                            <ul className="list-disc list-inside space-y-0.5">
+                                              {block.quiz.choices.map((choice, i) => (
+                                                <li key={i} className="flex items-center gap-2">
+                                                  {choice}
+                                                  {i === block.quiz!.correctIndex && (
+                                                    <span className="text-green-600" aria-label="Correct">✓</span>
+                                                  )}
+                                                </li>
+                                              ))}
+                                            </ul>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ))}
+                              {(!sub.units || sub.units.length === 0) && (
+                                <div className="flex items-center gap-2 pl-2">
+                                  <TooltipFlowbite content="Add subsection" position="top">
                                     <Button
                                       variant="ghost"
                                       size="icon"
-                                      className="h-8 w-8 text-gray-600 hover:text-red-600 hover:bg-red-50"
-                                      onClick={() => openDeleteSectionDialog(section)}
-                                      aria-label="Delete section"
+                                      className="h-7 w-7 text-gray-500 hover:text-[#2563EB]"
+                                      onClick={() => {
+                                        setSubsectionParentId(section.id)
+                                        setIsAddSubsectionOpen(true)
+                                      }}
                                     >
-                                      <Trash2 className="w-4 h-4" />
+                                      <Plus className="w-4 h-4" />
                                     </Button>
                                   </TooltipFlowbite>
-                                </TooltipProvider>
-                              </div>
-                              {generatingSectionId === section.id && (
-                                <span className="w-full sm:w-auto inline-flex items-center text-xs text-[#2563EB] animate-generating-dots ml-0 sm:ml-1 shrink-0" aria-live="polite">
-                                  Generating content<span>.</span><span>.</span><span>.</span>
-                                </span>
+                                  <span className="text-sm text-gray-500">No units yet. Add subsection to create content.</span>
+                                </div>
                               )}
                             </div>
-                            {expandedSectionIds.has(section.id) && (
-                              <div className="border-t border-gray-100 bg-gray-50/30 min-w-0">
-                                {section.subsections.length > 0 ? (
-                                  <ul className="min-w-0">
-                                    {section.subsections.map((sub) => (
-                                      <li
-                                        key={sub.id}
-                                        className="flex flex-wrap items-center justify-start gap-2 pl-4 sm:pl-10 pr-3 sm:pr-4 py-2 text-sm border-b border-gray-100 last:border-b-0 min-w-0"
-                                      >
-                                        <span className="flex-1 min-w-0 text-gray-600 truncate">{sub.name}</span>
-                                        {generatingSubsectionId === sub.id && (
-                                          <span className="inline-flex items-center text-xs text-[#2563EB] animate-generating-dots mr-1 shrink-0" aria-live="polite">
-                                            Generating content<span>.</span><span>.</span><span>.</span>
-                                          </span>
-                                        )}
-                                        <div className="flex items-center justify-start gap-1 shrink-0">
-                                          <TooltipProvider>
-                                            <TooltipFlowbite content="Generate content" position="top">
-                                              <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-7 w-7 text-gray-600 hover:text-[#2563EB] hover:bg-blue-50"
-                                                onClick={() => handleGenerateSubsectionContent(sub.id)}
-                                                disabled={generatingSubsectionId === sub.id}
-                                                aria-label="Generate content"
-                                              >
-                                                <RotateCw className={cn("w-4 h-4", generatingSubsectionId === sub.id && "animate-spin")} />
-                                              </Button>
-                                            </TooltipFlowbite>
-                                          </TooltipProvider>
-                                          <TooltipProvider>
-                                            <TooltipFlowbite content="Edit subsection" position="top">
-                                              <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-7 w-7 text-gray-600 hover:text-[#2563EB] hover:bg-blue-50"
-                                                onClick={() => openEditSubsection(section.id, sub)}
-                                                aria-label="Edit subsection"
-                                              >
-                                                <Pencil className="w-4 h-4" />
-                                              </Button>
-                                            </TooltipFlowbite>
-                                          </TooltipProvider>
-                                        </div>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                ) : (
-                                  <p className="pl-4 sm:pl-10 pr-3 sm:pr-4 py-3 text-sm text-gray-500">No subsections. Click + to add one.</p>
-                                )}
-                              </div>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
+                          ))}
+                          {section.subsections.length === 0 && (
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="border-[#2563EB] text-[#2563EB] hover:bg-blue-50"
+                                onClick={() => {
+                                  setSubsectionParentId(section.id)
+                                  setIsAddSubsectionOpen(true)
+                                }}
+                              >
+                                <Plus className="w-4 h-4 mr-1" />
+                                Add subsection
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })()
+                  )}
                 </section>
+
+                {/* Publish button at bottom of page */}
+                <div className="mt-8 pt-6 border-t border-gray-200">
+                  <Button
+                    onClick={handlePublishChanges}
+                    disabled={isPublishing}
+                    className="bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white disabled:opacity-70 disabled:cursor-not-allowed text-sm font-medium px-4 py-2"
+                  >
+                    {isPublishing ? (
+                      <>
+                        <RotateCw className="w-4 h-4 mr-2 animate-spin" />
+                        Publishing...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4 mr-2" />
+                        Publish changes
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
 
               <div className="fixed top-20 right-2 sm:right-4 md:right-0 z-40 flex">
@@ -827,7 +1014,7 @@ export default function CourseEditPage() {
                     }
                   }
                 }}
-                className="px-4 py-2 text-sm font-medium border-red-200 text-red-600 hover:bg-red-50"
+                className="px-4 py-2 text-sm font-medium border-gray-200 text-gray-600 hover:bg-gray-50"
               >
                 Delete
               </Button>
@@ -964,7 +1151,7 @@ export default function CourseEditPage() {
               <Button
                 variant="outline"
                 onClick={handleDeleteSubsection}
-                className="px-4 py-2 text-sm font-medium border-red-200 text-red-600 hover:bg-red-50"
+                className="px-4 py-2 text-sm font-medium border-gray-200 text-gray-600 hover:bg-gray-50"
               >
                 Delete
               </Button>
@@ -1047,6 +1234,149 @@ export default function CourseEditPage() {
               className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90"
             >
               Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Block Dialog */}
+      <Dialog open={editingBlock !== null} onOpenChange={(open) => !open && handleCloseEditBlock()}>
+        <DialogContent className="sm:max-w-[640px] gap-3 max-h-[90vh] overflow-y-auto" maxWidth="640px">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold text-[var(--sidebar-foreground)]">
+              Edit Block
+            </DialogTitle>
+          </DialogHeader>
+          <div className="pb-2 space-y-4 border-t border-gray-100 pt-4 min-w-0">
+            {/* Display Name */}
+            <div className="space-y-1.5 min-w-0">
+              <Label className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
+                Display Name
+              </Label>
+              <div className="flex flex-wrap gap-2">
+                <Input
+                  value={editBlockDisplayName}
+                  onChange={(e) => setEditBlockDisplayName(e.target.value)}
+                  placeholder="Enter display name for the block"
+                  className="border-gray-200 flex-1 min-w-0"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-9 shrink-0 border-gray-300 text-gray-700 hover:bg-gray-50"
+                  onClick={() => {
+                    setEditBlockDisplayName(editBlockDisplayName ? `${editBlockDisplayName} (revised)` : "Untitled block")
+                    toast.success("Display name regenerated.", successToastStyle)
+                  }}
+                  aria-label="Regenerate"
+                >
+                  <RotateCw className="w-4 h-4 mr-1.5" />
+                  Regenerate
+                </Button>
+              </div>
+              <p className="text-xs text-gray-500">Enter the display name for the block</p>
+            </div>
+            {/* HTML Content - show for html type */}
+            {editingBlock?.block.type === "html" && (
+              <div className="space-y-1.5 min-w-0">
+                <Label className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
+                  HTML Content
+                </Label>
+                <div className="flex gap-1 p-1.5 border border-gray-200 rounded-lg bg-gray-50/50 min-w-0">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 text-gray-600 hover:bg-gray-200 shrink-0"
+                    onClick={() => {
+                      const ta = document.getElementById("edit-block-html") as HTMLTextAreaElement
+                      if (ta) {
+                        const start = ta.selectionStart
+                        const end = ta.selectionEnd
+                        const text = editBlockHtml
+                        const selected = text.slice(start, end)
+                        setEditBlockHtml(text.slice(0, start) + (selected ? `<strong>${selected}</strong>` : "<strong></strong>") + text.slice(end))
+                      }
+                    }}
+                    aria-label="Bold"
+                  >
+                    <span className="text-sm font-bold">B</span>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 text-gray-600 hover:bg-gray-200 italic shrink-0"
+                    onClick={() => {
+                      const ta = document.getElementById("edit-block-html") as HTMLTextAreaElement
+                      if (ta) {
+                        const start = ta.selectionStart
+                        const end = ta.selectionEnd
+                        const text = editBlockHtml
+                        const selected = text.slice(start, end)
+                        setEditBlockHtml(text.slice(0, start) + (selected ? `<em>${selected}</em>` : "<em></em>") + text.slice(end))
+                      }
+                    }}
+                    aria-label="Italic"
+                  >
+                    <span className="text-sm font-bold">I</span>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 text-gray-600 hover:bg-gray-200 shrink-0"
+                    onClick={() => setEditBlockHtml(editBlockHtml + "\n<ul>\n  <li></li>\n</ul>")}
+                    aria-label="Bullet list"
+                  >
+                    <span className="text-sm">•</span>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 text-gray-600 hover:bg-gray-200 shrink-0"
+                    onClick={() => setEditBlockHtml(editBlockHtml + "\n<ol>\n  <li></li>\n</ol>")}
+                    aria-label="Numbered list"
+                  >
+                    <span className="text-sm font-medium">1.</span>
+                  </Button>
+                </div>
+                <Textarea
+                  id="edit-block-html"
+                  value={editBlockHtml}
+                  onChange={(e) => setEditBlockHtml(e.target.value)}
+                  placeholder="Enter HTML content..."
+                  className="min-h-[200px] w-full min-w-0 border-gray-200 text-sm font-mono resize-y"
+                  rows={10}
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                  onClick={() => toast.success("Content regeneration started.", successToastStyle)}
+                  aria-label="Regenerate"
+                >
+                  <RotateCw className="w-4 h-4 mr-1.5" />
+                  Regenerate
+                </Button>
+                <p className="text-xs text-gray-500">Enter the HTML content for the block</p>
+              </div>
+            )}
+          </div>
+          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 pt-2 border-t border-gray-100">
+            <Button
+              variant="outline"
+              onClick={handleCloseEditBlock}
+              className="w-full sm:w-auto border-gray-300 text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveEditBlock}
+              className="w-full sm:w-auto bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white"
+            >
+              Save Changes
             </Button>
           </DialogFooter>
         </DialogContent>

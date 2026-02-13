@@ -370,7 +370,8 @@ export default function HomePage() {
         setShowCourseForm(false)
         setFormStep(1)
         setInputValue("")
-        router.push(`/course/${courseId}/edit`)
+        const courseName = courseForm.courseName || courseDetailsForm.displayName || "New course"
+        router.push(`/course/${courseId}/edit?name=${encodeURIComponent(courseName)}`)
       }, 800)
     }, 7000)
   }
