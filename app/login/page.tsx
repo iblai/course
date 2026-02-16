@@ -273,25 +273,25 @@ export default function AuthPage() {
 
   const getResponsiveSizes = () => {
     const maxHeight = Math.min(viewportHeight, 730)
-    const isSmallScreen = maxHeight < 600
-    const isMediumScreen = maxHeight >= 600 && maxHeight < 700
+    const isSmallScreen = maxHeight < 580
+    const isMediumScreen = maxHeight >= 580 && maxHeight < 680
 
     return {
       containerHeight: maxHeight,
       logoHeight: isSmallScreen ? "h-6" : isMediumScreen ? "h-8" : "h-10",
-      logoMarginTop: isSmallScreen ? "mt-1" : isMediumScreen ? "mt-2" : "mt-3",
+      logoMarginTop: isSmallScreen ? "mt-0.5" : isMediumScreen ? "mt-1.5" : "mt-3",
       titleSize: isSmallScreen ? "text-base" : isMediumScreen ? "text-lg" : "text-2xl",
       subtitleSize: isSmallScreen ? "text-[10px]" : isMediumScreen ? "text-xs" : "text-base",
       buttonHeight: isSmallScreen ? "h-9" : isMediumScreen ? "h-10" : "h-12",
       inputHeight: isSmallScreen ? "h-9" : isMediumScreen ? "h-10" : "h-12",
-      spacing: isSmallScreen ? "space-y-3" : isMediumScreen ? "space-y-4" : "space-y-5",
-      padding: isSmallScreen ? "p-3" : isMediumScreen ? "p-4" : "p-6",
-      margin: isSmallScreen ? "mb-3" : isMediumScreen ? "mb-4" : "mb-6",
+      spacing: isSmallScreen ? "space-y-2.5" : isMediumScreen ? "space-y-3" : "space-y-5",
+      padding: isSmallScreen ? "p-2.5" : isMediumScreen ? "p-3" : "p-6",
+      margin: isSmallScreen ? "mb-2" : isMediumScreen ? "mb-3" : "mb-6",
       iconSize: isSmallScreen ? "w-4 h-4" : isMediumScreen ? "w-5 h-5" : "w-6 h-6",
       fontSize: isSmallScreen ? "text-[10px]" : isMediumScreen ? "text-xs" : "text-base",
-      titleBlockMargin: isSmallScreen ? "my-2" : isMediumScreen ? "my-3 xl:my-4" : "my-5 xl:my-12",
+      titleBlockMargin: isSmallScreen ? "my-1" : isMediumScreen ? "my-2 xl:my-3" : "my-5 xl:my-12",
       titleHeadingSize: isSmallScreen ? "text-base" : isMediumScreen ? "text-lg lg:text-xl xl:text-2xl" : "text-xl sm:text-xl md:text-xl lg:text-2xl xl:text-3xl",
-      footerPaddingTop: isSmallScreen ? "pt-2" : isMediumScreen ? "pt-3" : "pt-4",
+      footerPaddingTop: isSmallScreen ? "pt-1.5" : isMediumScreen ? "pt-2" : "pt-4",
     }
   }
 
@@ -350,7 +350,7 @@ export default function AuthPage() {
         {/* Left Column - Auth Form */}
         <div className="flex w-full flex-col min-h-[100dvh] xl:w-1/2 xl:h-full xl:min-h-0">
           <div
-            className="flex flex-col h-[100dvh] min-h-[100dvh] px-5 py-3 md:p-4 lg:p-6 justify-between pt-[calc(0.75rem+env(safe-area-inset-top,0px))] pb-[calc(1rem+env(safe-area-inset-bottom,0px))]"
+            className="flex flex-col h-[100dvh] min-h-[100dvh] max-h-[100dvh] px-5 py-3 md:p-4 lg:p-6 justify-between pt-[calc(0.75rem+env(safe-area-inset-top,0px))] pb-[calc(1rem+env(safe-area-inset-bottom,0px))] overflow-y-auto"
             style={{ minHeight: "-webkit-fill-available" } as React.CSSProperties}
           >
             {/* Logo Section */}
@@ -572,12 +572,12 @@ export default function AuthPage() {
               )}
             </div>
 
-            <div className={`flex-shrink-0 mt-auto ${sizes.footerPaddingTop}`}>
-              <div className="w-full px-2 pb-0 flex justify-center">
+            <div className={`flex-shrink-0 mt-auto min-h-[3rem] flex items-end ${sizes.footerPaddingTop} pb-[calc(0.25rem+env(safe-area-inset-bottom,0px))]`}>
+              <div className="w-full px-2 flex justify-center">
                 <button
                   type="button"
                   onClick={() => document.getElementById("watch-section")?.scrollIntoView({ behavior: "smooth" })}
-                  className="text-sm font-medium text-[#00A3EC] hover:text-[#6988FF] transition-colors mt-[10px] mb-[10px] border border-[#00A3EC] rounded-md px-4 py-2 hover:border-[#6988FF]"
+                  className="text-sm font-medium text-[#00A3EC] hover:text-[#6988FF] transition-colors mt-[10px] border border-[#00A3EC] rounded-md px-4 py-2 hover:border-[#6988FF]"
                 >
                   Read more
                 </button>
