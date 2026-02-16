@@ -6,7 +6,7 @@ import { Check, ArrowRight } from "lucide-react"
 
 export function WatchSection() {
   return (
-    <section id="watch-section" className="min-h-screen bg-gray-50 flex items-center justify-center py-16 px-4">
+    <section id="watch-section" className="bg-gray-50 flex items-center justify-center py-16 px-4">
       <div className="max-w-7xl mx-auto w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}

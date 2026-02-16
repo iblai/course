@@ -279,6 +279,7 @@ export default function AuthPage() {
     return {
       containerHeight: maxHeight,
       logoHeight: isSmallScreen ? "h-6" : isMediumScreen ? "h-8" : "h-10",
+      logoMarginTop: isSmallScreen ? "mt-1" : isMediumScreen ? "mt-2" : "mt-3",
       titleSize: isSmallScreen ? "text-base" : isMediumScreen ? "text-lg" : "text-2xl",
       subtitleSize: isSmallScreen ? "text-[10px]" : isMediumScreen ? "text-xs" : "text-base",
       buttonHeight: isSmallScreen ? "h-9" : isMediumScreen ? "h-10" : "h-12",
@@ -288,6 +289,8 @@ export default function AuthPage() {
       margin: isSmallScreen ? "mb-3" : isMediumScreen ? "mb-4" : "mb-6",
       iconSize: isSmallScreen ? "w-4 h-4" : isMediumScreen ? "w-5 h-5" : "w-6 h-6",
       fontSize: isSmallScreen ? "text-[10px]" : isMediumScreen ? "text-xs" : "text-base",
+      titleBlockMargin: isSmallScreen ? "my-2" : isMediumScreen ? "my-3 xl:my-4" : "my-5 xl:my-12",
+      footerPaddingTop: isSmallScreen ? "pt-2" : isMediumScreen ? "pt-3" : "pt-4",
     }
   }
 
@@ -350,7 +353,7 @@ export default function AuthPage() {
             style={{ minHeight: "-webkit-fill-available" } as React.CSSProperties}
           >
             {/* Logo Section */}
-            <div className="flex justify-center flex-shrink-0 mt-3">
+            <div className={`flex justify-center flex-shrink-0 ${sizes.logoMarginTop}`}>
               <div className="flex items-center gap-2">
                 <Image
                   src="/images/skillsAI-logo.webp"
@@ -372,7 +375,7 @@ export default function AuthPage() {
               {/* Title and Subtitle Section */}
               {!showConfirmation && !showPasswordForm && (
                 <div className="text-center">
-                  <div className="space-y-2 my-5 xl:my-12">
+                  <div className={`space-y-2 ${sizes.titleBlockMargin}`}>
                     <h1
                       className="text-xl sm:text-xl md:text-xl lg:text-2xl xl:text-3xl text-[#4E5460] leading-tight font-normal"
                     >
@@ -566,12 +569,12 @@ export default function AuthPage() {
               )}
             </div>
 
-            <div className="flex-shrink-0 mt-auto">
+            <div className={`flex-shrink-0 mt-auto ${sizes.footerPaddingTop}`}>
               <div className="w-full px-2 pb-0 flex justify-center">
                 <button
                   type="button"
                   onClick={() => document.getElementById("watch-section")?.scrollIntoView({ behavior: "smooth" })}
-                  className="text-sm font-medium text-[#00A3EC] hover:text-[#6988FF] transition-colors mb-[10px] border border-[#00A3EC] rounded-md px-4 py-2 hover:border-[#6988FF]"
+                  className="text-sm font-medium text-[#00A3EC] hover:text-[#6988FF] transition-colors mt-[10px] mb-[10px] border border-[#00A3EC] rounded-md px-4 py-2 hover:border-[#6988FF]"
                 >
                   Read more
                 </button>
