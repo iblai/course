@@ -1255,7 +1255,7 @@ export default function HomePage() {
               <TooltipProvider>
                 <div
                   className={cn(
-                    "fixed right-0 left-0 z-20 bg-white/95 backdrop-blur px-3 sm:px-4 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] transition-[left] duration-300",
+                    "fixed right-0 left-0 z-40 bg-white/95 backdrop-blur px-3 sm:px-4 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] transition-[left] duration-300",
                     sidebarCollapsed ? "md:left-16" : "md:left-64",
                   )}
                   style={{ borderColor: "#F1F2F3", bottom: inputBarBottom }}
