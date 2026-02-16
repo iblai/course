@@ -15,7 +15,6 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { AddSourcesDialog, type SelectedSource } from "@/components/chat-input/add-sources-dialog"
 import { ChatInputForm } from "@/components/chat-input-form"
-import ChatButton from "@/components/chat-button"
 import { LoadingMessage } from "@/components/loading-message"
 import { TooltipFlowbite, TooltipProvider } from "@/components/ui/tooltip-flowbite"
 
@@ -1242,10 +1241,6 @@ export default function HomePage() {
           </div>
             </div>
 
-            {/* Chat Button - sticky right side */}
-            <div className="fixed top-20 right-2 sm:right-4 md:right-0 z-40 flex">
-              <ChatButton />
-            </div>
           </div>
 
             {/* Fixed prompt bar when in chat list view (same as chats page) */}

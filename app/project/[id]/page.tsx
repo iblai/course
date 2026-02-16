@@ -10,7 +10,6 @@ import { AddSourcesDialog, type SelectedSource } from "@/components/chat-input/a
 import { ChatInputForm } from "@/components/chat-input-form"
 import { LoadingMessage } from "@/components/loading-message"
 import { TooltipProvider, TooltipFlowbite } from "@/components/ui/tooltip-flowbite"
-import ChatButton from "@/components/chat-button"
 import { Copy, Volume2, Reply, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -319,10 +318,6 @@ export default function ProjectPage() {
                     </div>
             )}
 
-            {/* Chat Button - sticky right side (same as other pages) */}
-            <div className="fixed top-20 right-0 z-40 flex">
-              <ChatButton />
-            </div>
               </div>
             </div>
           </main>

@@ -7,7 +7,6 @@ import Image from "next/image"
 import { SidebarLearner } from "@/components/platform/sidebar-learner"
 import { Header } from "@/components/platform/header"
 import { PlatformFooter } from "@/components/platform/platform-footer"
-import ChatButton from "@/components/chat-button"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -821,9 +820,6 @@ export default function CourseEditPage() {
                 </div>
               </div>
 
-              <div className="fixed top-20 right-2 sm:right-4 md:right-0 z-40 flex">
-                <ChatButton />
-              </div>
             </div>
 
             {/* Footer - fixed to bottom (PlatformFooter uses fixed positioning) */}

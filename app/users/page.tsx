@@ -19,7 +19,6 @@ import {
 import { TooltipProvider, TooltipFlowbite } from "@/components/ui/tooltip-flowbite"
 import { Search, Check, AlertTriangle, Star, Pencil, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import ChatButton from "@/components/chat-button"
 
 interface User {
   id: number
@@ -503,10 +502,6 @@ export default function UsersPage() {
               </div>
             </div>
 
-              {/* Chat Button - sticky right side */}
-              <div className="fixed top-20 right-0 z-40 flex">
-                <ChatButton />
-              </div>
             </div>
 
             {/* Footer */}

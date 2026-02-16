@@ -9,7 +9,6 @@ import { PlatformFooter } from "@/components/platform/platform-footer"
 import { DocumentSidebar } from "@/components/document-sidebar"
 
 import { VoiceColumn } from "@/components/voice-column"
-import ChatButton from "@/components/chat-button"
 import { Calendar, Pencil, FileText, Eye, Trash2, Info } from "lucide-react"
 import { TooltipFlowbite, TooltipProvider } from "@/components/ui/tooltip-flowbite"
 import {
@@ -519,10 +518,6 @@ function CoursesPageContent() {
               </div>
             </div>
 
-              {/* Chat Button - sticky right side */}
-              <div className="fixed top-20 right-2 sm:right-4 md:right-0 z-40 flex">
-                <ChatButton />
-              </div>
             </div>
 
             {/* Footer */}

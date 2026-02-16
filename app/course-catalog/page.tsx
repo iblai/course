@@ -10,7 +10,6 @@ import { PlatformFooter } from "@/components/platform/platform-footer"
 import { DocumentSidebar } from "@/components/document-sidebar"
 
 import { VoiceColumn } from "@/components/voice-column"
-import ChatButton from "@/components/chat-button"
 import { cn } from "@/lib/utils"
 import "@/styles/colors.css"
 
@@ -248,10 +247,6 @@ function CourseCatalogContent() {
                 )}
               </div>
 
-              {/* Chat Button - sticky right side */}
-              <div className="fixed top-20 right-0 z-40 flex">
-                <ChatButton />
-              </div>
             </div>
 
             {/* Footer */}

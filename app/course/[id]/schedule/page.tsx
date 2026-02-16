@@ -7,7 +7,6 @@ import Image from "next/image"
 import { SidebarLearner } from "@/components/platform/sidebar-learner"
 import { Header } from "@/components/platform/header"
 import { PlatformFooter } from "@/components/platform/platform-footer"
-import ChatButton from "@/components/chat-button"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -384,9 +383,6 @@ export default function CourseSchedulePage() {
                 </section>
               </div>
 
-              <div className="fixed top-20 right-0 z-40 flex">
-                <ChatButton />
-              </div>
             </div>
 
             <PlatformFooter />

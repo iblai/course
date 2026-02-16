@@ -136,7 +136,7 @@ const CourseIcon = () => (
     height="20"
     viewBox="0 0 24 24"
     fill="none"
-    stroke="#2563eb"
+    stroke="#00A3EC"
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
@@ -154,22 +154,22 @@ const MentorIcon = () => (
     <g clipPath="url(#clip0_4320_645_agents)">
       <path
         d="M33.0667 19.7243C33.0667 28.482 25.9671 35.5815 17.2094 35.5815C8.45178 35.5815 1.35229 28.482 1.35229 19.7243C1.35229 10.9667 8.45178 3.86719 17.2094 3.86719"
-        stroke="#2563eb"
+        stroke="#00A3EC"
         strokeWidth="3"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <path d="M1.35229 19.7246H19.649" stroke="#2563eb" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M1.35229 19.7246H19.649" stroke="#00A3EC" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
       <path
         d="M17.2096 3.86719C13.5462 8.3722 11.4103 13.9255 11.1107 19.7243C11.4103 25.5231 13.5462 31.0765 17.2096 35.5815C20.0938 32.0348 22.0312 27.8382 22.8711 23.3837"
-        stroke="#2563eb"
+        stroke="#00A3EC"
         strokeWidth="3"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
         d="M19.5684 10.4934C18.6409 10.3321 18.6409 9.00064 19.5684 8.83929C22.9284 8.25475 25.6008 5.69551 26.3301 2.3639L26.386 2.10853C26.5866 1.1919 27.8919 1.18619 28.1005 2.10103L28.1684 2.39864C28.9248 5.71451 31.5978 8.25216 34.9486 8.83509C35.8808 8.99726 35.8808 10.3354 34.9486 10.4976C31.5978 11.0805 28.9248 13.6182 28.1684 16.934L28.1005 17.2317C27.8919 18.1465 26.5866 18.1408 26.386 17.2242L26.3301 16.9688C25.6008 13.6372 22.9284 11.078 19.5684 10.4934Z"
-        stroke="#2563eb"
+        stroke="#00A3EC"
         strokeWidth="3"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -190,7 +190,7 @@ const DashboardIcon = () => (
     height="20"
     viewBox="0 0 24 24"
     fill="none"
-    stroke="#2563eb"
+    stroke="#00A3EC"
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
@@ -207,7 +207,7 @@ const InsightsIcon = () => (
     height="20"
     viewBox="0 0 24 24"
     fill="none"
-    stroke="#0078FF"
+    stroke="#00A3EC"
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
@@ -360,7 +360,7 @@ export default function AuthPage() {
                   className={`${sizes.logoHeight} w-auto`}
                 />
                 <span
-                  className={`${sizes.titleSize} font-bold bg-gradient-to-r from-[#38A1E5] to-[#0078FF] bg-clip-text text-transparent`}
+                  className={`${sizes.titleSize} font-bold bg-gradient-to-r from-[#00A3EC] to-[#6988FF] bg-clip-text text-transparent`}
                 >
                   ibl.ai Wink
                 </span>
@@ -388,7 +388,7 @@ export default function AuthPage() {
                 <>
                   {!showPasswordForm ? (
                     <div
-                      className={`rounded-[0.70rem] border-[0.25px] border-[rgba(115,185,255,0.3)] bg-[#F5F8FF] ${sizes.padding} shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(115,185,255,0.23)] w-full max-w-[31rem]`}
+                      className={`rounded-[0.70rem] border-[0.25px] border-[rgba(0,163,236,0.25)] bg-[#F5F8FF] ${sizes.padding} shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(0,163,236,0.2)] w-full max-w-[31rem]`}
                     >
                       <div className={`flex flex-col justify-between ${sizes.spacing}`}>
                         <div className="w-full">
@@ -400,15 +400,15 @@ export default function AuthPage() {
                               setEmail(e.target.value)
                               if (emailError) setEmailError("")
                             }}
-                            className={`${sizes.inputHeight} rounded-md text-base ${emailError ? "border-2 border-blue-500" : "border-gray-200"}`}
+                            className={`${sizes.inputHeight} rounded-md text-base ${emailError ? "border-2 border-[#00A3EC]" : "border-gray-200"}`}
                           />
                           {emailError && (
-                            <p style={{ color: "#0078FF", fontSize: "0.7rem", marginTop: "0.25rem" }}>{emailError}</p>
+                            <p style={{ color: "#00A3EC", fontSize: "0.7rem", marginTop: "0.25rem" }}>{emailError}</p>
                           )}
                         </div>
 
                         <Button
-                          className={`w-full ${sizes.buttonHeight} bg-gradient-to-r from-[#BACEFF] to-[#0078FF] hover:from-[#A9BDFF] hover:to-[#0069E0] text-white rounded-md text-base`}
+                          className={`w-full ${sizes.buttonHeight} bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white rounded-md text-base`}
                           onClick={handleContinue}
                         >
                           Continue
@@ -458,7 +458,7 @@ export default function AuthPage() {
                     </div>
                   ) : (
                     <div
-                      className={`rounded-[0.70rem] border-[0.25px] border-[rgba(115,185,255,0.3)] bg-[#F5F8FF] ${sizes.padding} shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(115,185,255,0.23)] w-full max-w-[28rem]`}
+                      className={`rounded-[0.70rem] border-[0.25px] border-[rgba(0,163,236,0.25)] bg-[#F5F8FF] ${sizes.padding} shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(0,163,236,0.2)] w-full max-w-[28rem]`}
                     >
                       <div className={`flex flex-col justify-between ${sizes.spacing}`}>
                         <div className="w-full">
@@ -470,7 +470,7 @@ export default function AuthPage() {
                               setEmail(e.target.value)
                               if (emailError) setEmailError("")
                             }}
-                            className={`${sizes.inputHeight} rounded-md text-base ${emailError ? "border-2 border-blue-500" : "border-gray-200"}`}
+                            className={`${sizes.inputHeight} rounded-md text-base ${emailError ? "border-2 border-[#00A3EC]" : "border-gray-200"}`}
                           />
                         </div>
 
@@ -483,7 +483,7 @@ export default function AuthPage() {
                               setPassword(e.target.value)
                               if (emailError) setEmailError("")
                             }}
-                            className={`${sizes.inputHeight} rounded-md text-base ${emailError ? "border-2 border-blue-500" : "border-gray-200"}`}
+                            className={`${sizes.inputHeight} rounded-md text-base ${emailError ? "border-2 border-[#00A3EC]" : "border-gray-200"}`}
                           />
                           {password.length > 0 && (
                             <button
@@ -497,11 +497,11 @@ export default function AuthPage() {
                           )}
                         </div>
                         {emailError && (
-                          <p style={{ color: "#0078FF", fontSize: "0.7rem", marginTop: "0.25rem" }}>{emailError}</p>
+                          <p style={{ color: "#00A3EC", fontSize: "0.7rem", marginTop: "0.25rem" }}>{emailError}</p>
                         )}
 
                         <Button
-                          className={`w-full ${sizes.buttonHeight} bg-gradient-to-r from-[#BACEFF] to-[#0078FF] hover:from-[#A9BDFF] hover:to-[#0069E0] text-white rounded-md text-base`}
+                          className={`w-full ${sizes.buttonHeight} bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white rounded-md text-base`}
                           onClick={handlePasswordContinue}
                         >
                           Continue
@@ -510,7 +510,7 @@ export default function AuthPage() {
                         <div className="flex justify-center w-full">
                           <button
                             onClick={handleBackToMain}
-                            className="flex items-center text-blue-400 hover:text-blue-500"
+                            className="flex items-center text-[#00A3EC] hover:text-[#6988FF]"
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -521,7 +521,7 @@ export default function AuthPage() {
                             >
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                             </svg>
-                            <span className={`text-blue-400 text-base`}>Back</span>
+                            <span className="text-[#00A3EC] text-base">Back</span>
                           </button>
                         </div>
 
@@ -555,11 +555,11 @@ export default function AuthPage() {
                     We sent you a magic link to log in!
                   </h2>
                   <p className={`text-gray-600 mb-1 text-base`}>
-                    We sent an email to you at <span className="font-medium text-[#0078FF]">{email}</span>.
+                    We sent an email to you at <span className="font-medium text-[#00A3EC]">{email}</span>.
                   </p>
                   <p className={`text-gray-600 text-base`}>Click the link in the email to log in to your account.</p>
                   <p className={`text-gray-500 mt-3 text-base`}>
-                    Redirecting to onboarding in <span className="font-medium text-[#0078FF]">{countdown}</span>{" "}
+                    Redirecting to onboarding in <span className="font-medium text-[#00A3EC]">{countdown}</span>{" "}
                     seconds...
                   </p>
                 </div>
@@ -592,7 +592,7 @@ export default function AuthPage() {
         </div>
 
         {/* Right Column - Logo and Slides - Desktop Only */}
-        <div className="hidden xl:flex xl:w-1/2 bg-blue-50 flex-col rounded-lg m-4 xl:h-[calc(100vh-2rem)]">
+        <div className="hidden xl:flex xl:w-1/2 flex-col rounded-lg m-4 xl:h-[calc(100vh-2rem)]" style={{ background: "linear-gradient(135deg, #E8F7FE 0%, #EEF0FF 100%)" }}>
           <div className="flex flex-col h-full p-6">
             <div className="flex justify-center w-full flex-shrink-0 mb-7">
               <div className="flex flex-col items-center gap-2">
@@ -607,9 +607,9 @@ export default function AuthPage() {
             </div>
 
             <div className="flex justify-center w-full flex-shrink-0 mt-4">
-              <div className="flex items-center gap-3 rounded-[0.70rem] border-[0.25px] border-[rgba(115,185,255,0.3)] bg-[#F5F8FF] shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(115,185,255,0.23)] rounded-lg p-4 w-[30rem]">
+              <div className="flex items-center gap-3 rounded-[0.70rem] border-[0.25px] border-[rgba(0,163,236,0.25)] bg-[#F5F8FF] shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(0,163,236,0.2)] rounded-lg p-4 w-[30rem]">
                 <div className="flex-shrink-0">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(0,163,236,0.15)", color: "#00A3EC" }}>
                     {currentSlide === 0 && <DollarSign className="w-5 h-5" strokeWidth={2} />}
                     {currentSlide === 1 && <Globe className="w-5 h-5" strokeWidth={2} />}
                     {currentSlide === 2 && <Users className="w-5 h-5" strokeWidth={2} />}
@@ -640,7 +640,7 @@ export default function AuthPage() {
                     onClick={() => changeSlide((currentSlide + 1) % slides.length)}
                     onKeyDown={(e) => e.key === "Enter" && changeSlide((currentSlide + 1) % slides.length)}
                   >
-                    <div className="absolute left-0 top-0 z-10 rounded-xl border border-blue-200/70 bg-white px-4 py-2.5 shadow-sm w-fit -translate-y-[calc(100%+0.5rem)]">
+                    <div className="absolute left-0 top-0 z-10 rounded-xl border border-[#00A3EC]/30 bg-white px-4 py-2.5 shadow-sm w-fit -translate-y-[calc(100%+0.5rem)]">
                       <span className="text-sm font-medium text-gray-700">
                         {currentSlide === 0 && "Design, Build, and Refine Courses"}
                         {currentSlide === 1 && "Create Projects & Organize Folders"}
@@ -686,7 +686,7 @@ export default function AuthPage() {
               {slides.map((_, index) => (
                 <button
                   key={index}
-                  className={`w-2 h-2 rounded-full ${index === currentSlide ? "bg-blue-500" : "bg-gray-300"}`}
+                  className={`w-2 h-2 rounded-full ${index === currentSlide ? "bg-[#00A3EC]" : "bg-gray-300"}`}
                   onClick={() => changeSlide(index)}
                 />
               ))}
@@ -696,7 +696,7 @@ export default function AuthPage() {
       </div>
 
       {/* Mobile/Tablet Slides Section */}
-      <div id="mobile-slides-section" className="xl:hidden w-full bg-blue-50 py-12 px-5">
+      <div id="mobile-slides-section" className="xl:hidden w-full py-12 px-5" style={{ background: "linear-gradient(135deg, #E8F7FE 0%, #EEF0FF 100%)" }}>
         <div className="max-w-2xl mx-auto">
           <div className="flex justify-center w-full mb-6">
             <Image
@@ -709,9 +709,9 @@ export default function AuthPage() {
           </div>
 
           <div className="flex justify-center w-full mb-6">
-            <div className="flex items-center gap-3 rounded-[0.70rem] border-[0.25px] border-[rgba(115,185,255,0.3)] bg-[#F5F8FF] shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(115,185,255,0.23)] rounded-lg p-4 w-full max-w-md">
+            <div className="flex items-center gap-3 rounded-[0.70rem] border-[0.25px] border-[rgba(0,163,236,0.25)] bg-[#F5F8FF] shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(0,163,236,0.2)] rounded-lg p-4 w-full max-w-md">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(0,163,236,0.15)", color: "#00A3EC" }}>
                   {currentSlide === 0 && <DollarSign className="w-5 h-5" strokeWidth={2} />}
                   {currentSlide === 1 && <Globe className="w-5 h-5" strokeWidth={2} />}
                   {currentSlide === 2 && <Users className="w-5 h-5" strokeWidth={2} />}
@@ -739,7 +739,7 @@ export default function AuthPage() {
                   onClick={() => changeSlide((currentSlide + 1) % slides.length)}
                   onKeyDown={(e) => e.key === "Enter" && changeSlide((currentSlide + 1) % slides.length)}
                 >
-                  <div className="rounded-xl border border-blue-200/70 bg-white px-4 py-2.5 shadow-sm w-fit mb-2">
+                  <div className="rounded-xl border border-[#00A3EC]/30 bg-white px-4 py-2.5 shadow-sm w-fit mb-2">
                     <span className="text-sm font-medium text-gray-700">
                       {currentSlide === 0 && "Design, Build, and Refine Courses"}
                       {currentSlide === 1 && "Create Projects & Organize Folders"}
@@ -784,7 +784,7 @@ export default function AuthPage() {
             {slides.map((_, index) => (
               <button
                 key={index}
-                className={`w-2.5 h-2.5 rounded-full transition-colors ${index === currentSlide ? "bg-blue-500" : "bg-gray-300"}`}
+                className={`w-2.5 h-2.5 rounded-full transition-colors ${index === currentSlide ? "bg-[#00A3EC]" : "bg-gray-300"}`}
                 onClick={() => changeSlide(index)}
               />
             ))}

@@ -26,6 +26,8 @@ interface HeaderProps {
   showModelSelector?: boolean
   /** When true, sidebar is collapsed (narrow). Used for fixed header left offset on desktop. */
   sidebarCollapsed?: boolean
+  /** When true, show the mobile chat button in header. Only used on course details page. */
+  showChatButton?: boolean
 }
 
 export function Header({
@@ -39,6 +41,7 @@ export function Header({
   showBackButton = false,
   showModelSelector = false,
   sidebarCollapsed,
+  showChatButton = false,
 }: HeaderProps) {
   const router = useRouter()
   const [isLLMModalOpen, setIsLLMModalOpen] = useState(false)
@@ -112,15 +115,17 @@ export function Header({
 
           {/* Right Section - Actions */}
           <div className="flex items-center justify-center gap-3 shrink-0 self-stretch">
-            {/* Mobile: Chat button (opens chat panel) */}
-            <button
-              type="button"
-              onClick={() => document.dispatchEvent(new CustomEvent("open-chat"))}
-              className="md:hidden w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors flex-shrink-0 self-center"
-              aria-label="Open chat"
-            >
-              <Image src="/images/toolsAI-logo.png" alt="Chat" width={22} height={22} className="w-5 h-5 object-contain" />
-            </button>
+            {/* Mobile: Chat button (opens chat panel) - only on course details page */}
+            {showChatButton && (
+              <button
+                type="button"
+                onClick={() => document.dispatchEvent(new CustomEvent("open-chat"))}
+                className="md:hidden w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors flex-shrink-0 self-center"
+                aria-label="Open chat"
+              >
+                <Image src="/images/toolsAI-logo.png" alt="Chat" width={22} height={22} className="w-5 h-5 object-contain" />
+              </button>
+            )}
             {isLoggedIn ? (
               <TooltipProvider>
                 <TooltipFlowbite content="Profile" position="bottom">

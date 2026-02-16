@@ -9,7 +9,6 @@ import { SidebarLearner } from "@/components/platform/sidebar-learner"
 import { Header } from "@/components/platform/header"
 
 import { VoiceColumn } from "@/components/voice-column"
-import ChatButton from "@/components/chat-button"
 import { PlatformFooter } from "@/components/platform/platform-footer"
 import { cn } from "@/lib/utils"
 
@@ -463,10 +462,6 @@ export default function CourseContentLayout({
             </div>
           </div>
 
-          {/* Chat Button - sticky right side */}
-          <div className="fixed top-20 right-0 z-40 flex">
-            <ChatButton />
-          </div>
           </div>
 
           {/* Right Sidebars */}

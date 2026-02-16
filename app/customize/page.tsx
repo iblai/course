@@ -18,7 +18,6 @@ import {
 import { cn } from "@/lib/utils"
 import { ChevronLeft } from "lucide-react"
 import { toast } from "sonner"
-import ChatButton from "@/components/chat-button"
 
 export default function ConfigurePage() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -234,10 +233,6 @@ Section, Subsection, and Unit must contain ONLY descriptive titles (no explanati
               </div>
             </div>
 
-              {/* Chat Button - sticky right side */}
-              <div className="fixed top-20 right-0 z-40 flex">
-                <ChatButton />
-              </div>
             </div>
 
             {/* Footer */}

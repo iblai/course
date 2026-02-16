@@ -237,6 +237,7 @@ export default function CourseDetailsContent() {
             showBackButton={true}
             showModelSelector={true}
             sidebarCollapsed={sidebarCollapsed}
+            showChatButton={true}
           />
           <div className="flex-1 flex justify-center items-center">
             <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin"></div>
@@ -273,6 +274,7 @@ export default function CourseDetailsContent() {
           showBackButton={true}
           showModelSelector={true}
           sidebarCollapsed={sidebarCollapsed}
+          showChatButton={true}
         />
 
         <div className="flex flex-1">
