@@ -506,10 +506,10 @@ export default function HomePage() {
             <div
               className={cn(
                 "flex-1 min-h-0 min-w-0 flex px-4 sm:px-6 pt-12 pb-6 sm:py-12 w-full max-w-full sm:pl-8 sm:pr-8 md:pr-20",
-                hasChatMessages ? "items-start" : "items-center justify-center"
+                hasChatMessages ? "items-start justify-center" : "items-center justify-center"
               )}
             >
-          <div className="w-full max-w-6xl min-w-0">
+          <div className={cn("w-full min-w-0", hasChatMessages ? "max-w-3xl" : "max-w-6xl")}>
             {isCreatingCourse ? (
               /* Creating course progress UI */
               <div className="w-full max-w-2xl mx-auto space-y-6 min-w-0 px-1">
@@ -575,8 +575,7 @@ export default function HomePage() {
               (() => {
                 if (hasChatMessages) {
                   return (
-              <div className="w-full max-w-6xl min-w-0 flex flex-1 min-h-0">
-                <div className="w-full max-w-3xl mx-auto py-4 sm:py-6 pb-6 px-4 sm:px-6 min-w-0 flex-1 min-h-0 overflow-y-auto">
+              <div className="w-full px-3 sm:px-4 py-4 sm:py-6 pb-6 min-w-0 flex-1 min-h-0 overflow-y-auto">
                   {messages.map((msg) =>
                     msg.role === "user" ? (
                       <div key={msg.id} className="flex justify-end mb-4">
@@ -633,7 +632,6 @@ export default function HomePage() {
                   )}
                   {isAssistantTyping && <LoadingMessage mentorName="agentAI" />}
                   <div ref={messagesEndRef} />
-                </div>
               </div>
                   );
                 }

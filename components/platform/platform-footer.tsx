@@ -1,5 +1,6 @@
 "use client"
 
+import { createPortal } from "react-dom"
 import Link from "next/link"
 import Image from "next/image"
 import { FloatingMicrophoneButton } from "@/components/accessibility/floating-microphone-button"
@@ -71,12 +72,15 @@ export function PlatformFooter() {
         </div>
       </div>
 
-      {!isChatOpen && (
-        <div className="fixed bottom-6 right-6 hidden md:flex flex-col gap-3 z-[99990]">
-          <FloatingMicrophoneButton />
-          <FloatingAccessibilityButton />
-        </div>
-      )}
+      {!isChatOpen &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div className="fixed bottom-6 right-6 hidden md:flex flex-col gap-3 z-50 pointer-events-none [&>*]:pointer-events-auto">
+            <FloatingMicrophoneButton />
+            <FloatingAccessibilityButton />
+          </div>,
+          document.body
+        )}
     </footer>
   )
 }
