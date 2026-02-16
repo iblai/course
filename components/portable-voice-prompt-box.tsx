@@ -55,6 +55,7 @@ export function PortableVoicePromptBox({
   const streamRef = useRef<MediaStream | null>(null)
   const recognitionRef = useRef<any>(null)
   const dictationRecognitionRef = useRef<any>(null)
+  const dictationAccumulatedRef = useRef("")
   const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const lastSpeechTimeRef = useRef<number>(Date.now())
   const accumulatedTranscriptRef = useRef<string>("")
@@ -242,6 +243,7 @@ export function PortableVoicePromptBox({
     }
 
     setIsDictating(true)
+    dictationAccumulatedRef.current = inputValue
 
     const recognition = new SpeechRecognition()
     recognition.continuous = true
@@ -249,11 +251,16 @@ export function PortableVoicePromptBox({
     recognition.lang = "en-US"
 
     recognition.onresult = (event: any) => {
-      let finalTranscript = ""
-      for (let i = 0; i < event.results.length; i++) {
-        finalTranscript += event.results[i][0].transcript
+      let interim = ""
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const t = event.results[i][0].transcript
+        if (event.results[i].isFinal) {
+          dictationAccumulatedRef.current += t
+        } else {
+          interim += t
+        }
       }
-      setInputValue(finalTranscript)
+      setInputValue(dictationAccumulatedRef.current + interim)
     }
 
     recognition.onerror = (event: any) => {

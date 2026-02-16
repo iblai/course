@@ -144,7 +144,7 @@ export function ChatInputForm({
             hasReplyOrAttachments && "pt-1",
           )}
         />
-        {isListening && (
+        {isListening && !value.trim() && (
           <div
             className={cn(
               "absolute flex items-center gap-1 pointer-events-none left-4",
@@ -200,14 +200,14 @@ export function ChatInputForm({
                 <button
                   type="button"
                   onClick={onVoiceClick}
-                  className={cn("p-1.5 transition-colors rounded-lg", isListening ? "text-white" : "")}
+                  className={cn("w-9 h-9 flex items-center justify-center transition-colors rounded-lg", isListening ? "text-white" : "")}
                   style={
                     isListening ? { backgroundColor: "#00A6F1", color: "white" } : { color: "rgb(113,121,133)" }
                   }
                   aria-label={isListening ? "Stop listening" : "Voice input"}
                 >
                   {isListening ? (
-                    <Square className="w-5 h-5 shrink-0 fill-current" strokeWidth={0} />
+                    <Square className="w-3.5 h-3.5 shrink-0 fill-current" strokeWidth={0} />
                   ) : (
                     <img
                       src={`${PROMPT_ICONS}/mic.svg`}

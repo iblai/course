@@ -65,6 +65,7 @@ export function ChatButton({ isMobile = false, isSmallScreen = false }: ChatButt
   const [visualViewportOffsetTop, setVisualViewportOffsetTop] = useState(0)
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null)
   const accumulatedTranscriptRef = useRef<string>("")
+  const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const pathname = usePathname()
   const isMobileView = useIsMobile()
   const isCanvasView = pathname?.includes("/canvas") || pathname?.includes("/artifact")
@@ -107,6 +108,10 @@ export function ChatButton({ isMobile = false, isSmallScreen = false }: ChatButt
   }
 
   const stopDictation = () => {
+    if (silenceTimeoutRef.current) {
+      clearTimeout(silenceTimeoutRef.current)
+      silenceTimeoutRef.current = null
+    }
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop()
@@ -141,15 +146,21 @@ export function ChatButton({ isMobile = false, isSmallScreen = false }: ChatButt
       results: { length: number; [i: number]: { isFinal: boolean; [j: number]: { transcript: string } } }
     }) => {
       let interim = ""
+      let hadFinal = false
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const t = event.results[i][0].transcript
         if (event.results[i].isFinal) {
           accumulatedTranscriptRef.current += t
+          hadFinal = true
         } else {
           interim += t
         }
       }
       setInputValue(accumulatedTranscriptRef.current + interim)
+      if (hadFinal) {
+        if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current)
+        silenceTimeoutRef.current = setTimeout(() => stopDictation(), 2000)
+      }
     }
     recognition.onerror = () => {
       stopDictation()
@@ -169,6 +180,10 @@ export function ChatButton({ isMobile = false, isSmallScreen = false }: ChatButt
 
   useEffect(() => {
     return () => {
+      if (silenceTimeoutRef.current) {
+        clearTimeout(silenceTimeoutRef.current)
+        silenceTimeoutRef.current = null
+      }
       if (recognitionRef.current) {
         try {
           recognitionRef.current.stop()

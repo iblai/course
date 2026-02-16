@@ -66,6 +66,7 @@ export default function ProjectPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const recognitionRef = useRef<{ stop: () => void } | null>(null)
   const accumulatedTranscriptRef = useRef<string>("")
+  const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const hasMessages = messages.length > 0
 
@@ -138,6 +139,10 @@ export default function ProjectPage() {
 
   useEffect(() => {
     return () => {
+      if (silenceTimeoutRef.current) {
+        clearTimeout(silenceTimeoutRef.current)
+        silenceTimeoutRef.current = null
+      }
       if (recognitionRef.current) {
         try {
           recognitionRef.current.stop()
@@ -191,6 +196,10 @@ export default function ProjectPage() {
   }
 
   const stopDictation = () => {
+    if (silenceTimeoutRef.current) {
+      clearTimeout(silenceTimeoutRef.current)
+      silenceTimeoutRef.current = null
+    }
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop()
@@ -222,15 +231,21 @@ export default function ProjectPage() {
     recognition.lang = "en-US"
     recognition.onresult = (event: any) => {
       let interim = ""
+      let hadFinal = false
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const t = event.results[i][0].transcript
         if (event.results[i].isFinal) {
           accumulatedTranscriptRef.current += t
+          hadFinal = true
         } else {
           interim += t
         }
       }
       setInputValue(accumulatedTranscriptRef.current + interim)
+      if (hadFinal) {
+        if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current)
+        silenceTimeoutRef.current = setTimeout(() => stopDictation(), 2000)
+      }
     }
     recognition.onerror = () => {
       stopDictation()

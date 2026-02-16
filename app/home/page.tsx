@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { SidebarLearner } from "@/components/platform/sidebar-learner"
 import { Header } from "@/components/platform/header"
 import { PlatformFooter } from "@/components/platform/platform-footer"
-import { Plus, Mic, ArrowUp, RotateCw, ArrowLeft, Bold, Italic, Link as LinkIcon, List, ListOrdered, Upload, Sparkles, FileImage, X, Check, Copy, Volume2, Reply } from "lucide-react"
+import { Plus, Mic, ArrowUp, Square, RotateCw, ArrowLeft, Bold, Italic, Link as LinkIcon, List, ListOrdered, Upload, Sparkles, FileImage, X, Check, Copy, Volume2, Reply } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { JumpstartTemplates } from "@/components/jumpstart-templates"
 import { Textarea } from "@/components/ui/textarea"
@@ -83,6 +83,7 @@ export default function HomePage() {
   const userRequestedStopRef = useRef(false)
   const accumulatedTranscriptRef = useRef("")
   const restartTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const silenceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [courseForm, setCourseForm] = useState({
     courseName: "",
     organization: "test_admin",
@@ -111,6 +112,10 @@ export default function HomePage() {
   useEffect(() => {
     return () => {
       userRequestedStopRef.current = true
+      if (silenceTimeoutRef.current) {
+        clearTimeout(silenceTimeoutRef.current)
+        silenceTimeoutRef.current = null
+      }
       if (restartTimeoutRef.current) {
         clearTimeout(restartTimeoutRef.current)
         restartTimeoutRef.current = null
@@ -172,6 +177,10 @@ export default function HomePage() {
 
   const stopDictation = () => {
     userRequestedStopRef.current = true
+    if (silenceTimeoutRef.current) {
+      clearTimeout(silenceTimeoutRef.current)
+      silenceTimeoutRef.current = null
+    }
     if (restartTimeoutRef.current) {
       clearTimeout(restartTimeoutRef.current)
       restartTimeoutRef.current = null
@@ -193,12 +202,22 @@ export default function HomePage() {
     recognition.interimResults = true
     recognition.lang = "en-US"
     recognition.onresult = (event: any) => {
-      let chunk = ""
-      for (let i = 0; i < event.results.length; i++) {
-        chunk += event.results[i][0].transcript
+      let interim = ""
+      let hadFinal = false
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const t = event.results[i][0].transcript
+        if (event.results[i].isFinal) {
+          accumulatedTranscriptRef.current += t
+          hadFinal = true
+        } else {
+          interim += t
+        }
       }
-      accumulatedTranscriptRef.current += chunk
-      setInputValue(accumulatedTranscriptRef.current)
+      setInputValue(accumulatedTranscriptRef.current + interim)
+      if (hadFinal) {
+        if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current)
+        silenceTimeoutRef.current = setTimeout(() => stopDictation(), 2000)
+      }
     }
     recognition.onerror = (event: any) => {
       const err = event?.error
@@ -745,12 +764,12 @@ export default function HomePage() {
                         </div>
                         {/* Right Side Buttons */}
                         <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                          <TooltipFlowbite content="Dictate" position="top">
+                          <TooltipFlowbite content={isListening ? "Stop listening" : "Dictate"} position="top">
                             <button
                               type="button"
                               onClick={handleDictationClick}
                               className={cn(
-                                "p-1.5 transition-colors rounded-lg",
+                                "w-9 h-9 flex items-center justify-center transition-colors rounded-lg",
                                 isListening
                                   ? "text-white"
                                   : ""
@@ -760,21 +779,27 @@ export default function HomePage() {
                                   ? { backgroundColor: "#00A6F1", color: "white" }
                                   : { color: "rgb(113,121,133)" }
                               }
-                              aria-label="Voice input"
+                              aria-label={isListening ? "Stop listening" : "Voice input"}
                             >
-                              <Mic className="w-5 h-5" />
+                              {isListening ? (
+                                <Square className="w-3.5 h-3.5 fill-current" strokeWidth={0} />
+                              ) : (
+                                <Mic className="w-5 h-5" />
+                              )}
                             </button>
                           </TooltipFlowbite>
-                          <TooltipFlowbite content="Send Message" position="top">
-                            <button
-                              onClick={handleSubmit}
-                              className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors text-white hover:opacity-90"
-                              style={{ backgroundColor: "#00A6F1" }}
-                              aria-label="Submit"
-                            >
-                              <ArrowUp className="w-5 h-5" />
-                            </button>
-                          </TooltipFlowbite>
+                          {!isListening && (
+                            <TooltipFlowbite content="Send Message" position="top">
+                              <button
+                                onClick={handleSubmit}
+                                className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors text-white hover:opacity-90"
+                                style={{ backgroundColor: "#00A6F1" }}
+                                aria-label="Submit"
+                              >
+                                <ArrowUp className="w-5 h-5" />
+                              </button>
+                            </TooltipFlowbite>
+                          )}
                         </div>
                       </TooltipProvider>
                     </div>

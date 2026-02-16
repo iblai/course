@@ -25,6 +25,7 @@ export function ReplyBox({ value, onChange, onSend, recipientName }: ReplyBoxPro
   const [recordingStatus, setRecordingStatus] = useState("Listening...")
   const recognitionRef = useRef<any>(null)
   const recordingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const accumulatedTranscriptRef = useRef("")
 
   useEffect(() => {
     return () => {
@@ -64,6 +65,7 @@ export function ReplyBox({ value, onChange, onSend, recipientName }: ReplyBoxPro
 
     setIsRecording(true)
     setRecordingStatus("Listening...")
+    accumulatedTranscriptRef.current = value
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     const recognition = new SpeechRecognition()
@@ -96,12 +98,16 @@ export function ReplyBox({ value, onChange, onSend, recipientName }: ReplyBoxPro
         }, 5000)
       }
 
-      let finalTranscript = ""
-      for (let i = 0; i < event.results.length; i++) {
-        finalTranscript += event.results[i][0].transcript
+      let interim = ""
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const t = event.results[i][0].transcript
+        if (event.results[i].isFinal) {
+          accumulatedTranscriptRef.current += t
+        } else {
+          interim += t
+        }
       }
-
-      onChange(finalTranscript)
+      onChange(accumulatedTranscriptRef.current + interim)
     }
 
     recognition.onerror = (event) => {
