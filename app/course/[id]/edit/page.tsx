@@ -562,7 +562,7 @@ export default function CourseEditPage() {
         <div className="flex flex-1 min-h-0 min-w-0">
           <main className="flex-1 flex flex-col min-h-0 min-w-0 transition-all duration-300 pb-[200px] md:pb-[200px] overflow-x-hidden">
             <div className="flex flex-1 min-h-0 min-w-0">
-              <div className="flex-1 min-h-0 min-w-0 w-full pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:pl-8 sm:pr-8 md:pr-20 py-4 sm:py-8 max-w-4xl mx-auto overflow-x-hidden">
+              <div className="flex-1 min-h-0 min-w-0 w-full pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:pl-8 sm:pr-8 md:pr-20 py-4 sm:py-8 overflow-x-hidden">
                 {/* Page header: title, subtitle, Add Section */}
                 <div className="pt-4 pb-4 mb-4 sm:mb-6 border-b border-gray-100">
                   <h1 className="text-xl sm:text-2xl font-semibold mb-1 text-[var(--sidebar-foreground)] break-words">

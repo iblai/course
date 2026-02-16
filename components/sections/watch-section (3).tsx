@@ -54,14 +54,14 @@ export function WatchSection() {
 
           {/* Right Content */}
           <div className="relative flex items-center justify-center">
-            {/* Video Container with Custom Gradient and Border Radius */}
+            {/* Video Container - YouTube 16:9 size (e.g. 640×360) */}
             <div
-              className="relative w-full max-w-[800px] h-[300px] sm:h-[350px] md:h-[400px] lg:h-[450px] flex items-center justify-center overflow-hidden mx-4 shadow-sm"
+              className="relative w-full max-w-[640px] aspect-video flex items-center justify-center overflow-hidden mx-4 shadow-sm"
               style={{
                 background: "linear-gradient(135deg, rgba(0,163,236,0.09) 0%, rgba(105,136,255,0.09) 100%)",
                 borderRadius: "35px",
                 borderBottomLeftRadius: "35px",
-                borderBottomRightRadius: "100px",
+                borderBottomRightRadius: "70px",
               }}
             >
               {/* Play Button - Positioned on Left Top */}

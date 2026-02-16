@@ -546,8 +546,8 @@ export default function HomePage() {
             >
           <div className={cn("w-full min-w-0", hasChatMessages ? "max-w-3xl" : "max-w-6xl")}>
             {isCreatingCourse ? (
-              /* Creating course progress UI */
-              <div className="w-full max-w-2xl mx-auto space-y-6 min-w-0 px-1">
+              /* Creating course progress UI - same width as edit course / date picker step */
+              <div className="w-full space-y-6 min-w-0 px-1">
                 <div>
                   <h1 className="text-xl sm:text-2xl font-bold text-[var(--sidebar-foreground)] break-words">
                     {courseForm.courseName || courseDetailsForm.displayName || "New course"}
