@@ -64,6 +64,8 @@ export default function ProjectPage() {
   const [inputBarBottom, setInputBarBottom] = useState(56)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const recognitionRef = useRef<{ stop: () => void } | null>(null)
+  const accumulatedTranscriptRef = useRef<string>("")
 
   const hasMessages = messages.length > 0
 
@@ -134,6 +136,35 @@ export default function ProjectPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages, isAssistantTyping])
 
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop()
+        } catch (_) {}
+        recognitionRef.current = null
+      }
+      setIsListening(false)
+    }
+  }, [])
+
+  // Stop listening when user clicks anywhere else on the page (not inside prompt area)
+  useEffect(() => {
+    if (!isListening) return
+    const stopOnClick = (e: MouseEvent | TouchEvent) => {
+      const node = e.target as Node | null
+      const el = node?.nodeType === Node.ELEMENT_NODE ? (node as Element) : (node?.parentElement ?? null)
+      if (el?.closest?.("[data-prompt-area]")) return
+      stopDictation()
+    }
+    document.addEventListener("mousedown", stopOnClick)
+    document.addEventListener("touchstart", stopOnClick)
+    return () => {
+      document.removeEventListener("mousedown", stopOnClick)
+      document.removeEventListener("touchstart", stopOnClick)
+    }
+  }, [isListening])
+
   const projectSlug = id || "new-project"
 
   const handleSubmit = (content: string) => {
@@ -159,8 +190,62 @@ export default function ProjectPage() {
     }, 800)
   }
 
+  const stopDictation = () => {
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop()
+      } catch (_) {}
+      recognitionRef.current = null
+    }
+    setInputValue(accumulatedTranscriptRef.current)
+    setIsListening(false)
+  }
+
   const handleDictationClick = () => {
-    setIsListening((prev) => !prev)
+    if (isListening) {
+      stopDictation()
+      return
+    }
+    const SpeechRecognition =
+      typeof window !== "undefined" && (window.SpeechRecognition || (window as any).webkitSpeechRecognition)
+    if (!SpeechRecognition) {
+      if (typeof window !== "undefined") {
+        alert("Your browser does not support speech recognition. Please try Chrome or Edge.")
+      }
+      return
+    }
+    accumulatedTranscriptRef.current = inputValue ? `${inputValue.trim()} ` : ""
+    setIsListening(true)
+    const recognition = new SpeechRecognition()
+    recognition.continuous = true
+    recognition.interimResults = true
+    recognition.lang = "en-US"
+    recognition.onresult = (event: any) => {
+      let interim = ""
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const t = event.results[i][0].transcript
+        if (event.results[i].isFinal) {
+          accumulatedTranscriptRef.current += t
+        } else {
+          interim += t
+        }
+      }
+      setInputValue(accumulatedTranscriptRef.current + interim)
+    }
+    recognition.onerror = () => {
+      stopDictation()
+    }
+    recognition.onend = () => {
+      setInputValue(accumulatedTranscriptRef.current)
+      setIsListening(false)
+      recognitionRef.current = null
+    }
+    try {
+      recognition.start()
+      recognitionRef.current = recognition
+    } catch (_) {
+      setIsListening(false)
+    }
   }
 
   const handlePhoneCallClick = () => {

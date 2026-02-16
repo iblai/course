@@ -28,7 +28,7 @@ import { CommunicationTab } from "./chat-tabs/communication-tab"
 import { SummarizeTab } from "./chat-tabs/summarize-tab"
 import { PracticeTab } from "./chat-tabs/practice-tab"
 import { CreateTab } from "./chat-tabs/create-tab"
-import { ChatPromptBox } from "./chat-prompt-box"
+import { ChatInputForm } from "@/components/chat-input-form"
 import { createContext, useContext } from "react"
 import { useAccessibility } from "@/contexts/accessibility-context"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -64,6 +64,7 @@ export function ChatButton({ isMobile = false, isSmallScreen = false }: ChatButt
   const [visualViewportHeight, setVisualViewportHeight] = useState(0)
   const [visualViewportOffsetTop, setVisualViewportOffsetTop] = useState(0)
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null)
+  const accumulatedTranscriptRef = useRef<string>("")
   const pathname = usePathname()
   const isMobileView = useIsMobile()
   const isCanvasView = pathname?.includes("/canvas") || pathname?.includes("/artifact")
@@ -112,6 +113,7 @@ export function ChatButton({ isMobile = false, isSmallScreen = false }: ChatButt
       } catch (_) {}
       recognitionRef.current = null
     }
+    setInputValue(accumulatedTranscriptRef.current)
     setIsListening(false)
   }
 
@@ -128,22 +130,32 @@ export function ChatButton({ isMobile = false, isSmallScreen = false }: ChatButt
       }
       return
     }
+    accumulatedTranscriptRef.current = inputValue ? `${inputValue.trim()} ` : ""
     setIsListening(true)
     const recognition = new SpeechRecognition()
     recognition.continuous = true
     recognition.interimResults = true
     recognition.lang = "en-US"
-    recognition.onresult = (event: { results: { [key: number]: { [key: number]: { transcript: string } } } }) => {
-      let finalTranscript = ""
-      for (let i = 0; i < event.results.length; i++) {
-        finalTranscript += event.results[i][0].transcript
+    recognition.onresult = (event: {
+      resultIndex: number
+      results: { length: number; [i: number]: { isFinal: boolean; [j: number]: { transcript: string } } }
+    }) => {
+      let interim = ""
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const t = event.results[i][0].transcript
+        if (event.results[i].isFinal) {
+          accumulatedTranscriptRef.current += t
+        } else {
+          interim += t
+        }
       }
-      setInputValue(finalTranscript)
+      setInputValue(accumulatedTranscriptRef.current + interim)
     }
     recognition.onerror = () => {
       stopDictation()
     }
     recognition.onend = () => {
+      setInputValue(accumulatedTranscriptRef.current)
       setIsListening(false)
       recognitionRef.current = null
     }
@@ -166,6 +178,23 @@ export function ChatButton({ isMobile = false, isSmallScreen = false }: ChatButt
       setIsListening(false)
     }
   }, [])
+
+  // Stop listening when user clicks anywhere else on the page (not inside prompt area)
+  useEffect(() => {
+    if (!isListening) return
+    const stopOnClick = (e: MouseEvent | TouchEvent) => {
+      const node = e.target as Node | null
+      const el = node?.nodeType === Node.ELEMENT_NODE ? (node as Element) : (node?.parentElement ?? null)
+      if (el?.closest?.("[data-prompt-area]")) return
+      stopDictation()
+    }
+    document.addEventListener("mousedown", stopOnClick)
+    document.addEventListener("touchstart", stopOnClick)
+    return () => {
+      document.removeEventListener("mousedown", stopOnClick)
+      document.removeEventListener("touchstart", stopOnClick)
+    }
+  }, [isListening])
 
   // Set a CSS variable when the chat state changes
   useEffect(() => {
@@ -334,13 +363,15 @@ export function ChatButton({ isMobile = false, isSmallScreen = false }: ChatButt
         <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">{renderTabContent()}</div>
 
         {/* Prompt Box */}
-        <div className="flex-shrink-0 border-t border-gray-100 bg-white pb-2">
-          <ChatPromptBox
-            inputValue={inputValue}
-            onInputChange={setInputValue}
+        <div className="flex-shrink-0 border-t border-gray-100 bg-white px-4 pb-2">
+          <ChatInputForm
+            value={inputValue}
+            onChange={setInputValue}
             onSubmit={handleSubmit}
+            placeholder="Ask a question or prompt"
             onVoiceClick={handleDictationClick}
             isListening={isListening}
+            compact
           />
         </div>
       </div>
@@ -482,14 +513,16 @@ export function ChatButton({ isMobile = false, isSmallScreen = false }: ChatButt
           <div className="flex-1 overflow-y-auto p-4 space-y-3">{renderTabContent()}</div>
 
           {/* Prompt Box */}
-          <div className="flex-shrink-0 border-t border-gray-100 bg-white pb-2">
-            <ChatPromptBox
-            inputValue={inputValue}
-            onInputChange={setInputValue}
-            onSubmit={handleSubmit}
-            onVoiceClick={handleDictationClick}
-            isListening={isListening}
-          />
+          <div className="flex-shrink-0 border-t border-gray-100 bg-white px-4 pb-2">
+            <ChatInputForm
+              value={inputValue}
+              onChange={setInputValue}
+              onSubmit={handleSubmit}
+              placeholder="Ask a question or prompt"
+              onVoiceClick={handleDictationClick}
+              isListening={isListening}
+              compact
+            />
           </div>
         </div>
       )}

@@ -125,6 +125,23 @@ export default function HomePage() {
     }
   }, [])
 
+  // Stop listening when user clicks anywhere else on the page (not inside prompt area)
+  useEffect(() => {
+    if (!isListening) return
+    const stopOnClick = (e: MouseEvent | TouchEvent) => {
+      const node = e.target as Node | null
+      const el = node?.nodeType === Node.ELEMENT_NODE ? (node as Element) : (node?.parentElement ?? null)
+      if (el?.closest?.("[data-prompt-area]")) return
+      stopDictation()
+    }
+    document.addEventListener("mousedown", stopOnClick)
+    document.addEventListener("touchstart", stopOnClick)
+    return () => {
+      document.removeEventListener("mousedown", stopOnClick)
+      document.removeEventListener("touchstart", stopOnClick)
+    }
+  }, [isListening])
+
   const hasChatMessages = messages.length > 0
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })

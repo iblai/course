@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { TooltipFlowbite, TooltipProvider } from "@/components/ui/tooltip-flowbite"
-import { ArrowUp, Mic, Paperclip, X } from "lucide-react"
+import { ArrowUp, Mic, Paperclip, Square, X } from "lucide-react"
 
 // Type declarations for speech recognition
 declare global {
@@ -409,7 +409,7 @@ export function PortableVoicePromptBox({
               </div>
 
               <div className="flex items-center gap-2">
-<TooltipFlowbite content="Dictate" position="top">
+<TooltipFlowbite content={isDictating ? "Stop listening" : "Dictate"} position="top">
                 <Button
                   type="button"
                   variant="ghost"
@@ -418,8 +418,13 @@ export function PortableVoicePromptBox({
                     isDictating ? "bg-blue-100 text-blue-500" : "text-gray-400 hover:bg-gray-100"
                   }`}
                   onClick={handleDictation}
+                  aria-label={isDictating ? "Stop listening" : "Dictate"}
                 >
-                  <Mic className="h-4 w-4" />
+                  {isDictating ? (
+                    <Square className="h-4 w-4 fill-current" strokeWidth={0} />
+                  ) : (
+                    <Mic className="h-4 w-4" />
+                  )}
                 </Button>
               </TooltipFlowbite>
 

@@ -4,7 +4,7 @@ import { useRef } from "react"
 import { Textarea } from "@/components/ui/textarea"
 import { TooltipFlowbite, TooltipProvider } from "@/components/ui/tooltip-flowbite"
 import { cn } from "@/lib/utils"
-import { X } from "lucide-react"
+import { X, Square } from "lucide-react"
 
 const PROMPT_ICONS = "/icons/home-prompt"
 
@@ -59,6 +59,7 @@ export function ChatInputForm({
 
   return (
     <div
+      data-prompt-area
       className={cn(
         "bg-[#FBFBFB] rounded-2xl flex flex-col border-2 relative",
         compact ? "min-h-0" : "",
@@ -123,45 +124,47 @@ export function ChatInputForm({
           ))}
         </div>
       )}
-      <Textarea
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={isListening ? "" : placeholder}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault()
-            onSubmit()
-          }
-        }}
-        className={cn(
-          "w-full bg-transparent px-4 text-base focus:outline-none rounded-2xl border-0 resize-none placeholder:text-gray-400 placeholder:text-base shadow-none focus-visible:ring-0 focus-visible:border-0",
-          compact
-            ? "min-h-[52px] py-2.5"
-            : "min-h-[80px] pb-3",
-          compact ? (isListening ? "pt-9" : "pt-2.5") : isListening ? "pt-10" : "pt-4",
-          hasReplyOrAttachments && "pt-1",
-        )}
-      />
-      {isListening && (
-        <div
+      <div className="relative">
+        <Textarea
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={isListening ? "" : placeholder}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault()
+              onSubmit()
+            }
+          }}
           className={cn(
-            "absolute flex items-center gap-1 pointer-events-none",
-            compact ? "top-2.5 left-4" : "top-4 left-4",
+            "w-full bg-transparent px-4 text-base focus:outline-none rounded-2xl border-0 resize-none placeholder:text-gray-400 placeholder:text-base shadow-none focus-visible:ring-0 focus-visible:border-0",
+            compact
+              ? "min-h-[52px] py-2.5"
+              : "min-h-[80px] pb-3",
+            compact ? (isListening ? "pt-9" : "pt-2.5") : isListening ? "pt-10" : "pt-4",
+            hasReplyOrAttachments && "pt-1",
           )}
-        >
-          {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              className="w-2 h-2 rounded-full animate-bounce"
-              style={{
-                backgroundColor: "#00A6F1",
-                animationDelay: `${i * 0.15}s`,
-              }}
-            />
-          ))}
-          <span className="ml-2 text-gray-500 text-sm">Listening...</span>
-        </div>
-      )}
+        />
+        {isListening && (
+          <div
+            className={cn(
+              "absolute flex items-center gap-1 pointer-events-none left-4",
+              compact ? "top-2.5" : "top-4",
+            )}
+          >
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="w-2 h-2 rounded-full animate-bounce"
+                style={{
+                  backgroundColor: "#00A6F1",
+                  animationDelay: `${i * 0.15}s`,
+                }}
+              />
+            ))}
+            <span className="ml-2 text-gray-500 text-sm">Listening...</span>
+          </div>
+        )}
+      </div>
       <div
         className={cn(
           "flex items-center justify-between px-4 border-gray-200 rounded-b-2xl",
@@ -193,7 +196,7 @@ export function ChatInputForm({
           </div>
           <div className="flex items-center gap-2">
             {onVoiceClick && (
-              <TooltipFlowbite content="Dictate" position="top">
+              <TooltipFlowbite content={isListening ? "Stop listening" : "Dictate"} position="top">
                 <button
                   type="button"
                   onClick={onVoiceClick}
@@ -201,28 +204,34 @@ export function ChatInputForm({
                   style={
                     isListening ? { backgroundColor: "#00A6F1", color: "white" } : { color: "rgb(113,121,133)" }
                   }
-                  aria-label="Voice input"
+                  aria-label={isListening ? "Stop listening" : "Voice input"}
                 >
-                  <img
-                    src={`${PROMPT_ICONS}/mic.svg`}
-                    alt=""
-                    className={cn("w-5 h-5 shrink-0", isListening && "brightness-0 invert")}
-                    aria-hidden
-                  />
+                  {isListening ? (
+                    <Square className="w-5 h-5 shrink-0 fill-current" strokeWidth={0} />
+                  ) : (
+                    <img
+                      src={`${PROMPT_ICONS}/mic.svg`}
+                      alt=""
+                      className="w-5 h-5 shrink-0"
+                      aria-hidden
+                    />
+                  )}
                 </button>
               </TooltipFlowbite>
             )}
-            <TooltipFlowbite content="Send Message" position="top">
-              <button
-                type="button"
-                onClick={onSubmit}
-                className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors text-white hover:opacity-90"
-                style={{ backgroundColor: "#00A6F1" }}
-                aria-label="Submit"
-              >
-                <img src={`${PROMPT_ICONS}/arrow-up.svg`} alt="" className="w-5 h-5 shrink-0" aria-hidden />
-              </button>
-            </TooltipFlowbite>
+            {!isListening && (
+              <TooltipFlowbite content="Send Message" position="top">
+                <button
+                  type="button"
+                  onClick={onSubmit}
+                  className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors text-white hover:opacity-90"
+                  style={{ backgroundColor: "#00A6F1" }}
+                  aria-label="Submit"
+                >
+                  <img src={`${PROMPT_ICONS}/arrow-up.svg`} alt="" className="w-5 h-5 shrink-0" aria-hidden />
+                </button>
+              </TooltipFlowbite>
+            )}
           </div>
         </TooltipProvider>
       </div>
