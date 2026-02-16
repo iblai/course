@@ -13,10 +13,10 @@ export function WatchSection() {
           <div className="space-y-8">
             {/* Main Heading */}
             <div className="space-y-4">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+              <h1 className="text-3xl font-bold text-[var(--sidebar-foreground)] leading-tight lg:text-5xl">
                 <span className="block">Create engaging courses</span>
                 <span className="block">
-                  in <span className="text-blue-500">minutes</span>
+                  in <span className="bg-gradient-to-r from-[#00A3EC] to-[#6988FF] bg-clip-text text-transparent font-bold">minutes</span>
                 </span>
               </h1>
             </div>
@@ -24,28 +24,28 @@ export function WatchSection() {
             {/* Feature List */}
             <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mt-0.5">
+                <div className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-0.5 bg-gradient-to-r from-[#00A3EC] to-[#6988FF]">
                   <Check className="w-4 h-4 text-white" />
                 </div>
-                <p className="text-gray-700 text-lg">Generate personalized course content based on your teaching goals</p>
+                <p className="text-[var(--sidebar-foreground)] text-lg">Generate personalized course content based on your teaching goals</p>
               </div>
               <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mt-0.5">
+                <div className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-0.5 bg-gradient-to-r from-[#00A3EC] to-[#6988FF]">
                   <Check className="w-4 h-4 text-white" />
                 </div>
-                <p className="text-gray-700 text-lg">AI-powered content creation and curriculum recommendations</p>
+                <p className="text-[var(--sidebar-foreground)] text-lg">AI-powered content creation and curriculum recommendations</p>
               </div>
               <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mt-0.5">
+                <div className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-0.5 bg-gradient-to-r from-[#00A3EC] to-[#6988FF]">
                   <Check className="w-4 h-4 text-white" />
                 </div>
-                <p className="text-gray-700 text-lg">24/7 educational support and course development assistance</p>
+                <p className="text-[var(--sidebar-foreground)] text-lg">24/7 educational support and course development assistance</p>
               </div>
             </div>
 
             {/* Get Started Button */}
             <div className="pt-4">
-              <Button className="bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 px-8 py-3 rounded-lg font-medium flex items-center gap-2 shadow-sm">
+              <Button className="bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white border-0 px-8 py-3 rounded-lg font-medium flex items-center gap-2 shadow-sm">
                 Get Started
                 <ArrowRight className="w-4 h-4" />
               </Button>
@@ -56,9 +56,9 @@ export function WatchSection() {
           <div className="relative flex items-center justify-center">
             {/* Video Container with Custom Gradient and Border Radius */}
             <div
-              className="relative w-full max-w-[800px] h-[300px] sm:h-[350px] md:h-[400px] lg:h-[450px] flex items-center justify-center overflow-hidden mx-4"
+              className="relative w-full max-w-[800px] h-[300px] sm:h-[350px] md:h-[400px] lg:h-[450px] flex items-center justify-center overflow-hidden mx-4 shadow-sm"
               style={{
-                background: "linear-gradient(135deg, #FFFFFF 0%, #D7EEFC 50%, #5EB8F2 100%)",
+                background: "linear-gradient(135deg, rgba(0,163,236,0.09) 0%, rgba(105,136,255,0.09) 100%)",
                 borderRadius: "35px",
                 borderBottomLeftRadius: "35px",
                 borderBottomRightRadius: "100px",
@@ -87,7 +87,7 @@ export function WatchSection() {
                   height={32}
                   className="w-16 sm:w-20 md:w-24 lg:w-28 h-auto object-contain"
                 />
-                <span className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-[#0078FF] to-[#38A1E5] bg-clip-text text-transparent">
+                <span className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-[#00A3EC] to-[#6988FF] bg-clip-text text-transparent">
                   Ibl.ai Wink
                 </span>
               </div>

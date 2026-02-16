@@ -566,26 +566,15 @@ export default function AuthPage() {
               )}
             </div>
 
-            {/* Footer Section */}
             <div className="flex-shrink-0 mt-auto">
-              <div className="w-full px-2 py-3">
-                <div className="border-t border-gray-200"></div>
-              </div>
-
-              <div className="w-full px-2 pb-4">
-                <div className="flex flex-col items-center justify-center gap-2">
-                  <div className="flex items-center justify-center gap-1.5 text-gray-500 text-xs">
-                    <span>Powered</span>
-                    <Image
-                      src="/images/iblai-logo.png"
-                      alt="ibl.ai"
-                      width={16}
-                      height={16}
-                      className="w-auto h-[23px] pb-[7px]"
-                    />
-                    <span>New York</span>
-                  </div>
-                </div>
+              <div className="w-full px-2 pb-0 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => document.getElementById("watch-section")?.scrollIntoView({ behavior: "smooth" })}
+                  className="text-sm font-medium text-[#00A3EC] hover:text-[#6988FF] transition-colors mb-[10px] border border-[#00A3EC] rounded-md px-4 py-2 hover:border-[#6988FF]"
+                >
+                  Read more
+                </button>
               </div>
             </div>
           </div>
