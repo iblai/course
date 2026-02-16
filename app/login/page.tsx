@@ -290,6 +290,7 @@ export default function AuthPage() {
       iconSize: isSmallScreen ? "w-4 h-4" : isMediumScreen ? "w-5 h-5" : "w-6 h-6",
       fontSize: isSmallScreen ? "text-[10px]" : isMediumScreen ? "text-xs" : "text-base",
       titleBlockMargin: isSmallScreen ? "my-2" : isMediumScreen ? "my-3 xl:my-4" : "my-5 xl:my-12",
+      titleHeadingSize: isSmallScreen ? "text-base" : isMediumScreen ? "text-lg lg:text-xl xl:text-2xl" : "text-xl sm:text-xl md:text-xl lg:text-2xl xl:text-3xl",
       footerPaddingTop: isSmallScreen ? "pt-2" : isMediumScreen ? "pt-3" : "pt-4",
     }
   }
@@ -377,9 +378,11 @@ export default function AuthPage() {
                 <div className="text-center">
                   <div className={`space-y-2 ${sizes.titleBlockMargin}`}>
                     <h1
-                      className="text-xl sm:text-xl md:text-xl lg:text-2xl xl:text-3xl text-[#4E5460] leading-tight font-normal"
+                      className={`${sizes.titleHeadingSize} text-[#4E5460] leading-tight font-normal`}
                     >
-                      Instantly create and sell engaging courses
+                      Instantly create and sell engaging
+                      <br />
+                      courses
                     </h1>
                     <p className={`text-gray-600 mt-1 ${sizes.subtitleSize} leading-tight`}>
                       Launch a subscription-based learning community on a top platform
