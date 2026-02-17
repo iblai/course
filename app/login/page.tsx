@@ -350,7 +350,7 @@ export default function AuthPage() {
         {/* Left Column - Auth Form */}
         <div className="flex w-full flex-col min-h-[100dvh] xl:w-1/2 xl:h-full xl:min-h-0">
           <div
-            className="flex flex-col h-[100dvh] min-h-[100dvh] max-h-[100dvh] px-5 py-3 md:p-4 lg:p-6 justify-between pt-[calc(0.75rem+env(safe-area-inset-top,0px))] pb-[calc(1rem+env(safe-area-inset-bottom,0px))] overflow-y-auto scrollbar-hide"
+            className="flex flex-col h-[100dvh] min-h-[100dvh] max-h-[100dvh] px-5 py-3 md:p-4 lg:p-6 justify-between pt-[calc(0.75rem+env(safe-area-inset-top,0px))] pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] overflow-y-auto scrollbar-hide"
             style={{ minHeight: "-webkit-fill-available" } as React.CSSProperties}
           >
             {/* Logo Section */}
@@ -572,7 +572,7 @@ export default function AuthPage() {
               )}
             </div>
 
-            <div className={`flex-shrink-0 mt-auto min-h-[3rem] flex items-end ${sizes.footerPaddingTop} pb-[calc(0.25rem+env(safe-area-inset-bottom,0px))]`}>
+            <div className={`flex-shrink-0 mt-auto min-h-[2.5rem] flex items-end ${sizes.footerPaddingTop} pb-[calc(0.25rem+env(safe-area-inset-bottom,0px))]`}>
               <div className="w-full px-2 flex justify-center">
                 <button
                   type="button"
