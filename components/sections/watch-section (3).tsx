@@ -27,19 +27,19 @@ export function WatchSection() {
                 <div className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-0.5 bg-gradient-to-r from-[#00A3EC] to-[#6988FF]">
                   <Check className="w-4 h-4 text-white" />
                 </div>
-                <p className="text-[var(--sidebar-foreground)] text-lg">Generate personalized course content based on your teaching goals</p>
+                <p className="text-[var(--sidebar-foreground)] text-lg">Personalized content based on learning goals</p>
               </div>
               <div className="flex items-start gap-3">
                 <div className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-0.5 bg-gradient-to-r from-[#00A3EC] to-[#6988FF]">
                   <Check className="w-4 h-4 text-white" />
                 </div>
-                <p className="text-[var(--sidebar-foreground)] text-lg">AI-powered content creation and curriculum recommendations</p>
+                <p className="text-[var(--sidebar-foreground)] text-lg">AI-powered content and curriculum creation</p>
               </div>
               <div className="flex items-start gap-3">
                 <div className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-0.5 bg-gradient-to-r from-[#00A3EC] to-[#6988FF]">
                   <Check className="w-4 h-4 text-white" />
                 </div>
-                <p className="text-[var(--sidebar-foreground)] text-lg">24/7 educational support and course development assistance</p>
+                <p className="text-[var(--sidebar-foreground)] text-lg">24/7 support and development assistance</p>
               </div>
             </div>
 

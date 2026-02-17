@@ -13,9 +13,9 @@ export function FAQSection() {
 
   const faqData = [
     {
-      question: "How does courseAI help me create better courses?",
+      question: "How does ibl.ai Wink help me create better courses?",
       answer:
-        "courseAI uses advanced AI algorithms to analyze your teaching goals, subject matter, student level, and learning objectives to help you create engaging, personalized course content that aligns with your educational vision and student needs.",
+        "ibl.ai Wink uses advanced AI algorithms to analyze your teaching goals, subject matter, student level, and learning objectives to help you create engaging, personalized course content that aligns with your educational vision and student needs.",
     },
     {
       question: "What kind of course content can I create?",
@@ -25,7 +25,7 @@ export function FAQSection() {
     {
       question: "How do I customize my course content?",
       answer:
-        "Simply input your course objectives, target audience, and subject matter. courseAI will generate tailored content that you can further customize, edit, and adapt to match your teaching style and student requirements.",
+        "Simply input your course objectives, target audience, and subject matter. ibl.ai Wink will generate tailored content that you can further customize, edit, and adapt to match your teaching style and student requirements.",
     },
     {
       question: "How do I update my course preferences?",
@@ -43,7 +43,7 @@ export function FAQSection() {
         "You can work on multiple course projects simultaneously by creating different course outlines and generating content for various subjects based on your diverse teaching needs and educational goals.",
     },
     {
-      question: "Can I use courseAI for free?",
+      question: "Can I use ibl.ai Wink for free?",
       answer:
         "Yes! We offer a free Basic plan that includes 3 course templates, 4 AI-powered content generations, access to 10 educational resources, and 50 community interactions. Perfect for getting started with course creation.",
     },
@@ -53,7 +53,7 @@ export function FAQSection() {
         "You can upgrade your plan at any time from your account settings. Changes take effect immediately and you'll have access to additional course templates and premium AI features.",
     },
     {
-      question: "Can I cancel courseAI at any time?",
+      question: "Can I cancel ibl.ai Wink at any time?",
       answer:
         "Yes, you can cancel your subscription at any time. Your account will remain active until the end of your current billing period, and you'll retain access to your course creation history.",
     },
@@ -152,7 +152,7 @@ export function FAQSection() {
 
               <div>
                 <label htmlFor="impact" className="block text-sm font-medium text-[var(--sidebar-foreground)] mb-1">
-                  How does this issue limit your use of courseAI?
+                  How does this issue limit your use of ibl.ai Wink?
                 </label>
                 <Select>
                   <SelectTrigger className="w-full h-10 border border-[#E5E7EB] rounded-md">

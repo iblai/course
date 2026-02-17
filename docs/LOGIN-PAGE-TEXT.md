@@ -46,9 +46,9 @@ Only the main section copy on the login page (`/login`).
 - in minutes
 
 **Feature list**
-- Generate personalized course content based on your teaching goals
-- AI-powered content creation and curriculum recommendations
-- 24/7 educational support and course development assistance
+- Personalized content based on learning goals
+- AI-powered content and curriculum creation
+- 24/7 support and development assistance
 
 **Button**
 - Get Started
@@ -137,14 +137,14 @@ Only the main section copy on the login page (`/login`).
 - Frequently asked questions
 
 **FAQ questions and answers**
-1. How does courseAI help me create better courses?  
-   courseAI uses advanced AI algorithms to analyze your teaching goals, subject matter, student level, and learning objectives to help you create engaging, personalized course content that aligns with your educational vision and student needs.
+1. How does ibl.ai Wink help me create better courses?  
+   ibl.ai Wink uses advanced AI algorithms to analyze your teaching goals, subject matter, student level, and learning objectives to help you create engaging, personalized course content that aligns with your educational vision and student needs.
 
 2. What kind of course content can I create?  
    You can create various types of educational content including interactive lessons, assessments, quizzes, assignments, video scripts, reading materials, and personalized learning paths for different student skill levels.
 
 3. How do I customize my course content?  
-   Simply input your course objectives, target audience, and subject matter. courseAI will generate tailored content that you can further customize, edit, and adapt to match your teaching style and student requirements.
+   Simply input your course objectives, target audience, and subject matter. ibl.ai Wink will generate tailored content that you can further customize, edit, and adapt to match your teaching style and student requirements.
 
 4. How do I update my course preferences?  
    You can update your course preferences anytime through your profile settings. The AI will re-analyze your updated information and suggest new content approaches that better match your current teaching goals.
@@ -155,13 +155,13 @@ Only the main section copy on the login page (`/login`).
 6. Can I create multiple courses simultaneously?  
    You can work on multiple course projects simultaneously by creating different course outlines and generating content for various subjects based on your diverse teaching needs and educational goals.
 
-7. Can I use courseAI for free?  
+7. Can I use ibl.ai Wink for free?  
    Yes! We offer a free Basic plan that includes 3 course templates, 4 AI-powered content generations, access to 10 educational resources, and 50 community interactions. Perfect for getting started with course creation.
 
 8. Can I upgrade my account at any time?  
    You can upgrade your plan at any time from your account settings. Changes take effect immediately and you'll have access to additional course templates and premium AI features.
 
-9. Can I cancel courseAI at any time?  
+9. Can I cancel ibl.ai Wink at any time?  
    Yes, you can cancel your subscription at any time. Your account will remain active until the end of your current billing period, and you'll retain access to your course creation history.
 
 **Contact form**
@@ -170,7 +170,7 @@ Only the main section copy on the login page (`/login`).
 - Email
 - Subject
 - Description * (placeholder: Please provide all relevant details, include steps to reproduce or screenshots of the issue if important)
-- How does this issue limit your use of courseAI?
+- How does this issue limit your use of ibl.ai Wink?
 - Please Select
 - Critical - Cannot use the platform
 - High - Significantly impacts usage

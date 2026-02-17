@@ -78,15 +78,15 @@ const useSlides = () => {
   const slides = [
     {
       image: "/images/slide-1.png",
-      alt: "Monetize your expertise and deliver an impactful experience",
+      alt: "Monetize your expertise, deliver an impactful experience",
     },
     {
       image: "/images/slide-2.png",
-      alt: "Run a smart educational business and scale it worldwide",
+      alt: "Successfully ran and scale an educational business",
     },
     {
       image: "/images/slide-3.png",
-      alt: "Create, sell, and manage memberships on Wink",
+      alt: "Create, sell, and manage memberships",
     },
   ]
 
@@ -278,20 +278,20 @@ export default function AuthPage() {
 
     return {
       containerHeight: maxHeight,
-      logoHeight: isSmallScreen ? "h-6" : isMediumScreen ? "h-8" : "h-10",
-      logoMarginTop: isSmallScreen ? "mt-0.5" : isMediumScreen ? "mt-1.5" : "mt-3",
-      titleSize: isSmallScreen ? "text-base" : isMediumScreen ? "text-lg" : "text-2xl",
-      subtitleSize: isSmallScreen ? "text-[10px]" : isMediumScreen ? "text-xs" : "text-base",
-      buttonHeight: isSmallScreen ? "h-9" : isMediumScreen ? "h-10" : "h-12",
-      inputHeight: isSmallScreen ? "h-9" : isMediumScreen ? "h-10" : "h-12",
-      spacing: isSmallScreen ? "space-y-2.5" : isMediumScreen ? "space-y-3" : "space-y-5",
-      padding: isSmallScreen ? "p-2.5" : isMediumScreen ? "p-3" : "p-6",
-      margin: isSmallScreen ? "mb-2" : isMediumScreen ? "mb-3" : "mb-6",
-      iconSize: isSmallScreen ? "w-4 h-4" : isMediumScreen ? "w-5 h-5" : "w-6 h-6",
-      fontSize: isSmallScreen ? "text-[10px]" : isMediumScreen ? "text-xs" : "text-base",
-      titleBlockMargin: isSmallScreen ? "my-1" : isMediumScreen ? "my-2 xl:my-3" : "my-5 xl:my-12",
-      titleHeadingSize: isSmallScreen ? "text-base" : isMediumScreen ? "text-lg lg:text-xl xl:text-2xl" : "text-xl sm:text-xl md:text-xl lg:text-2xl xl:text-3xl",
-      footerPaddingTop: isSmallScreen ? "pt-1.5" : isMediumScreen ? "pt-2" : "pt-4",
+      logoHeight: isSmallScreen ? "h-6" : isMediumScreen ? "h-8" : "h-9",
+      logoMarginTop: isSmallScreen ? "mt-0.5" : isMediumScreen ? "mt-1.5" : "mt-2",
+      titleSize: isSmallScreen ? "text-base" : isMediumScreen ? "text-lg" : "text-xl",
+      subtitleSize: isSmallScreen ? "text-[10px]" : isMediumScreen ? "text-xs" : "text-sm",
+      buttonHeight: isSmallScreen ? "h-9" : isMediumScreen ? "h-10" : "h-11",
+      inputHeight: isSmallScreen ? "h-9" : isMediumScreen ? "h-10" : "h-11",
+      spacing: isSmallScreen ? "space-y-2.5" : isMediumScreen ? "space-y-3" : "space-y-3",
+      padding: isSmallScreen ? "p-2.5" : isMediumScreen ? "p-3" : "p-4",
+      margin: isSmallScreen ? "mb-2" : isMediumScreen ? "mb-3" : "mb-4",
+      iconSize: isSmallScreen ? "w-4 h-4" : isMediumScreen ? "w-5 h-5" : "w-5 h-5",
+      fontSize: isSmallScreen ? "text-[10px]" : isMediumScreen ? "text-xs" : "text-sm",
+      titleBlockMargin: isSmallScreen ? "my-1" : isMediumScreen ? "my-2 xl:my-3" : "my-2 xl:my-4",
+      titleHeadingSize: isSmallScreen ? "text-base" : isMediumScreen ? "text-lg lg:text-xl xl:text-2xl" : "text-lg sm:text-xl lg:text-xl xl:text-2xl",
+      footerPaddingTop: isSmallScreen ? "pt-1.5" : isMediumScreen ? "pt-2" : "pt-2",
     }
   }
 
@@ -375,7 +375,7 @@ export default function AuthPage() {
             <div className="flex flex-col justify-center items-center flex-1">
               {/* Title and Subtitle Section */}
               {!showConfirmation && !showPasswordForm && (
-                <div className="text-center">
+                <div className="text-center mb-5">
                   <div className={`space-y-2 ${sizes.titleBlockMargin}`}>
                     <h1
                       className={`${sizes.titleHeadingSize} text-[#4E5460] leading-tight font-normal`}
@@ -406,7 +406,7 @@ export default function AuthPage() {
                               setEmail(e.target.value)
                               if (emailError) setEmailError("")
                             }}
-                            className={`${sizes.inputHeight} rounded-md text-base ${emailError ? "border-2 border-[#00A3EC]" : "border-gray-200"}`}
+                            className={`${sizes.inputHeight} rounded-md ${sizes.fontSize} ${emailError ? "border-2 border-[#00A3EC]" : "border-gray-200"}`}
                           />
                           {emailError && (
                             <p style={{ color: "#00A3EC", fontSize: "0.7rem", marginTop: "0.25rem" }}>{emailError}</p>
@@ -414,17 +414,17 @@ export default function AuthPage() {
                         </div>
 
                         <Button
-                          className={`w-full ${sizes.buttonHeight} bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white rounded-md text-base`}
+                          className={`w-full ${sizes.buttonHeight} bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white rounded-md ${sizes.fontSize}`}
                           onClick={handleContinue}
                         >
                           Continue
                         </Button>
 
-                        <div className={`text-center text-gray-500 text-base py-1`}>OR</div>
+                        <div className={`text-center text-gray-500 ${sizes.fontSize} py-0.5`}>OR</div>
 
                         <Button
                           variant="outline"
-                          className={`w-full ${sizes.buttonHeight} flex items-center justify-center gap-1 border border-gray-200 rounded-md text-base`}
+                          className={`w-full ${sizes.buttonHeight} flex items-center justify-center gap-1 border border-gray-200 rounded-md ${sizes.fontSize}`}
                         >
                           <GoogleIcon />
                           Continue with Google
@@ -432,7 +432,7 @@ export default function AuthPage() {
 
                         <Button
                           variant="outline"
-                          className={`w-full ${sizes.buttonHeight} flex items-center justify-center gap-1 border border-gray-200 rounded-md text-base`}
+                          className={`w-full ${sizes.buttonHeight} flex items-center justify-center gap-1 border border-gray-200 rounded-md ${sizes.fontSize}`}
                         >
                           <AppleIcon />
                           Continue with Apple
@@ -440,7 +440,7 @@ export default function AuthPage() {
 
                         <Button
                           variant="outline"
-                          className={`w-full ${sizes.buttonHeight} flex items-center justify-center gap-1 border border-gray-200 rounded-md text-base`}
+                          className={`w-full ${sizes.buttonHeight} flex items-center justify-center gap-1 border border-gray-200 rounded-md ${sizes.fontSize}`}
                           onClick={handlePasswordLogin}
                         >
                           <svg width="1.25rem" height="1.25rem" viewBox="0 -960 960 960" fill="#383838">
@@ -476,7 +476,7 @@ export default function AuthPage() {
                               setEmail(e.target.value)
                               if (emailError) setEmailError("")
                             }}
-                            className={`${sizes.inputHeight} rounded-md text-base ${emailError ? "border-2 border-[#00A3EC]" : "border-gray-200"}`}
+                            className={`${sizes.inputHeight} rounded-md ${sizes.fontSize} ${emailError ? "border-2 border-[#00A3EC]" : "border-gray-200"}`}
                           />
                         </div>
 
@@ -489,7 +489,7 @@ export default function AuthPage() {
                               setPassword(e.target.value)
                               if (emailError) setEmailError("")
                             }}
-                            className={`${sizes.inputHeight} rounded-md text-base ${emailError ? "border-2 border-[#00A3EC]" : "border-gray-200"}`}
+                            className={`${sizes.inputHeight} rounded-md ${sizes.fontSize} ${emailError ? "border-2 border-[#00A3EC]" : "border-gray-200"}`}
                           />
                           {password.length > 0 && (
                             <button
@@ -507,7 +507,7 @@ export default function AuthPage() {
                         )}
 
                         <Button
-                          className={`w-full ${sizes.buttonHeight} bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white rounded-md text-base`}
+                          className={`w-full ${sizes.buttonHeight} bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white rounded-md ${sizes.fontSize}`}
                           onClick={handlePasswordContinue}
                         >
                           Continue
@@ -527,7 +527,7 @@ export default function AuthPage() {
                             >
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                             </svg>
-                            <span className="text-[#00A3EC] text-base">Back</span>
+                            <span className={`text-[#00A3EC] ${sizes.fontSize}`}>Back</span>
                           </button>
                         </div>
 
@@ -547,24 +547,24 @@ export default function AuthPage() {
                   )}
                 </>
               ) : (
-                <div className="flex flex-col items-center justify-center w-full max-w-md text-center min-h-[100dvh]">
-                  <div className="mb-4">
+                <div className="flex flex-col items-center justify-center w-full max-w-md text-center min-h-0">
+                  <div className="mb-2">
                     <Image
                       src="/images/email-verify-icon.png"
                       alt="Email Sent"
-                      width={viewportHeight < 600 ? 60 : 80}
-                      height={viewportHeight < 600 ? 60 : 80}
+                      width={viewportHeight < 600 ? 56 : 72}
+                      height={viewportHeight < 600 ? 56 : 72}
                       className="mx-auto"
                     />
                   </div>
-                  <h2 className={`${sizes.titleSize} font-medium text-gray-800 mb-3`}>
+                  <h2 className={`${sizes.titleSize} font-medium text-gray-800 mb-2`}>
                     We sent you a magic link to log in!
                   </h2>
-                  <p className={`text-gray-600 mb-1 text-base`}>
+                  <p className={`text-gray-600 mb-1 ${sizes.fontSize}`}>
                     We sent an email to you at <span className="font-medium text-[#00A3EC]">{email}</span>.
                   </p>
-                  <p className={`text-gray-600 text-base`}>Click the link in the email to log in to your account.</p>
-                  <p className={`text-gray-500 mt-3 text-base`}>
+                  <p className={`text-gray-600 ${sizes.fontSize}`}>Click the link in the email to log in to your account.</p>
+                  <p className={`text-gray-500 mt-2 ${sizes.fontSize}`}>
                     Redirecting to onboarding in <span className="font-medium text-[#00A3EC]">{countdown}</span>{" "}
                     seconds...
                   </p>
@@ -577,7 +577,7 @@ export default function AuthPage() {
                 <button
                   type="button"
                   onClick={() => document.getElementById("watch-section")?.scrollIntoView({ behavior: "smooth" })}
-                  className="text-sm font-medium text-[#00A3EC] hover:text-[#6988FF] transition-colors mt-[10px] border border-[#00A3EC] rounded-md px-4 py-2 hover:border-[#6988FF]"
+                  className={`${sizes.fontSize} font-medium text-[#00A3EC] hover:text-[#6988FF] transition-colors mt-1 border border-[#00A3EC] rounded-md px-3 py-1.5 hover:border-[#6988FF]`}
                 >
                   Read more
                 </button>
@@ -612,9 +612,9 @@ export default function AuthPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-gray-600 leading-relaxed text-base">
-                    {currentSlide === 0 && "Monetize your expertise and deliver an impactful experience"}
-                    {currentSlide === 1 && "Run a smart educational business and scale it worldwide"}
-                    {currentSlide === 2 && "Create, sell, and manage memberships on Wink"}
+                    {currentSlide === 0 && "Monetize your expertise, deliver an impactful experience"}
+                    {currentSlide === 1 && "Successfully ran and scale an educational business"}
+                    {currentSlide === 2 && "Create, sell, and manage memberships"}
                   </p>
                 </div>
               </div>
@@ -645,7 +645,7 @@ export default function AuthPage() {
                     {currentSlide === 0 ? (
                       <Image
                         src="/images/slide-1.png"
-                        alt="Monetize your expertise and deliver an impactful experience"
+                        alt="Monetize your expertise, deliver an impactful experience"
                         width={680}
                         height={400}
                         className="rounded-lg object-contain max-w-full max-h-full block"
@@ -655,7 +655,7 @@ export default function AuthPage() {
                     ) : currentSlide === 1 ? (
                       <Image
                         src="/images/slide-2.png"
-                        alt="Run a smart educational business and scale it worldwide"
+                        alt="Successfully ran and scale an educational business"
                         width={680}
                         height={400}
                         className="rounded-lg object-contain max-w-full max-h-full block"
@@ -664,7 +664,7 @@ export default function AuthPage() {
                     ) : (
                       <Image
                         src="/images/slide-3.png"
-                        alt="Create, sell, and manage memberships on Wink"
+                        alt="Create, sell, and manage memberships"
                         width={680}
                         height={400}
                         className="rounded-lg object-contain max-w-full max-h-full block"
@@ -714,9 +714,9 @@ export default function AuthPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-gray-600 leading-relaxed text-sm sm:text-base">
-                  {currentSlide === 0 && "Monetize your expertise and deliver an impactful experience"}
-                  {currentSlide === 1 && "Run a smart educational business and scale it worldwide"}
-                  {currentSlide === 2 && "Create, sell, and manage memberships on Wink"}
+                  {currentSlide === 0 && "Monetize your expertise, deliver an impactful experience"}
+                  {currentSlide === 1 && "Successfully ran and scale an educational business"}
+                  {currentSlide === 2 && "Create, sell, and manage memberships"}
                 </p>
               </div>
             </div>
@@ -744,7 +744,7 @@ export default function AuthPage() {
                   {currentSlide === 0 ? (
                     <Image
                       src="/images/slide-1.png"
-                      alt="Monetize your expertise and deliver an impactful experience"
+                      alt="Monetize your expertise, deliver an impactful experience"
                       width={680}
                       height={400}
                       className="rounded-lg object-contain w-full h-auto max-h-[500px] block"
@@ -754,7 +754,7 @@ export default function AuthPage() {
                   ) : currentSlide === 1 ? (
                     <Image
                       src="/images/slide-2.png"
-                      alt="Run a smart educational business and scale it worldwide"
+                      alt="Successfully ran and scale an educational business"
                       width={680}
                       height={400}
                       className="rounded-lg object-contain w-full h-auto max-h-[500px] block"
@@ -763,7 +763,7 @@ export default function AuthPage() {
                   ) : (
                     <Image
                       src="/images/slide-3.png"
-                      alt="Create, sell, and manage memberships on Wink"
+                      alt="Create, sell, and manage memberships"
                       width={680}
                       height={400}
                       className="rounded-lg object-contain w-full h-auto max-h-[500px] block"
