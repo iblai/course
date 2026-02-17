@@ -375,14 +375,14 @@ export default function AuthPage() {
             <div className="flex flex-col justify-center items-center flex-1">
               {/* Title and Subtitle Section */}
               {!showConfirmation && !showPasswordForm && (
-                <div className="text-center mb-8">
+                <div className="text-center mb-10">
                   <div className={`space-y-2 ${sizes.titleBlockMargin}`}>
                     <h1
                       className={`${sizes.titleHeadingSize} text-[#4E5460] leading-tight font-normal`}
                     >
-                      Instantly create and sell engaging
+                      Instantly create and sell
                       <br />
-                      courses
+                      engaging courses
                     </h1>
                     <p className={`text-gray-600 mt-1 ${sizes.subtitleSize} leading-tight`}>
                       Launch a subscription-based learning community on a top platform

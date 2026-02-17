@@ -14,7 +14,8 @@ export function WatchSection() {
             {/* Main Heading */}
             <div className="space-y-4">
               <h1 className="text-3xl font-bold text-[var(--sidebar-foreground)] leading-tight lg:text-5xl">
-                <span className="block">Create engaging courses</span>
+                <span className="block">Create engaging</span>
+                <span className="block">courses</span>
                 <span className="block">
                   in <span className="bg-gradient-to-r from-[#00A3EC] to-[#6988FF] bg-clip-text text-transparent font-bold">minutes</span>
                 </span>
