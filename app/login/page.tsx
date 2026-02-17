@@ -290,7 +290,7 @@ export default function AuthPage() {
       iconSize: isSmallScreen ? "w-4 h-4" : isMediumScreen ? "w-5 h-5" : "w-5 h-5",
       fontSize: isSmallScreen ? "text-[10px]" : isMediumScreen ? "text-xs" : "text-sm",
       titleBlockMargin: isSmallScreen ? "my-1" : isMediumScreen ? "my-2 xl:my-3" : "my-2 xl:my-4",
-      titleHeadingSize: isSmallScreen ? "text-base" : isMediumScreen ? "text-lg lg:text-xl xl:text-2xl" : "text-lg sm:text-xl lg:text-xl xl:text-2xl",
+      titleHeadingSize: isSmallScreen ? "text-base" : isMediumScreen ? "text-lg lg:text-xl xl:text-2xl" : "text-xl sm:text-2xl lg:text-2xl xl:text-3xl",
       footerPaddingTop: isSmallScreen ? "pt-1.5" : isMediumScreen ? "pt-2" : "pt-2",
     }
   }
