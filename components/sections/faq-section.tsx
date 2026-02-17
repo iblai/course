@@ -67,16 +67,16 @@ export function FAQSection() {
   return (
     <section
       id="faq-section"
-      className="bg-[#F8F9FA] flex items-center justify-center py-20 px-4"
+      className="bg-[#F8F9FA] flex items-center justify-center py-16 px-4"
     >
       <div className="max-w-7xl mx-auto w-full">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-10">
           <h1 className="text-3xl font-bold text-[var(--sidebar-foreground)] mb-6 mr-5 lg:text-5xl lg:mr-0">Frequently asked questions</h1>
         </div>
 
         {/* FAQ Content - Two Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           {/* Left Column - FAQ Items */}
           <div className="bg-white border border-[#E5E7EB] rounded-lg overflow-hidden">
             {faqData.map((faq, index) => (

@@ -1,0 +1,36 @@
+---
+description: How to partition multi-line headings so words and phrases break correctly
+globs: **/*.tsx
+alwaysApply: false
+---
+
+# Heading and hero text partition
+
+When writing multi-line headings (e.g. hero titles, section headings), control line breaks so that:
+
+1. **Phrases stay together** – Don’t split a natural phrase across lines (e.g. keep “engaging courses” together, or “in minutes”).
+2. **Avoid single words on a line** – Prefer breaking so the second line has at least two words unless the design explicitly wants one word per line.
+3. **Use explicit breaks** – Use `<br />` or separate `<span className="block">` elements so the partition is stable across viewports.
+
+## Examples
+
+```tsx
+// ❌ BAD – “courses” alone on a line, “in” can wrap awkwardly
+<span className="block">Create engaging</span>
+<span className="block">courses in minutes</span>
+
+// ❌ BAD – phrase split
+<span className="block">Create engaging courses</span>
+<span className="block">in minutes</span>
+// (can wrap to “Create engaging” / “courses” on small screens)
+
+// ✅ GOOD – clear three-line partition
+<span className="block">Create engaging</span>
+<span className="block">courses</span>
+<span className="block">in <span className="gradient...">minutes</span></span>
+```
+
+For login-style headings (e.g. “Instantly create and sell engaging courses”):
+
+- Prefer: **“Instantly create and sell”** / **“engaging courses”** so “engaging courses” stays together.
+- Avoid: “Instantly create and sell engaging” / “courses” (single word on second line).

@@ -6,11 +6,11 @@ import { Check, ArrowRight } from "lucide-react"
 
 export function WatchSection() {
   return (
-    <section id="watch-section" className="bg-gray-50 flex items-center justify-center py-20 px-4">
+    <section id="watch-section" className="bg-gray-50 flex items-center justify-center py-16 px-4">
       <div className="max-w-7xl mx-auto w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
           {/* Left Content */}
-          <div className="space-y-6">
+          <div className="space-y-7">
             {/* Main Heading */}
             <div className="space-y-4">
               <h1 className="text-3xl font-bold text-[var(--sidebar-foreground)] leading-tight lg:text-5xl">
