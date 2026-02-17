@@ -18,9 +18,9 @@ export function FAQSection() {
         "ibl.ai Wink uses advanced AI algorithms to analyze your teaching goals, subject matter, student level, and learning objectives to help you create engaging, personalized course content that aligns with your educational vision and student needs.",
     },
     {
-      question: "What kind of course content can I create?",
+      question: "Can I launch my own school, academy, or university?",
       answer:
-        "You can create various types of educational content including interactive lessons, assessments, quizzes, assignments, video scripts, reading materials, and personalized learning paths for different student skill levels.",
+        "That's the point. Our goal is to allow you to develop your own learning initiative by monetizing your expertise and maximizing impact. We built Wink to give you a powerful tool to thrive in this new AI economy.",
     },
     {
       question: "How do I customize my course content?",
@@ -67,16 +67,16 @@ export function FAQSection() {
   return (
     <section
       id="faq-section"
-      className="min-h-screen bg-[#F8F9FA] flex items-center justify-center py-16 px-4 mt-0 xl:mt-8"
+      className="bg-[#F8F9FA] flex items-center justify-center py-20 px-4"
     >
       <div className="max-w-7xl mx-auto w-full">
         {/* Header */}
-        <div className="mb-16">
+        <div className="mb-8">
           <h1 className="text-3xl font-bold text-[var(--sidebar-foreground)] mb-6 mr-5 lg:text-5xl lg:mr-0">Frequently asked questions</h1>
         </div>
 
         {/* FAQ Content - Two Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - FAQ Items */}
           <div className="bg-white border border-[#E5E7EB] rounded-lg overflow-hidden">
             {faqData.map((faq, index) => (

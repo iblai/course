@@ -348,7 +348,7 @@ export default function AuthPage() {
     <div className="w-full">
       <div className="flex w-full flex-col xl:flex-row overflow-hidden min-h-[100dvh] xl:h-[100dvh] xl:max-h-screen">
         {/* Left Column - Auth Form */}
-        <div className="flex w-full flex-col min-h-[100dvh] xl:w-1/2 xl:h-full xl:min-h-0">
+        <div className="flex w-full flex-col min-h-[100dvh] xl:w-1/2 xl:h-full xl:min-h-0 xl:bg-white xl:border-r xl:border-gray-200/80 xl:shadow-[4px_0_24px_-4px_rgba(0,0,0,0.06)]">
           <div
             className="flex flex-col h-[100dvh] min-h-[100dvh] max-h-[100dvh] px-5 py-3 md:p-4 lg:p-6 justify-between pt-[calc(0.75rem+env(safe-area-inset-top,0px))] pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] overflow-y-auto scrollbar-hide"
             style={{ minHeight: "-webkit-fill-available" } as React.CSSProperties}
@@ -375,7 +375,7 @@ export default function AuthPage() {
             <div className="flex flex-col justify-center items-center flex-1">
               {/* Title and Subtitle Section */}
               {!showConfirmation && !showPasswordForm && (
-                <div className="text-center mb-5">
+                <div className="text-center mb-8">
                   <div className={`space-y-2 ${sizes.titleBlockMargin}`}>
                     <h1
                       className={`${sizes.titleHeadingSize} text-[#4E5460] leading-tight font-normal`}
@@ -572,12 +572,12 @@ export default function AuthPage() {
               )}
             </div>
 
-            <div className={`flex-shrink-0 mt-auto min-h-[2.5rem] flex items-end ${sizes.footerPaddingTop} pb-[calc(0.25rem+env(safe-area-inset-bottom,0px))]`}>
+            <div className={`flex-shrink-0 mt-auto min-h-[2rem] flex items-end pt-1 pb-[calc(0.25rem+env(safe-area-inset-bottom,0px))]`}>
               <div className="w-full px-2 flex justify-center">
                 <button
                   type="button"
                   onClick={() => document.getElementById("watch-section")?.scrollIntoView({ behavior: "smooth" })}
-                  className={`${sizes.fontSize} font-medium text-[#00A3EC] hover:text-[#6988FF] transition-colors mt-1 border border-[#00A3EC] rounded-md px-3 py-1.5 hover:border-[#6988FF]`}
+                  className={`${sizes.fontSize} font-medium text-[#00A3EC] hover:text-[#6988FF] transition-colors border border-[#00A3EC] rounded-md px-3 py-1.5 hover:border-[#6988FF]`}
                 >
                   Read more
                 </button>
@@ -587,7 +587,7 @@ export default function AuthPage() {
         </div>
 
         {/* Right Column - Logo and Slides - Desktop Only */}
-        <div className="hidden xl:flex xl:w-1/2 flex-col rounded-lg m-4 xl:h-[calc(100vh-2rem)]" style={{ background: "linear-gradient(135deg, #E8F7FE 0%, #EEF0FF 100%)" }}>
+        <div className="hidden xl:flex xl:w-1/2 flex-col xl:h-full xl:min-h-0 flex-1" style={{ background: "linear-gradient(135deg, #E8F7FE 0%, #EEF0FF 100%)" }}>
           <div className="flex flex-col h-full p-6">
             <div className="flex justify-center w-full flex-shrink-0 mb-7">
               <div className="flex flex-col items-center gap-2">
@@ -691,7 +691,7 @@ export default function AuthPage() {
       </div>
 
       {/* Mobile/Tablet Slides Section */}
-      <div id="mobile-slides-section" className="xl:hidden w-full py-12 px-5" style={{ background: "linear-gradient(135deg, #E8F7FE 0%, #EEF0FF 100%)" }}>
+      <div id="mobile-slides-section" className="xl:hidden w-full py-16 px-5" style={{ background: "linear-gradient(135deg, #E8F7FE 0%, #EEF0FF 100%)" }}>
         <div className="max-w-2xl mx-auto">
           <div className="flex justify-center w-full mb-6">
             <Image
