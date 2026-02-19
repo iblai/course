@@ -744,7 +744,7 @@ export default function CourseEditPage() {
                                                 <li key={i} className="flex items-center gap-2">
                                                   {choice}
                                                   {i === block.quiz!.correctIndex && (
-                                                    <span className="text-green-600" aria-label="Correct">✓</span>
+                                                    <span className="text-[#00A3EC]" aria-label="Correct">✓</span>
                                                   )}
                                                 </li>
                                               ))}
