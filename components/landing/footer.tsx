@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { GraduationCap } from "lucide-react"
 
 export function Footer() {
@@ -105,10 +106,17 @@ export function Footer() {
         <div className="border-t border-[var(--border-color)] mt-10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-text-secondary">© 2025 ibl.ai Wink. All rights reserved.</p>
           <p className="text-sm text-text-secondary flex items-center gap-1">
-            Powered by{" "}
-            <Link href="#" className="text-brand-primary font-medium hover:underline">
-              ibl.ai
-            </Link>
+            Part of{" "}
+            <Link href="#" className="inline-flex items-center text-brand-primary font-medium hover:underline">
+              <Image
+                src="/images/iblai-logo.png"
+                alt="ibl.ai"
+                width={80}
+                height={24}
+                className="w-auto h-[18px]"
+              />
+            </Link>{" "}
+            OS
           </p>
         </div>
       </div>

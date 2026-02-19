@@ -60,7 +60,7 @@ export function PlatformFooter() {
             </Link>
           </div>
           <div className="flex items-center gap-2">
-            <span>Powered by</span>
+            <span>Part of</span>
             <Image
               src="/images/iblai-logo.png"
               alt="ibl.ai"
@@ -68,6 +68,7 @@ export function PlatformFooter() {
               height={24}
               className="w-auto h-[18px] mb-1.5"
             />
+            <span>OS</span>
           </div>
         </div>
       </div>
