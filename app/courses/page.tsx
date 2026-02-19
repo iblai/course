@@ -211,6 +211,10 @@ function CoursesPageContent() {
       router.push(`/course/${courseId}/edit`)
       return
     }
+    if (action === "view") {
+      router.push(`/course/${courseId}/creation-prompt`)
+      return
+    }
     if (action === "delete") {
       const course = courses.find((c) => c.id === courseId)
       if (course) {
