@@ -49,10 +49,13 @@ export function TooltipFlowbite({ content, children, position = "top", className
   const effectiveDelay = delay ?? context.delayDuration ?? 300
 
   const calculatePosition = () => {
-    if (!triggerRef.current) return
+    if (!triggerRef.current || typeof window === "undefined") return
 
     const rect = triggerRef.current.getBoundingClientRect()
     const gap = 8
+    const padding = 8
+    const assumedTooltipHalfWidth = 60
+    const assumedTooltipHalfHeight = 20
 
     let top = 0
     let left = 0
@@ -74,6 +77,20 @@ export function TooltipFlowbite({ content, children, position = "top", className
         top = rect.top + rect.height / 2
         left = rect.left - gap
         break
+    }
+
+    // Keep tooltip within viewport (tooltip uses translateX(-50%) for top/bottom, translateY(-50%) for left/right)
+    const maxLeft = window.innerWidth - padding - assumedTooltipHalfWidth
+    const minLeft = padding + assumedTooltipHalfWidth
+    const maxTop = window.innerHeight - padding - assumedTooltipHalfHeight
+    const minTop = padding + assumedTooltipHalfHeight
+
+    if (position === "top" || position === "bottom") {
+      left = Math.max(minLeft, Math.min(maxLeft, left))
+      top = Math.max(minTop, Math.min(maxTop, top))
+    } else {
+      left = Math.max(minLeft, Math.min(maxLeft, left))
+      top = Math.max(minTop, Math.min(maxTop, top))
     }
 
     setTooltipPosition({ top, left })

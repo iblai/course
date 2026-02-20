@@ -128,7 +128,7 @@ export function Header({
             )}
             {isLoggedIn ? (
               <TooltipProvider>
-                <TooltipFlowbite content="Profile" position="bottom">
+                <TooltipFlowbite content="Profile" position="left">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button
@@ -145,7 +145,7 @@ export function Header({
                         />
                       </button>
                     </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuContent align="end" sideOffset={6} collisionPadding={12} className="w-56">
                   <DropdownMenuItem
                     onClick={() => setIsAccountDialogOpen(true)}
                     className="cursor-pointer"
