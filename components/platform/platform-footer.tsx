@@ -75,7 +75,7 @@ export function PlatformFooter() {
       {!isChatOpen &&
         typeof document !== "undefined" &&
         createPortal(
-          <div className="fixed bottom-6 right-6 hidden md:flex flex-col gap-3 z-50 pointer-events-none [&>*]:pointer-events-auto">
+          <div className="fixed bottom-6 right-6 hidden min-[1221px]:flex flex-col gap-3 z-50 pointer-events-none [&>*]:pointer-events-auto">
             <FloatingMicrophoneButton />
             <FloatingAccessibilityButton />
           </div>,

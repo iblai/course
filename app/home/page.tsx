@@ -23,7 +23,7 @@ interface ChatMessage {
   id: string
   role: "user" | "assistant"
   content: string
-  /** When true, show a "Create course" button under this assistant message */
+  /** When true, show a "Start course setup" button under this assistant message */
   createCourseCta?: boolean
   /** User's text used to prefill course form when CTA is clicked */
   courseNameForCta?: string
@@ -601,7 +601,7 @@ export default function HomePage() {
                               onClick={() => openCreateCourseForm(msg.courseNameForCta)}
                               className="bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white rounded-lg px-4 py-2 text-sm font-medium"
                             >
-                              Create course
+                              Start course setup
                             </Button>
                           </div>
                         )}

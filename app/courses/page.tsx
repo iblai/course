@@ -242,7 +242,7 @@ function CoursesPageContent() {
   }
 
   return (
-    <div className="h-screen-dvh overflow-y-auto bg-background">
+    <div className="h-screen-dvh overflow-y-auto overflow-x-hidden bg-background">
       {/* Sidebar */}
       <SidebarLearner
         isCollapsed={isCollapsed}
@@ -254,7 +254,7 @@ function CoursesPageContent() {
 
       {/* Main Content */}
       <div
-        className={cn("flex flex-col min-h-screen-dvh transition-all duration-300", isCollapsed ? "md:ml-16" : "md:ml-64")}
+        className={cn("flex flex-col min-h-screen-dvh min-w-0 transition-all duration-300", isCollapsed ? "md:ml-16" : "md:ml-64")}
       >
         {/* Header */}
         <Header
@@ -266,15 +266,15 @@ function CoursesPageContent() {
           sidebarCollapsed={isCollapsed}
         />
 
-        <div className="flex flex-1">
+        <div className="flex flex-1 min-w-0 overflow-hidden">
           <main
             className={cn(
-              "flex-1 transition-all duration-300 pb-[200px] md:pb-[200px]",
+              "flex-1 min-w-0 transition-all duration-300 pb-[200px] md:pb-[200px]",
               (isDocumentSidebarOpen || isAgentSidebarOpen || isVoiceSidebarOpen) && "md:mr-[380px]",
             )}
           >
-            <div className="flex">
-              <div className="flex-1 px-5 sm:px-2 py-4 sm:py-8 w-full sm:pl-8 sm:pr-8 md:pr-20">
+            <div className="flex min-w-0">
+              <div className="flex-1 px-5 sm:px-2 py-4 sm:py-8 w-full min-w-0 sm:pl-8 sm:pr-8 md:pr-20">
               {/* Page Title */}
               <div className="mb-4 sm:mb-6 mt-[15px] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
@@ -295,9 +295,9 @@ function CoursesPageContent() {
               </div>
 
               {/* Desktop Table View */}
-              <div className="hidden md:block bg-white rounded-lg border border-gray-200 overflow-hidden mb-8">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
+              <div className="hidden md:block bg-white rounded-lg border border-gray-200 overflow-hidden mb-8 w-full min-w-0">
+                <div className="overflow-x-auto max-w-full">
+                  <table className="w-full min-w-[700px]">
                     <thead className="bg-gray-50 border-b border-gray-200">
                       <tr>
                         <th className="px-4 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">

@@ -305,7 +305,13 @@ export function SidebarLearner({
                       router.push("/home")
                     }}
                   >
-                    <img src={`${SIDEBAR_ICONS}/square-pen.svg`} alt="" className="w-5 h-5 flex-shrink-0" aria-hidden />
+                    <img
+                      src={`${SIDEBAR_ICONS}/square-pen.svg`}
+                      alt=""
+                      className="w-[18px] h-[18px] flex-shrink-0"
+                      style={pathname === "/home" ? { filter: "brightness(0) saturate(100%) invert(27%) sepia(96%) saturate(1352%) hue-rotate(202deg) brightness(98%) contrast(96%)" } : {}}
+                      aria-hidden
+                    />
                   </Button>
                 </div>
               </TooltipFlowbite>
@@ -327,7 +333,13 @@ export function SidebarLearner({
                 }
               }}
             >
-              <img src={`${SIDEBAR_ICONS}/square-pen.svg`} alt="" className="w-5 h-5 flex-shrink-0" aria-hidden />
+              <img
+                src={`${SIDEBAR_ICONS}/square-pen.svg`}
+                alt=""
+                className="w-[18px] h-[18px] flex-shrink-0"
+                style={pathname === "/home" ? { filter: "brightness(0) saturate(100%) invert(27%) sepia(96%) saturate(1352%) hue-rotate(202deg) brightness(98%) contrast(96%)" } : {}}
+                aria-hidden
+              />
               <span>New Course</span>
             </Button>
           )}
