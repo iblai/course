@@ -330,7 +330,7 @@ export function SidebarLearner({
         </div>
       )}
 
-      <div className={cn("flex-1 overflow-y-auto text-left", isCollapsed ? "px-0 py-2" : "px-3 py-4", "space-y-1")}>
+      <div className={cn("flex-1 overflow-y-auto space-y-1", isCollapsed ? "flex flex-col items-center px-0 py-2" : "text-left px-3 py-4")}>
         {sidebarItems.map((item) => {
           const sidebarButton = (
             <div key={item.id} className={isCollapsed ? "flex justify-center items-center" : ""}>
@@ -1006,7 +1006,7 @@ export function SidebarLearner({
       </div>
 
       {showAdminButtons && !isLoggedIn && (
-        <div className={cn("border-t space-y-1", isCollapsed ? "px-0 py-3" : "p-3", isMobile && "pb-6")} style={{ borderColor: "#D0E0FF" }}>
+        <div className={cn("border-t space-y-1", isCollapsed ? "flex flex-col items-center px-0 py-3" : "p-3", isMobile && "pb-6")} style={{ borderColor: "#D0E0FF" }}>
           {isCollapsed ? (
             <TooltipFlowbite content="Pricing" position="right">
               <div className="flex justify-center items-center">

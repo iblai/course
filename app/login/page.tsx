@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { FAQSection } from "@/components/sections/faq-section"
@@ -353,9 +354,17 @@ export default function AuthPage() {
     <div className="w-full">
       <div className="flex w-full flex-col xl:flex-row xl:min-h-screen xl:h-screen overflow-hidden">
         {/* Left Column - Auth Form */}
-        <div className="flex w-full flex-col xl:w-1/2 xl:h-full xl:min-h-0">
+        <div
+          className={cn(
+            "flex w-full flex-col xl:w-1/2 xl:h-full xl:min-h-0",
+            showConfirmation && "min-h-[100dvh]"
+          )}
+        >
           <div
-            className="flex flex-col min-h-0 xl:flex-1 p-4 sm:p-6 md:p-4 lg:p-6 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] pb-0 overflow-y-auto scrollbar-hide"
+            className={cn(
+              "flex flex-col min-h-0 p-4 sm:p-6 md:p-4 lg:p-6 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] pb-0 overflow-y-auto scrollbar-hide xl:overflow-hidden",
+              showConfirmation ? "flex-1 min-h-0" : "xl:flex-1"
+            )}
           >
             {/* Logo Section */}
             <div className={`flex justify-center flex-shrink-0 ${sizes.logoMarginBottom}`}>
@@ -376,7 +385,7 @@ export default function AuthPage() {
             </div>
 
             {/* Auth Container Section */}
-            <div className="flex flex-col items-center xl:flex-1 xl:justify-center">
+            <div className={cn("flex flex-col items-center", showConfirmation ? "flex-1 min-h-0 justify-center" : "xl:flex-1 xl:justify-center")}>
               {/* Title and Subtitle Section */}
               {!showConfirmation && !showPasswordForm && (
                 <div className="flex justify-center items-center w-full">
@@ -555,24 +564,24 @@ export default function AuthPage() {
                   )}
                 </>
               ) : (
-                <div className="flex flex-col items-center justify-center w-full max-w-md text-center min-h-0">
-                  <div className="mb-2">
+                <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto text-center min-h-0 px-4 sm:px-6">
+                  <div className="mb-3 sm:mb-4">
                     <Image
                       src="/images/email-verify-icon.png"
                       alt="Email Sent"
                       width={viewportHeight < 600 ? 56 : 72}
                       height={viewportHeight < 600 ? 56 : 72}
-                      className="mx-auto"
+                      className="mx-auto block"
                     />
                   </div>
-                  <h2 className={`${sizes.titleSize} font-medium text-[#4E5460] mb-2`}>
+                  <h2 className={`${sizes.titleSize} font-medium text-[#4E5460] mb-2 leading-snug`}>
                     We sent you a magic link to log in!
                   </h2>
-                  <p className={`text-[#4E5460] mb-1 ${sizes.fontSize}`}>
-                    We sent an email to you at <span className="font-medium text-[#00A3EC]">{email}</span>.
+                  <p className={`text-[#4E5460] mb-1.5 ${sizes.fontSize} leading-relaxed max-w-sm mx-auto`}>
+                    We sent an email to you at <span className="font-medium text-[#00A3EC] break-all">{email}</span>.
                   </p>
-                  <p className={`text-[#4E5460] ${sizes.fontSize}`}>Click the link in the email to log in to your account.</p>
-                  <p className={`text-[#4E5460] mt-2 ${sizes.fontSize} opacity-90`}>
+                  <p className={`text-[#4E5460] ${sizes.fontSize} leading-relaxed max-w-sm mx-auto`}>Click the link in the email to log in to your account.</p>
+                  <p className={`text-[#4E5460] mt-3 sm:mt-4 ${sizes.fontSize} opacity-90`}>
                     Redirecting to onboarding in <span className="font-medium text-[#00A3EC]">{countdown}</span>{" "}
                     seconds...
                   </p>
