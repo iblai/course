@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search } from "lucide-react"
+import { Search, Share2, Link2 } from "lucide-react"
 import Image from "next/image"
+import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { SidebarLearner } from "@/components/platform/sidebar-learner"
 import { Header } from "@/components/platform/header"
@@ -139,6 +140,65 @@ function CourseCatalogContent() {
 
   const filteredCourses = courses.filter((course) => course.title.toLowerCase().includes(searchValue.toLowerCase()))
 
+  const successToastStyle = {
+    duration: 3000,
+    style: {
+      background: "linear-gradient(135deg, #00A3EC 0%, #6988FF 100%)",
+      color: "white",
+      border: "none",
+      borderRadius: "12px",
+      padding: "14px 18px",
+      fontSize: "15px",
+      fontWeight: "600",
+      boxShadow: "0 4px 12px rgba(0, 163, 236, 0.3)",
+      WebkitFontSmoothing: "antialiased",
+      MozOsxFontSmoothing: "grayscale",
+      WebkitTapHighlightColor: "transparent",
+      touchAction: "manipulation",
+    },
+    className: "toast-success",
+  } as const
+
+  const getCourseUrl = (courseId: number) => {
+    if (typeof window === "undefined") return ""
+    return `${window.location.origin}/course/${courseId}`
+  }
+
+  const handleCopyLink = (e: React.MouseEvent, course: (typeof courses)[0]) => {
+    e.stopPropagation()
+    const url = getCourseUrl(course.id)
+    navigator.clipboard.writeText(url).then(
+      () => toast.success("Link copied to clipboard", successToastStyle),
+      () => toast.error("Failed to copy link")
+    )
+  }
+
+  const handleShare = async (e: React.MouseEvent, course: (typeof courses)[0]) => {
+    e.stopPropagation()
+    const url = getCourseUrl(course.id)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: course.title,
+          url,
+        })
+        toast.success("Shared successfully", successToastStyle)
+      } catch (err) {
+        if ((err as Error).name !== "AbortError") {
+          navigator.clipboard.writeText(url).then(
+            () => toast.success("Link copied to clipboard", successToastStyle),
+            () => toast.error("Failed to copy link")
+          )
+        }
+      }
+    } else {
+      navigator.clipboard.writeText(url).then(
+        () => toast.success("Link copied to clipboard", successToastStyle),
+        () => toast.error("Failed to copy link")
+      )
+    }
+  }
+
   const handleCourseClick = (course: (typeof courses)[0]) => {
     if (!isLoggedIn) {
       router.push("/login")
@@ -234,6 +294,26 @@ function CourseCatalogContent() {
                       </div>
                       <div className="pt-3">
                         <h3 className="font-medium line-clamp-2 text-sm sm:text-base" style={{ color: "rgb(113,121,133)" }}>{course.title}</h3>
+                        <div className="flex items-center gap-2 mt-2">
+                          <button
+                            type="button"
+                            onClick={(e) => handleShare(e, course)}
+                            className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md px-2 py-1.5 transition-colors"
+                            title="Share"
+                          >
+                            <Share2 className="w-3.5 h-3.5" />
+                            <span>Share</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => handleCopyLink(e, course)}
+                            className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md px-2 py-1.5 transition-colors"
+                            title="Copy link"
+                          >
+                            <Link2 className="w-3.5 h-3.5" />
+                            <span>Copy link</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}

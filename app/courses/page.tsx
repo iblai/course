@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
 import { SidebarLearner } from "@/components/platform/sidebar-learner"
 import { Header } from "@/components/platform/header"
 import { PlatformFooter } from "@/components/platform/platform-footer"
@@ -34,21 +35,37 @@ function CoursesPageContent() {
   const [isVoiceSidebarOpen, setIsVoiceSidebarOpen] = useState(false)
 
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isDeleteCourseDialogOpen, setIsDeleteCourseDialogOpen] = useState(false)
   const [courseToDelete, setCourseToDelete] = useState<{ id: number; title: string } | null>(null)
   const [isCreateAcademyDialogOpen, setIsCreateAcademyDialogOpen] = useState(false)
+  const [hasAcademy, setHasAcademy] = useState(false)
   const [createAcademyForm, setCreateAcademyForm] = useState<{
     imageFile: File | null
     imagePreview: string | null
     title: string
+    subtitle: string
     membershipPricing: string
-  }>({ imageFile: null, imagePreview: null, title: "", membershipPricing: "" })
+  }>({ imageFile: null, imagePreview: null, title: "", subtitle: "", membershipPricing: "" })
 
   useEffect(() => {
     // Set logged in state - can be determined by other means (auth context, localStorage, etc.)
       setIsLoggedIn(true)
   }, [])
+
+  useEffect(() => {
+    try {
+      setHasAcademy(typeof window !== "undefined" && localStorage.getItem("hasAcademy") === "1")
+    } catch (_) {}
+  }, [])
+
+  useEffect(() => {
+    if (searchParams.get("openCreateAcademy") === "1") {
+      setIsCreateAcademyDialogOpen(true)
+      router.replace("/courses", { scroll: false })
+    }
+  }, [searchParams, router])
 
   useEffect(() => {
     const checkMobile = () => {
@@ -285,13 +302,24 @@ function CoursesPageContent() {
                     Total courses: {courses.length}
                   </p>
                 </div>
-                <Button
-                  onClick={() => setIsCreateAcademyDialogOpen(true)}
-                  className="shrink-0 gap-2 text-white bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90"
-                >
-                  <Plus className="w-4 h-4" strokeWidth={2} />
-                  Create Academy
-                </Button>
+                {hasAcademy ? (
+                  <Button
+                    asChild
+                    className="shrink-0 gap-2 text-white border-0 hover:opacity-90"
+                    style={{ background: "linear-gradient(135deg, #00A3EC 0%, #6988FF 100%)" }}
+                  >
+                    <Link href="/courses">View academy</Link>
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => setIsCreateAcademyDialogOpen(true)}
+                    className="shrink-0 gap-2 text-white border-0 shadow-sm hover:opacity-90"
+                    style={{ background: "linear-gradient(135deg, #00A3EC 0%, #6988FF 100%)" }}
+                  >
+                    <Plus className="w-4 h-4" strokeWidth={2} />
+                    Create Academy
+                  </Button>
+                )}
               </div>
 
               {/* Desktop Table View */}
@@ -627,7 +655,7 @@ function CoursesPageContent() {
           setIsCreateAcademyDialogOpen(open)
           if (!open) {
             if (createAcademyForm.imagePreview) URL.revokeObjectURL(createAcademyForm.imagePreview)
-            setCreateAcademyForm({ imageFile: null, imagePreview: null, title: "", membershipPricing: "" })
+            setCreateAcademyForm({ imageFile: null, imagePreview: null, title: "", subtitle: "", membershipPricing: "" })
           }
         }}
       >
@@ -699,6 +727,21 @@ function CoursesPageContent() {
                 className="w-full"
               />
             </div>
+            {/* Subtitle */}
+            <div className="space-y-2">
+              <Label htmlFor="academy-subtitle" className="text-sm font-medium text-gray-700">
+                Subtitle
+              </Label>
+              <Input
+                id="academy-subtitle"
+                placeholder="e.g. Learn data science from industry experts"
+                value={createAcademyForm.subtitle}
+                onChange={(e) =>
+                  setCreateAcademyForm((prev) => ({ ...prev, subtitle: e.target.value }))
+                }
+                className="w-full"
+              />
+            </div>
             {/* Membership Pricing */}
             <div className="space-y-2">
               <Label htmlFor="academy-pricing" className="text-sm font-medium text-gray-700">
@@ -720,7 +763,7 @@ function CoursesPageContent() {
               variant="outline"
               onClick={() => {
                 setIsCreateAcademyDialogOpen(false)
-                setCreateAcademyForm({ imageFile: null, imagePreview: null, title: "", membershipPricing: "" })
+                setCreateAcademyForm({ imageFile: null, imagePreview: null, title: "", subtitle: "", membershipPricing: "" })
               }}
               className="w-full sm:w-auto px-4 py-2 text-sm font-medium border-gray-300 text-gray-700 hover:bg-gray-50"
             >
@@ -732,9 +775,12 @@ function CoursesPageContent() {
                   toast.error("Please enter a title for the academy.")
                   return
                 }
-                // TODO: submit to API (createAcademyForm.imageFile, createAcademyForm.title, createAcademyForm.membershipPricing)
+                try {
+                  localStorage.setItem("hasAcademy", "1")
+                } catch (_) {}
+                setHasAcademy(true)
                 setIsCreateAcademyDialogOpen(false)
-                setCreateAcademyForm({ imageFile: null, imagePreview: null, title: "", membershipPricing: "" })
+                setCreateAcademyForm({ imageFile: null, imagePreview: null, title: "", subtitle: "", membershipPricing: "" })
                 toast.success("Academy created successfully", {
                   duration: 3000,
                   style: {

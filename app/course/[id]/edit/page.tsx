@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useParams, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
@@ -27,7 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { TooltipFlowbite, TooltipProvider } from "@/components/ui/tooltip-flowbite"
-import { RotateCw, Pencil, Trash2, Plus, ChevronDown, ChevronRight, FileText, Upload, Sparkles } from "lucide-react"
+import { RotateCw, Pencil, Trash2, Plus, ChevronDown, ChevronRight, FileText, Upload, Sparkles, Link2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getCourseMetadata } from "@/lib/course-metadata"
 import { toast } from "sonner"
@@ -196,6 +196,30 @@ export default function CourseEditPage() {
   const [isPublishing, setIsPublishing] = useState(false)
   const [isPublishSuccessOpen, setIsPublishSuccessOpen] = useState(false)
   const [hasPublished, setHasPublished] = useState(false)
+  const [hasAcademy, setHasAcademy] = useState(false)
+  const mainScrollRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    try {
+      setHasAcademy(typeof window !== "undefined" && localStorage.getItem("hasAcademy") === "1")
+    } catch (_) {}
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    try {
+      const publishedId = sessionStorage.getItem("course-edit-publish-success")
+      if (publishedId === id) {
+        sessionStorage.removeItem("course-edit-publish-success")
+        setHasPublished(true)
+        window.scrollTo(0, 0)
+        mainScrollRef.current?.scrollTo(0, 0)
+        const t = setTimeout(() => setIsPublishSuccessOpen(true), 100)
+        return () => clearTimeout(t)
+      }
+    } catch (_) {}
+  }, [id])
+
   const [sectionToDelete, setSectionToDelete] = useState<{ id: string; name: string } | null>(null)
   const [isUpdatingCourse, setIsUpdatingCourse] = useState(false)
   const [isUpdatingDescriptions, setIsUpdatingDescriptions] = useState(false)
@@ -273,8 +297,12 @@ export default function CourseEditPage() {
     // Simulate publish request
     setTimeout(() => {
       setIsPublishing(false)
-      setHasPublished(true)
-      setIsPublishSuccessOpen(true)
+      if (typeof window !== "undefined") {
+        try {
+          sessionStorage.setItem("course-edit-publish-success", id)
+        } catch (_) {}
+        window.location.reload()
+      }
     }, 2000)
   }
 
@@ -538,7 +566,7 @@ export default function CourseEditPage() {
   }
 
   return (
-    <div className="h-screen-dvh overflow-y-auto bg-background">
+    <div ref={mainScrollRef} className="h-screen-dvh overflow-y-auto bg-background">
       <SidebarLearner
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -569,16 +597,35 @@ export default function CourseEditPage() {
               <div className="flex-1 min-h-0 min-w-0 w-full pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:pl-8 sm:pr-8 md:pr-20 py-4 sm:py-8 overflow-x-hidden">
                 {/* Page header: title, subtitle, Add Section */}
                 <div className="pt-4 pb-4 mb-4 sm:mb-6 border-b border-gray-100">
-                  <h1 className="text-xl sm:text-2xl font-semibold mb-1 text-[var(--sidebar-foreground)] break-words">
-                    {courseTitle}
-                  </h1>
+                  <div className="flex flex-row items-center justify-between gap-3 mb-1">
+                    <div className="min-w-0 flex-1">
+                      <h1 className="text-xl sm:text-2xl font-semibold mb-1 text-[var(--sidebar-foreground)] break-words truncate">
+                        {courseTitle}
+                      </h1>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          const url = typeof window !== "undefined" ? `${window.location.origin}/course/${id}` : ""
+                          navigator.clipboard.writeText(url).then(() => toast.success("Link copied to clipboard", successToastStyle), () => toast.error("Failed to copy link"))
+                        }}
+                        className="border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium px-3 py-2"
+                      >
+                        <Link2 className="w-4 h-4 sm:mr-1.5" />
+                        <span className="hidden sm:inline">Copy link</span>
+                      </Button>
+                    </div>
+                  </div>
                   <p className="text-sm mb-4" style={{ color: "rgb(113,121,133)" }}>
                     Edit course content
                   </p>
                   <div className="flex flex-wrap items-center gap-2">
                     <Button
                       onClick={() => setIsAddSectionOpen(true)}
-                      className="bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white text-sm font-medium px-4 py-2"
+                      variant="outline"
+                      className="border-gray-300 bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm font-medium px-4 py-2"
                     >
                       Add Section
                     </Button>
@@ -590,11 +637,35 @@ export default function CourseEditPage() {
                       <FileText className="w-4 h-4 mr-2" />
                       Course Outline
                     </Button>
-                    {hasPublished && (
+                    {hasAcademy ? (
                       <Button
                         variant="outline"
                         asChild
                         className="border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium px-4 py-2"
+                      >
+                        <Link href="/courses">View academy</Link>
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        asChild
+                        className={
+                          hasPublished
+                            ? "border-[#2563EB] text-[#2563EB] hover:bg-blue-50 text-sm font-medium px-4 py-2"
+                            : "text-white border-0 text-sm font-medium px-4 py-2 hover:opacity-90"
+                        }
+                        style={!hasPublished ? { background: "linear-gradient(135deg, #00A3EC 0%, #6988FF 100%)" } : undefined}
+                      >
+                        <Link href="/courses?openCreateAcademy=1">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create academy
+                        </Link>
+                      </Button>
+                    )}
+                    {hasPublished && (
+                      <Button
+                        asChild
+                        className="bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white text-sm font-medium px-4 py-2"
                       >
                         <Link href={`/course/${id}`}>View course</Link>
                       </Button>
@@ -888,7 +959,7 @@ export default function CourseEditPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Publish success dialog */}
+      {/* Publish success dialog - shown after reload */}
       <Dialog open={isPublishSuccessOpen} onOpenChange={setIsPublishSuccessOpen}>
         <DialogContent className="sm:max-w-[440px] gap-3" maxWidth="440px">
           <DialogHeader>

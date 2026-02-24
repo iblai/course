@@ -1,11 +1,12 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { SidebarLearner } from "@/components/platform/sidebar-learner"
 import { Header } from "@/components/platform/header"
 import { PlatformFooter } from "@/components/platform/platform-footer"
-import { Plus, Mic, ArrowUp, Square, RotateCw, ArrowLeft, Bold, Italic, Link as LinkIcon, List, ListOrdered, Upload, Sparkles, FileImage, X, Check, Copy, Volume2, Reply } from "lucide-react"
+import { Plus, Mic, ArrowUp, Square, RotateCw, ArrowLeft, Bold, Italic, Link as LinkIcon, List, ListOrdered, Upload, Sparkles, FileImage, X, Check, Copy, Volume2, Reply, Wand2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { JumpstartTemplates } from "@/components/jumpstart-templates"
 import { Textarea } from "@/components/ui/textarea"
@@ -18,6 +19,7 @@ import { ChatInputForm } from "@/components/chat-input-form"
 import { LoadingMessage } from "@/components/loading-message"
 import { TooltipFlowbite, TooltipProvider } from "@/components/ui/tooltip-flowbite"
 import { CreatingCourseProgress } from "@/components/creating-course-progress"
+import { toast } from "sonner"
 
 interface ChatMessage {
   id: string
@@ -83,6 +85,15 @@ export default function HomePage() {
   const [creationStep, setCreationStep] = useState<1 | 2 | 3>(1)
   const [creationProgress, setCreationProgress] = useState(0)
   const [completedActions, setCompletedActions] = useState<{ label: string; time: string }[]>([])
+  const [showAcademyChoiceDialog, setShowAcademyChoiceDialog] = useState(false)
+  const [createAcademyForm, setCreateAcademyForm] = useState<{
+    imageFile: File | null
+    imagePreview: string | null
+    title: string
+    subtitle: string
+    membershipPricing: string
+  }>({ imageFile: null, imagePreview: null, title: "", subtitle: "", membershipPricing: "" })
+  const pendingCourseEditRef = useRef<{ courseId: string; courseName: string } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const recognitionRef = useRef<any>(null)
   const userRequestedStopRef = useRef(false)
@@ -512,13 +523,11 @@ export default function HomePage() {
         ...prev,
         { label: "Step 3: Generated course content", time: formatTime() },
       ])
+      const courseId = `course-v1:${(courseForm.courseNumber || "ACI")}+UTA+${courseForm.courseRun || "2026_03"}`
+      const courseName = courseForm.courseName || courseDetailsForm.displayName || "New course"
+      pendingCourseEditRef.current = { courseId, courseName }
       setTimeout(() => {
-        setIsCreatingCourse(false)
-        setShowCourseForm(false)
-        setFormStep(1)
-        setInputValue("")
-        const courseName = courseForm.courseName || courseDetailsForm.displayName || "New course"
-        router.push(`/course/${courseId}/edit?name=${encodeURIComponent(courseName)}`)
+        setShowAcademyChoiceDialog(true)
       }, 800)
     }, 7000)
   }
@@ -526,6 +535,30 @@ export default function HomePage() {
   const handleTemplateClick = (template: string) => {
     setInputValue(template)
   }
+
+  const handleRemoveAcademyImage = () => {
+    if (createAcademyForm.imagePreview) URL.revokeObjectURL(createAcademyForm.imagePreview)
+    setCreateAcademyForm((prev) => ({ ...prev, imageFile: null, imagePreview: null }))
+  }
+
+  const successToastStyle = {
+    duration: 3000,
+    style: {
+      background: "linear-gradient(135deg, #00A3EC 0%, #6988FF 100%)",
+      color: "white",
+      border: "none",
+      borderRadius: "12px",
+      padding: "14px 18px",
+      fontSize: "15px",
+      fontWeight: "600",
+      boxShadow: "0 4px 12px rgba(0, 163, 236, 0.3)",
+      WebkitFontSmoothing: "antialiased",
+      MozOsxFontSmoothing: "grayscale",
+      WebkitTapHighlightColor: "transparent",
+      touchAction: "manipulation",
+    },
+    className: "toast-success",
+  } as const
 
   return (
     <div className="h-screen-dvh overflow-y-auto bg-background">
@@ -567,12 +600,161 @@ export default function HomePage() {
             >
           <div className={cn("w-full min-w-0", hasChatMessages ? "max-w-3xl mx-auto" : "max-w-6xl")}>
             {isCreatingCourse ? (
-              <CreatingCourseProgress
-                courseName={courseForm.courseName || courseDetailsForm.displayName || "New course"}
-                creationStep={creationStep}
-                creationProgress={creationProgress}
-                completedActions={completedActions}
-              />
+              <>
+                <CreatingCourseProgress
+                  courseName={courseForm.courseName || courseDetailsForm.displayName || "New course"}
+                  creationStep={creationStep}
+                  creationProgress={creationProgress}
+                  completedActions={completedActions}
+                  courseCreated={showAcademyChoiceDialog}
+                />
+                {showAcademyChoiceDialog && (
+                  <div className="mt-8 w-full min-w-0 px-1">
+                    <div className="rounded-lg border border-gray-200 p-6 sm:p-8 bg-white shadow-sm">
+                      <h2 className="text-xl font-semibold text-[var(--sidebar-foreground)] mb-1">
+                        Your course has been generated successfully.
+                      </h2>
+                      <p className="text-sm text-gray-600 mb-6">
+                        Would you like to create an academy or skip?
+                      </p>
+                      <div className="space-y-4 mb-6 max-w-md">
+                        <div className="space-y-2">
+                          <Label htmlFor="academy-image-home" className="text-sm font-medium text-gray-700">
+                            Academy Image
+                          </Label>
+                          <div className="flex items-center gap-3">
+                            {createAcademyForm.imagePreview ? (
+                              <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+                                <Image
+                                  src={createAcademyForm.imagePreview}
+                                  alt="Academy preview"
+                                  fill
+                                  className="object-cover"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={handleRemoveAcademyImage}
+                                  className="absolute top-1 right-1 w-5 h-5 rounded-full bg-gray-800/80 text-white flex items-center justify-center text-xs hover:bg-gray-800"
+                                  aria-label="Remove image"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            ) : null}
+                            <div className="min-w-0 max-w-[240px]">
+                              <Input
+                                id="academy-image-home"
+                                type="file"
+                                accept="image/*"
+                                className="cursor-pointer file:cursor-pointer"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0]
+                                  if (file) {
+                                    const preview = URL.createObjectURL(file)
+                                    setCreateAcademyForm((prev) => ({
+                                      ...prev,
+                                      imageFile: file,
+                                      imagePreview: preview,
+                                    }))
+                                  }
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="academy-title-home" className="text-sm font-medium text-gray-700">
+                            Title
+                          </Label>
+                          <Input
+                            id="academy-title-home"
+                            placeholder="e.g. Data Science Academy"
+                            value={createAcademyForm.title}
+                            onChange={(e) =>
+                              setCreateAcademyForm((prev) => ({ ...prev, title: e.target.value }))
+                            }
+                            className="w-full"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="academy-subtitle-home" className="text-sm font-medium text-gray-700">
+                            Subtitle
+                          </Label>
+                          <Input
+                            id="academy-subtitle-home"
+                            placeholder="e.g. Learn data science from industry experts"
+                            value={createAcademyForm.subtitle}
+                            onChange={(e) =>
+                              setCreateAcademyForm((prev) => ({ ...prev, subtitle: e.target.value }))
+                            }
+                            className="w-full"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="academy-pricing-home" className="text-sm font-medium text-gray-700">
+                            Membership subscription
+                          </Label>
+<Input
+                                id="academy-pricing-home"
+                                type="text"
+                                inputMode="decimal"
+                                placeholder="e.g. 9.99"
+                                value={createAcademyForm.membershipPricing}
+                                onChange={(e) => {
+                                  const v = e.target.value.replace(/[^0-9.]/g, "")
+                                  const parts = v.split(".")
+                                  const filtered = parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : v
+                                  setCreateAcademyForm((prev) => ({ ...prev, membershipPricing: filtered }))
+                                }}
+                                className="w-full"
+                              />
+                        </div>
+                      </div>
+                      <div className="flex flex-col-reverse sm:flex-row gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setShowAcademyChoiceDialog(false)
+                            setIsCreatingCourse(false)
+                            setShowCourseForm(false)
+                            setFormStep(1)
+                            setInputValue("")
+                            const pending = pendingCourseEditRef.current
+                            if (pending) {
+                              pendingCourseEditRef.current = null
+                              router.push(`/course/${pending.courseId}/edit?name=${encodeURIComponent(pending.courseName)}`)
+                            }
+                          }}
+                          className="border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium px-4 py-2"
+                        >
+                          Skip
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            if (!createAcademyForm.title.trim()) {
+                              toast.error("Please enter a title for the academy.")
+                              return
+                            }
+                            try {
+                              localStorage.setItem("hasAcademy", "1")
+                            } catch (_) {}
+                            setCreateAcademyForm({ imageFile: null, imagePreview: null, title: "", subtitle: "", membershipPricing: "" })
+                            toast.success("Academy created successfully", successToastStyle)
+                            const pending = pendingCourseEditRef.current
+                            if (pending) {
+                              pendingCourseEditRef.current = null
+                              router.push(`/course/${pending.courseId}/edit?name=${encodeURIComponent(pending.courseName)}`)
+                            }
+                          }}
+                          className="bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white text-sm font-medium px-4 py-2"
+                        >
+                          Create Academy
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
             ) : !showCourseForm ? (
               (() => {
                 if (hasChatMessages) {
@@ -724,6 +906,18 @@ export default function HomePage() {
                     <div className="flex items-center justify-between gap-2 px-3 sm:px-4 border-gray-200 rounded-b-2xl py-3 min-w-0">
                       <TooltipProvider>
                         <div className="flex items-center gap-1.5 flex-shrink-0">
+                          <TooltipFlowbite content="Create a course" position="top">
+                            <button
+                              type="button"
+                              onClick={() => setShowCourseForm(true)}
+                              className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-gray-100 border border-gray-200"
+                              style={{ color: "rgb(113,121,133)" }}
+                              aria-label="Create a course"
+                            >
+                              <Wand2 className="w-4 h-4" />
+                              <span className="hidden min-[360px]:inline">Create a course</span>
+                            </button>
+                          </TooltipFlowbite>
                           <TooltipFlowbite content="Add Source" position="top">
                             <button
                               onClick={() => setIsAddSourcesDialogOpen(true)}
