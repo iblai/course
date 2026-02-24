@@ -305,7 +305,7 @@ export function SidebarLearner({
                       router.push("/home")
                     }}
                   >
-                    <img src={`${SIDEBAR_ICONS}/square-pen.svg`} alt="" className="w-4 h-4 flex-shrink-0" aria-hidden />
+                    <img src={`${SIDEBAR_ICONS}/square-pen.svg`} alt="" className="w-5 h-5 flex-shrink-0" aria-hidden />
                   </Button>
                 </div>
               </TooltipFlowbite>
@@ -314,16 +314,20 @@ export function SidebarLearner({
             <Button
               variant="outline"
               className={cn(
-                "w-full justify-start gap-3 border-gray-300 rounded-lg py-2.5",
+                "w-full justify-start gap-2 pl-[11px] border-gray-300 rounded-lg py-2.5",
                 pathname === "/home"
                   ? "bg-blue-50 text-blue-600 border-blue-200"
                   : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
               )}
               onClick={() => {
-                router.push("/home")
+                if (pathname === "/home") {
+                  window.location.href = "/home"
+                } else {
+                  router.push("/home")
+                }
               }}
             >
-              <img src={`${SIDEBAR_ICONS}/square-pen.svg`} alt="" className="w-4 h-4 flex-shrink-0" aria-hidden />
+              <img src={`${SIDEBAR_ICONS}/square-pen.svg`} alt="" className="w-5 h-5 flex-shrink-0" aria-hidden />
               <span>New Course</span>
             </Button>
           )}
@@ -362,7 +366,9 @@ export function SidebarLearner({
                       src={item.icon}
                       alt={item.label}
                       className={cn(
-                        "w-5 h-5 flex-shrink-0 p-0 transition-colors",
+                        item.id === "invite-user"
+                          ? "w-[21px] h-[19px] flex-shrink-0 p-0 transition-colors"
+                          : "w-5 h-[19px] flex-shrink-0 p-0 transition-colors",
                         isItemHighlighted(item) && "opacity-100"
                       )}
                       style={
@@ -549,7 +555,7 @@ export function SidebarLearner({
                       src={item.icon}
                       alt={item.label}
                       className={cn(
-                        "w-5 h-5 flex-shrink-0 p-0 transition-colors",
+                        "w-5 h-[19px] flex-shrink-0 p-0 transition-colors",
                         isItemHighlighted(item) && "opacity-100"
                       )}
                       style={
@@ -742,7 +748,7 @@ export function SidebarLearner({
                       src={item.icon}
                       alt={item.label}
                       className={cn(
-                        "w-5 h-5 flex-shrink-0 p-0 transition-colors",
+                        "w-5 h-[19px] flex-shrink-0 p-0 transition-colors",
                         isItemHighlighted(item) && "opacity-100"
                       )}
                       style={
@@ -884,7 +890,7 @@ export function SidebarLearner({
                       src={item.icon}
                       alt={item.label}
                       className={cn(
-                        "w-5 h-5 flex-shrink-0 p-0 transition-colors",
+                        "w-5 h-[19px] flex-shrink-0 p-0 transition-colors",
                         isItemHighlighted(item) && "opacity-100"
                       )}
                       style={
