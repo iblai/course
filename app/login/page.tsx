@@ -583,7 +583,7 @@ export default function AuthPage() {
                 <button
                   type="button"
                   onClick={() => document.getElementById("watch-section")?.scrollIntoView({ behavior: "smooth" })}
-                  className={`${sizes.fontSize} text-sm md:text-base font-medium text-[#00A3EC] hover:text-[#6988FF] transition-colors border border-[#00A3EC] rounded-md px-3 pt-1.5 pb-1.5 hover:border-[#6988FF] mt-6 md:mt-4 mb-5`}
+                  className={`${sizes.fontSize} text-sm md:text-base font-medium text-[#00A3EC] hover:text-[#6988FF] transition-colors border border-[#00A3EC] rounded-md px-3 pt-1.5 pb-1.5 hover:border-[#6988FF] mt-[40px] md:mt-4 mb-5`}
                 >
                   Read more
                 </button>
