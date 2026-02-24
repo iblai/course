@@ -67,12 +67,14 @@ export function FAQSection() {
   return (
     <section
       id="faq-section"
-      className="bg-[#F8F9FA] flex items-center justify-center py-16 px-4"
+      className="bg-[#F8F9FA] flex items-center justify-center py-10 px-4"
     >
       <div className="max-w-7xl mx-auto w-full">
         {/* Header */}
         <div className="mb-10">
-          <h1 className="text-3xl font-bold text-[var(--sidebar-foreground)] mb-6 mr-5 lg:text-5xl lg:mr-0">Frequently asked questions</h1>
+          <h1 className="text-3xl font-bold text-[var(--sidebar-foreground)] mb-10 mr-5 lg:text-5xl lg:mr-0">
+            Frequently asked questions
+          </h1>
         </div>
 
         {/* FAQ Content - Two Column Layout */}
@@ -192,18 +194,17 @@ export function FAQSection() {
 
         {/* Footer */}
         <div className="mt-20 -mx-4">
-          <div className="border-t border-gray-200 pt-8 px-4">
+          <div className="border-t border-gray-200 pt-2.5 px-4">
             <div className="flex items-center justify-center text-sm text-[#3E6BAD]">
               <span className="flex items-center gap-2">
-                Part of
                 <Image
-                  src="/images/iblai-logo.png"
-                  alt="ibl.ai"
+                  src="/images/os-logo.png"
+                  alt="OS"
                   width={80}
                   height={22}
-                  className="h-5 w-auto mb-0.5 pb-[3.5px]"
+                  className="h-5 w-auto mb-0.5 pb-0"
                 />
-                OS
+                ibl.ai OS
               </span>
             </div>
           </div>

@@ -105,8 +105,7 @@ export function Footer() {
 
         <div className="border-t border-[var(--border-color)] mt-10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-text-secondary">© 2025 ibl.ai Wink. All rights reserved.</p>
-          <p className="text-sm text-text-secondary flex items-center gap-1">
-            Part of{" "}
+          <p className="text-sm text-text-secondary flex items-center gap-2">
             <Link href="#" className="inline-flex items-center text-brand-primary font-medium hover:underline">
               <Image
                 src="/images/iblai-logo.png"
@@ -115,7 +114,7 @@ export function Footer() {
                 height={24}
                 className="w-auto h-[18px]"
               />
-            </Link>{" "}
+            </Link>
             OS
           </p>
         </div>

@@ -6,7 +6,7 @@ import { Check, ArrowRight } from "lucide-react"
 
 export function WatchSection() {
   return (
-    <section id="watch-section" className="bg-gray-50 flex items-center justify-center py-16 px-4">
+    <section id="watch-section" className="bg-gray-50 flex justify-center py-[50px] px-4">
       <div className="max-w-7xl mx-auto w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
           {/* Left Content */}
@@ -57,12 +57,9 @@ export function WatchSection() {
           <div className="relative flex items-center justify-center">
             {/* Video Container - YouTube 16:9 size (e.g. 640×360) */}
             <div
-              className="relative w-full max-w-[640px] aspect-video flex items-center justify-center overflow-hidden mx-4 shadow-sm"
+              className="relative w-full max-w-[640px] aspect-video flex items-center justify-center overflow-hidden mx-4 shadow-sm rounded-[18px] rounded-bl-[18px] rounded-br-[36px] md:rounded-[35px] md:rounded-bl-[35px] md:rounded-br-[70px]"
               style={{
                 background: "linear-gradient(135deg, rgba(0,163,236,0.09) 0%, rgba(105,136,255,0.09) 100%)",
-                borderRadius: "35px",
-                borderBottomLeftRadius: "35px",
-                borderBottomRightRadius: "70px",
               }}
             >
               {/* Play Button - Positioned on Left Top */}

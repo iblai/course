@@ -139,6 +139,6 @@ Only the main section copy on the login page (`/login`).
 - Submit
 
 **Footer**
-- Part of [ibl.ai logo] OS
+- [ibl.ai logo] OS
 
 

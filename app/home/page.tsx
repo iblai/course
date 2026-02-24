@@ -544,6 +544,7 @@ export default function HomePage() {
                 "flex-1 min-h-0 min-w-0 flex px-4 sm:px-6 pt-12 pb-6 sm:py-12 w-full max-w-full sm:pl-8 sm:pr-8 md:pr-20",
                 hasChatMessages ? "items-start justify-center" : "items-center justify-center"
               )}
+              style={{ paddingTop: "25px" }}
             >
           <div className={cn("w-full min-w-0", hasChatMessages ? "max-w-3xl" : "max-w-6xl")}>
             {isCreatingCourse ? (
@@ -619,7 +620,7 @@ export default function HomePage() {
                 }
                 return (
               <>
-                <div className="w-full max-w-2xl mx-auto min-w-0 mt-[55px]">
+                <div className="w-full max-w-2xl mx-auto min-w-0 mt-0">
                   {/* Main Prompt */}
                   <h2 className="text-center text-base sm:text-lg md:text-xl font-medium mb-6 sm:mb-8 bg-gradient-to-r from-[#00A3EC] to-[#6988FF] bg-clip-text text-transparent px-1">
                     Lets build together a great course!

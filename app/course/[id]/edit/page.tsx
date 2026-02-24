@@ -194,6 +194,8 @@ export default function CourseEditPage() {
   const [expandedSectionIds, setExpandedSectionIds] = useState<Set<string>>(new Set(["sec-1"]))
   const [isOutlineOpen, setIsOutlineOpen] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
+  const [isPublishSuccessOpen, setIsPublishSuccessOpen] = useState(false)
+  const [hasPublished, setHasPublished] = useState(false)
   const [sectionToDelete, setSectionToDelete] = useState<{ id: string; name: string } | null>(null)
   const [isUpdatingCourse, setIsUpdatingCourse] = useState(false)
   const [isUpdatingDescriptions, setIsUpdatingDescriptions] = useState(false)
@@ -271,7 +273,8 @@ export default function CourseEditPage() {
     // Simulate publish request
     setTimeout(() => {
       setIsPublishing(false)
-      toast.success("Changes published successfully", successToastStyle)
+      setHasPublished(true)
+      setIsPublishSuccessOpen(true)
     }, 2000)
   }
 
@@ -299,6 +302,7 @@ export default function CourseEditPage() {
     )
     setIsEditSectionOpen(false)
     setEditingSectionId(null)
+    toast.success("Section updated.", successToastStyle)
   }
 
   const handleAddSection = () => {
@@ -586,6 +590,15 @@ export default function CourseEditPage() {
                       <FileText className="w-4 h-4 mr-2" />
                       Course Outline
                     </Button>
+                    {hasPublished && (
+                      <Button
+                        variant="outline"
+                        asChild
+                        className="border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium px-4 py-2"
+                      >
+                        <Link href={`/course/${id}`}>View course</Link>
+                      </Button>
+                    )}
                   </div>
                 </div>
 
@@ -870,6 +883,28 @@ export default function CourseEditPage() {
               ) : (
                 "Add Section"
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Publish success dialog */}
+      <Dialog open={isPublishSuccessOpen} onOpenChange={setIsPublishSuccessOpen}>
+        <DialogContent className="sm:max-w-[440px] gap-3" maxWidth="440px">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold text-[var(--sidebar-foreground)]">
+              Published
+            </DialogTitle>
+            <p className="text-sm text-gray-600 mt-1">
+              Your course has published. Click View Course to review the course page.
+            </p>
+          </DialogHeader>
+          <DialogFooter className="pt-2">
+            <Button
+              asChild
+              className="bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white text-sm font-medium px-4 py-2"
+            >
+              <Link href={`/course/${id}`}>View course</Link>
             </Button>
           </DialogFooter>
         </DialogContent>

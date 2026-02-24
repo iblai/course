@@ -279,22 +279,22 @@ export default function AuthPage() {
     return {
       containerHeight: maxHeight,
       logoHeight: isSmallScreen ? "h-6" : isMediumScreen ? "h-8" : "h-10",
-      logoMarginBottom: "mb-2 sm:mb-3 md:mb-2 lg:mb-4",
-      logoMarginTop: "mt-5",
+      logoMarginBottom: "mb-3 sm:mb-4 md:mb-3 lg:mb-4",
+      logoMarginTop: "mt-6",
       titleSize: isSmallScreen ? "text-lg" : isMediumScreen ? "text-xl" : "text-2xl",
       subtitleSize: isSmallScreen ? "text-xs" : isMediumScreen ? "text-sm" : "text-base",
       buttonHeight: isSmallScreen ? "h-9" : isMediumScreen ? "h-10" : "h-12",
       inputHeight: isSmallScreen ? "h-9" : isMediumScreen ? "h-10" : "h-12",
-      spacing: "space-y-2 md:space-y-3 lg:space-y-4",
+      spacing: "space-y-2 md:space-y-2.5 lg:space-y-3",
       padding: isSmallScreen ? "p-3" : isMediumScreen ? "p-4" : "p-6",
       margin: isSmallScreen ? "mb-3" : isMediumScreen ? "mb-4" : "mb-6",
       iconSize: isSmallScreen ? "w-4 h-4" : isMediumScreen ? "w-5 h-5" : "w-6 h-6",
       fontSize: isSmallScreen ? "text-xs" : isMediumScreen ? "text-sm" : "text-base",
-      titleBlockSpacing: "space-y-0.5 md:space-y-1 lg:space-y-2",
-      titleBlockPadding: "py-8 md:py-10 lg:py-12",
-      titleHeadingSize: isSmallScreen ? "text-lg md:text-xl" : isMediumScreen ? "text-xl lg:text-2xl" : "text-lg md:text-xl lg:text-2xl xl:text-3xl",
+      titleBlockSpacing: "space-y-0.5 md:space-y-1 lg:space-y-2 pt-6 md:pt-4 pb-8 md:pb-4 lg:pb-5",
+      titleBlockPadding: "py-0",
+      titleHeadingSize: isSmallScreen ? "text-[22px] md:text-xl" : "text-[22px] md:text-xl lg:text-2xl xl:text-3xl",
       subtitleMargin: "mt-2.5 md:mt-1",
-      footerPaddingTop: "pt-2",
+      footerPaddingTop: "pt-0",
     }
   }
 
@@ -349,12 +349,11 @@ export default function AuthPage() {
 
   return (
     <div className="w-full">
-      <div className="flex w-full flex-col xl:flex-row overflow-hidden min-h-[100dvh] xl:h-[100dvh] xl:max-h-screen">
+      <div className="flex w-full flex-col xl:flex-row overflow-hidden">
         {/* Left Column - Auth Form */}
-        <div className="flex w-full flex-col min-h-[100dvh] xl:w-1/2 xl:h-full xl:min-h-0">
+        <div className="flex w-full flex-col xl:w-1/2 xl:h-full xl:min-h-0">
           <div
-            className="flex flex-col h-[100dvh] min-h-[100dvh] max-h-[100dvh] min-h-0 p-4 sm:p-6 md:p-4 lg:p-6 justify-between pt-[calc(0.75rem+env(safe-area-inset-top,0px))] pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] overflow-y-auto scrollbar-hide"
-            style={{ minHeight: "-webkit-fill-available" } as React.CSSProperties}
+            className="flex flex-col min-h-0 p-4 sm:p-6 md:p-4 lg:p-6 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] pb-0 overflow-y-auto scrollbar-hide"
           >
             {/* Logo Section */}
             <div className={`flex justify-center flex-shrink-0 ${sizes.logoMarginBottom}`}>
@@ -375,10 +374,10 @@ export default function AuthPage() {
             </div>
 
             {/* Auth Container Section */}
-            <div className="flex flex-col justify-center items-center flex-1">
+            <div className="flex flex-col items-center">
               {/* Title and Subtitle Section */}
               {!showConfirmation && !showPasswordForm && (
-                <div className="flex justify-center items-center py-2 w-full">
+                <div className="flex justify-center items-center w-full">
                   <div className={`text-center w-full ${sizes.titleBlockPadding}`}>
                     <div className={sizes.titleBlockSpacing}>
                       <h1
@@ -389,7 +388,9 @@ export default function AuthPage() {
                         engaging courses
                       </h1>
                       <p className={`text-[#4E5460] ${sizes.subtitleMargin} ${sizes.subtitleSize} leading-tight`}>
-                        Launch a subscription-based learning community on a top platform
+                        Launch a subscription-based learning
+                        <br />
+                        community on a top platform
                       </p>
                     </div>
                   </div>
@@ -455,7 +456,7 @@ export default function AuthPage() {
                         </Button>
 
                         <div className="w-full text-center">
-                          <div className="text-xs text-[#4E5460]">
+                          <div className="text-xs text-[#4E5460] pt-2.5 pb-2.5">
                             <Link href="/terms" className="hover:underline">
                               Terms of Use
                             </Link>
@@ -537,7 +538,7 @@ export default function AuthPage() {
                         </div>
 
                         <div className="w-full text-center">
-                          <div className="text-xs text-[#4E5460]">
+                          <div className="text-xs text-[#4E5460] pt-2.5 pb-2.5">
                             <Link href="/terms" className="hover:underline">
                               Terms of Use
                             </Link>
@@ -577,12 +578,12 @@ export default function AuthPage() {
               )}
             </div>
 
-            <div className={`flex-shrink-0 mt-auto min-h-[2.5rem] flex items-end ${sizes.footerPaddingTop} pb-[calc(0.25rem+env(safe-area-inset-bottom,0px))]`}>
+            <div className={`flex items-end ${sizes.footerPaddingTop} py-4 md:py-3`}>
               <div className="w-full px-2 flex justify-center">
                 <button
                   type="button"
                   onClick={() => document.getElementById("watch-section")?.scrollIntoView({ behavior: "smooth" })}
-                  className={`${sizes.fontSize} font-medium text-[#00A3EC] hover:text-[#6988FF] transition-colors mt-1 border border-[#00A3EC] rounded-md px-3 py-1.5 hover:border-[#6988FF]`}
+                  className={`${sizes.fontSize} text-sm md:text-base font-medium text-[#00A3EC] hover:text-[#6988FF] transition-colors border border-[#00A3EC] rounded-md px-3 pt-1.5 pb-1.5 hover:border-[#6988FF] mt-6 md:mt-4 mb-5`}
                 >
                   Read more
                 </button>
@@ -695,9 +696,15 @@ export default function AuthPage() {
         </div>
       </div>
 
+
       {/* Mobile/Tablet Slides Section */}
-      <div id="mobile-slides-section" className="xl:hidden w-full py-12 px-5" style={{ background: "linear-gradient(135deg, #E8F7FE 0%, #EEF0FF 100%)" }}>
-        <div className="max-w-2xl mx-auto">
+      <div
+        id="mobile-slides-section"
+        className="xl:hidden w-full py-16 px-4"
+        style={{ background: "linear-gradient(135deg, #E8F7FE 0%, #EEF0FF 100%)" }}
+      >
+        <div className="max-w-7xl mx-auto w-full">
+          <div className="max-w-2xl mx-auto">
           <div className="flex justify-center w-full mb-6">
             <Image
               src="/images/skillsAI-logo.webp"
@@ -789,8 +796,10 @@ export default function AuthPage() {
               />
             ))}
           </div>
+          </div>
         </div>
       </div>
+
 
       <WatchSection />
       <PricingSection />
