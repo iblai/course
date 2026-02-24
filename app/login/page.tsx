@@ -280,24 +280,25 @@ export default function AuthPage() {
       containerHeight: maxHeight,
       logoHeight: isSmallScreen ? "h-6" : isMediumScreen ? "h-8" : "h-10",
       logoMarginBottom: "mb-0",
-      logoMarginTop: "mt-6",
+      logoMarginTop: "mt-4 sm:mt-5 md:mt-6",
       titleSize: isSmallScreen ? "text-lg" : isMediumScreen ? "text-xl" : "text-2xl",
       subtitleSize: isSmallScreen ? "text-xs" : isMediumScreen ? "text-sm" : "text-base",
       buttonHeight: isSmallScreen ? "h-9" : isMediumScreen ? "h-10" : "h-12",
       inputHeight: isSmallScreen ? "h-9" : isMediumScreen ? "h-10" : "h-12",
-      spacing: "space-y-2 md:space-y-2.5 lg:space-y-3",
+      spacing: "space-y-2.5 sm:space-y-2.5 md:space-y-2.5 lg:space-y-3",
       padding: isSmallScreen ? "p-3" : isMediumScreen ? "p-4" : "p-6",
       margin: isSmallScreen ? "mb-3" : isMediumScreen ? "mb-4" : "mb-6",
       iconSize: isSmallScreen ? "w-4 h-4" : isMediumScreen ? "w-5 h-5" : "w-6 h-6",
       fontSize: isSmallScreen ? "text-xs" : isMediumScreen ? "text-sm" : "text-base",
       inputFontSize: "text-base",
-      titleBlockSpacing: "space-y-0.5 md:space-y-1 lg:space-y-2 pt-10 md:pt-10 pb-10 md:pb-10 lg:pb-10",
+      titleBlockSpacing: "space-y-0.5 md:space-y-1 lg:space-y-2 pt-4 pb-4 sm:pt-6 sm:pb-6 md:pt-8 md:pb-8 lg:pt-10 lg:pb-10",
       titleBlockPadding: "py-0",
       titleHeadingSize: isSmallScreen ? "text-[22px] md:text-xl" : "text-[22px] md:text-xl lg:text-2xl xl:text-3xl",
       subtitleMargin: "mt-2.5 md:mt-1",
       footerPaddingTop: "pt-10",
       footerPaddingBottom: "pb-10",
       maxFormWidth: isSmallScreen ? "max-w-[26rem]" : isMediumScreen ? "max-w-[28rem]" : "max-w-[31rem]",
+      formBlockMarginTop: "mt-4 sm:mt-5 md:mt-6",
     }
   }
 
@@ -385,7 +386,7 @@ export default function AuthPage() {
             </div>
 
             {/* Auth Container Section */}
-            <div className={cn("flex flex-col items-center", showConfirmation ? "flex-1 min-h-0 justify-center" : "xl:flex-1 xl:justify-center")}>
+            <div className={cn("flex flex-col items-center pt-10 xl:pt-0", showConfirmation ? "flex-1 min-h-0 justify-center" : "xl:flex-1 xl:justify-center")}>
               {/* Title and Subtitle Section */}
               {!showConfirmation && !showPasswordForm && (
                 <div className="flex justify-center items-center w-full">
@@ -411,7 +412,7 @@ export default function AuthPage() {
                 <>
                   {!showPasswordForm ? (
                     <div
-                      className={`rounded-[0.70rem] border-[0.25px] border-[rgba(0,163,236,0.25)] bg-[#F5F8FF] ${sizes.padding} shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(0,163,236,0.2)] w-full ${sizes.maxFormWidth}`}
+                      className={`rounded-[0.70rem] border-[0.25px] border-[rgba(0,163,236,0.25)] bg-[#F5F8FF] ${sizes.padding} shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(0,163,236,0.2)] w-full ${sizes.maxFormWidth} ${sizes.formBlockMarginTop}`}
                     >
                       <div className={`flex flex-col justify-between ${sizes.spacing}`}>
                         <div className="w-full">
@@ -481,7 +482,7 @@ export default function AuthPage() {
                     </div>
                   ) : (
                     <div
-                      className={`rounded-[0.70rem] border-[0.25px] border-[rgba(0,163,236,0.25)] bg-[#F5F8FF] ${sizes.padding} shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(0,163,236,0.2)] w-full ${sizes.maxFormWidth}`}
+                      className={`rounded-[0.70rem] border-[0.25px] border-[rgba(0,163,236,0.25)] bg-[#F5F8FF] ${sizes.padding} shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(0,163,236,0.2)] w-full ${sizes.maxFormWidth} ${sizes.formBlockMarginTop}`}
                     >
                       <div className={`flex flex-col justify-between ${sizes.spacing}`}>
                         <div className="w-full">
