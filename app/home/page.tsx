@@ -23,6 +23,10 @@ interface ChatMessage {
   id: string
   role: "user" | "assistant"
   content: string
+  /** When true, show a "Create course" button under this assistant message */
+  createCourseCta?: boolean
+  /** User's text used to prefill course form when CTA is clicked */
+  courseNameForCta?: string
 }
 
 function formatAssistantMessage(content: string): string {
@@ -293,37 +297,7 @@ export default function HomePage() {
     const text = inputValue.trim()
     if (!text) return
 
-    if (isCreateCourseIntent(text)) {
-      // User asked to create a course → show course creation flow
-      const generatedCourseName = text
-      const courseNumber = generatedCourseName
-        .split(" ")
-        .map((word) => word[0]?.toUpperCase() || "")
-        .join("")
-        .slice(0, 3)
-      const now = new Date()
-      const courseRun = `${now.getFullYear()}_${String(now.getMonth() + 1).padStart(2, "0")}`
-
-      setCourseForm({
-        courseName: generatedCourseName,
-        organization: "test_admin",
-        courseNumber: courseNumber,
-        courseRun: courseRun,
-      })
-      setCourseDetailsForm((prev) => ({
-        ...prev,
-        displayName: generatedCourseName,
-        description: `The ${generatedCourseName} course is designed to provide comprehensive learning on this topic. This course covers fundamental concepts and explores practical applications.`,
-        shortDescription: `The ${generatedCourseName} course is designed to equip professionals with the knowledge and tools needed.`,
-        imageDescriptionPrompt: generatedCourseName,
-      }))
-      setShowCourseForm(true)
-      setFormStep(1)
-      setInputValue("")
-      return
-    }
-
-    // Otherwise show chat list view: add user message and simulate assistant reply
+    // Always show chat list view: add user message first
     const userMessage: ChatMessage = {
       id: `user-${Date.now()}`,
       role: "user",
@@ -334,6 +308,24 @@ export default function HomePage() {
     setReplyingTo(null)
     setIsAssistantTyping(true)
 
+    if (isCreateCourseIntent(text)) {
+      // User asked to create a course → show chat response with CTA to create course
+      const assistantMessage: ChatMessage = {
+        id: `assistant-${Date.now()}`,
+        role: "assistant",
+        content:
+          "I'd be happy to help you **create a new course**. Tell me the topic or title you have in mind, and I'll guide you through setting it up. Use the button below to open the course creation form and get started.",
+        createCourseCta: true,
+        courseNameForCta: text,
+      }
+      setTimeout(() => {
+        setMessages((prev) => [...prev, assistantMessage])
+        setIsAssistantTyping(false)
+      }, 800)
+      return
+    }
+
+    // Other messages: generic assistant reply
     const defaultAssistantReply = `Thanks for your message. I can help you **create a new course** or answer questions about course design and content. Just say "create a course" or describe what you'd like to build, and I'll guide you through it.`
     setTimeout(() => {
       const assistantMessage: ChatMessage = {
@@ -344,6 +336,34 @@ export default function HomePage() {
       setMessages((prev) => [...prev, assistantMessage])
       setIsAssistantTyping(false)
     }, 800)
+  }
+
+  /** Open course creation form with optional prefill from chat CTA */
+  const openCreateCourseForm = (courseNameFromUser?: string) => {
+    const generatedCourseName = (courseNameFromUser || "").trim() || "New course"
+    const courseNumber = generatedCourseName
+      .split(" ")
+      .map((word) => word[0]?.toUpperCase() || "")
+      .join("")
+      .slice(0, 3)
+    const now = new Date()
+    const courseRun = `${now.getFullYear()}_${String(now.getMonth() + 1).padStart(2, "0")}`
+
+    setCourseForm({
+      courseName: generatedCourseName,
+      organization: "test_admin",
+      courseNumber: courseNumber,
+      courseRun: courseRun,
+    })
+    setCourseDetailsForm((prev) => ({
+      ...prev,
+      displayName: generatedCourseName,
+      description: `The ${generatedCourseName} course is designed to provide comprehensive learning on this topic. This course covers fundamental concepts and explores practical applications.`,
+      shortDescription: `The ${generatedCourseName} course is designed to equip professionals with the knowledge and tools needed.`,
+      imageDescriptionPrompt: generatedCourseName,
+    }))
+    setShowCourseForm(true)
+    setFormStep(1)
   }
 
   const handleRegenerate = () => {
@@ -541,11 +561,11 @@ export default function HomePage() {
           <div className="flex flex-1 min-h-0 min-w-0">
             <div
               className={cn(
-                "flex-1 min-h-0 min-w-0 flex px-4 sm:px-6 pt-8 pb-8 sm:pl-8 sm:pr-8 md:pr-20 w-full max-w-full",
-                hasChatMessages ? "items-start justify-center" : "items-start justify-center"
+                "flex-1 min-h-0 min-w-0 flex pt-8 pb-8 w-full max-w-full",
+                hasChatMessages ? "px-3 sm:px-4 items-start justify-center" : "px-4 sm:px-6 sm:pl-8 sm:pr-8 md:pr-20 items-start justify-center"
               )}
             >
-          <div className={cn("w-full min-w-0", hasChatMessages ? "max-w-3xl" : "max-w-6xl")}>
+          <div className={cn("w-full min-w-0", hasChatMessages ? "max-w-3xl mx-auto" : "max-w-6xl")}>
             {isCreatingCourse ? (
               <CreatingCourseProgress
                 courseName={courseForm.courseName || courseDetailsForm.displayName || "New course"}
@@ -557,7 +577,7 @@ export default function HomePage() {
               (() => {
                 if (hasChatMessages) {
                   return (
-              <div className="w-full px-3 sm:px-4 pt-0 py-4 sm:py-6 pb-6 min-w-0 flex-1 min-h-0 overflow-y-auto">
+              <div className="w-full pt-0 py-4 sm:py-6 pb-6 min-w-0 flex-1 min-h-0 overflow-y-auto scrollbar-hide">
                   {messages.map((msg) =>
                     msg.role === "user" ? (
                       <div key={msg.id} className="flex justify-end mb-4">
@@ -572,6 +592,19 @@ export default function HomePage() {
                           style={{ color: "rgb(113,121,133)" }}
                           dangerouslySetInnerHTML={{ __html: formatAssistantMessage(msg.content) }}
                         />
+                        {msg.createCourseCta && (
+                          <div className="mt-3 p-4 rounded-xl border-2 border-[#00A3EC]/20 bg-gradient-to-br from-[#F0F9FF] to-[#EEF0FF]">
+                            <p className="text-sm text-[#4E5460] mb-3">
+                              Click to start creating your course. We&apos;ll open the setup form and use your idea to get you started.
+                            </p>
+                            <Button
+                              onClick={() => openCreateCourseForm(msg.courseNameForCta)}
+                              className="bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white rounded-lg px-4 py-2 text-sm font-medium"
+                            >
+                              Create course
+                            </Button>
+                          </div>
+                        )}
                         <div className="flex items-center gap-0.5 mt-1.5 pt-1 text-gray-400">
                           <TooltipFlowbite content={copiedMessageId === msg.id ? "Copied" : "Copy"} position="top">
                             <button
