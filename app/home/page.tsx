@@ -541,10 +541,9 @@ export default function HomePage() {
           <div className="flex flex-1 min-h-0 min-w-0">
             <div
               className={cn(
-                "flex-1 min-h-0 min-w-0 flex px-4 sm:px-6 pt-12 pb-6 sm:py-12 w-full max-w-full sm:pl-8 sm:pr-8 md:pr-20",
-                hasChatMessages ? "items-start justify-center" : "items-center justify-center"
+                "flex-1 min-h-0 min-w-0 flex px-4 sm:px-6 pt-8 pb-8 sm:pl-8 sm:pr-8 md:pr-20 w-full max-w-full",
+                hasChatMessages ? "items-start justify-center" : "items-start justify-center"
               )}
-              style={{ paddingTop: "25px" }}
             >
           <div className={cn("w-full min-w-0", hasChatMessages ? "max-w-3xl" : "max-w-6xl")}>
             {isCreatingCourse ? (
