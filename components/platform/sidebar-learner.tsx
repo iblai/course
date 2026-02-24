@@ -111,6 +111,25 @@ export function SidebarLearner({
     }
   }, [pathname])
 
+  // Load created projects from sessionStorage so they persist across refresh
+  useEffect(() => {
+    try {
+      const loaded: { id: string; label: string }[] = []
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i)
+        if (key?.startsWith(`${PROJECT_STORAGE_KEY}-`) && key !== PROJECT_STORAGE_KEY) {
+          const id = key.replace(`${PROJECT_STORAGE_KEY}-`, "")
+          const raw = sessionStorage.getItem(key)
+          if (raw) {
+            const data = JSON.parse(raw) as { name?: string }
+            loaded.push({ id, label: data?.name || "Untitled Project" })
+          }
+        }
+      }
+      if (loaded.length > 0) setProjectsData(loaded)
+    } catch (_) {}
+  }, [])
+
   const toggleExpanded = (id: string) => {
     setExpandedItems((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]))
   }
@@ -135,12 +154,7 @@ export function SidebarLearner({
   }
 
 
-  const [projectsData, setProjectsData] = useState([
-    { id: "1", label: "Web Development Bo..." },
-    { id: "2", label: "Data Science Fundam.." },
-    { id: "3", label: "AI for Business Leaders" },
-    { id: "4", label: "Course - Generative AI" },
-  ])
+  const [projectsData, setProjectsData] = useState<{ id: string; label: string }[]>([])
 
   const [pinnedData, setPinnedData] = useState([
     { id: "1", label: "Design a course on..." },
@@ -316,7 +330,7 @@ export function SidebarLearner({
         </div>
       )}
 
-      <div className={cn("flex-1 overflow-y-auto text-center", isCollapsed ? "px-0 py-2" : "px-3 py-4", "space-y-1")}>
+      <div className={cn("flex-1 overflow-y-auto text-left", isCollapsed ? "px-0 py-2" : "px-3 py-4", "space-y-1")}>
         {sidebarItems.map((item) => {
           const sidebarButton = (
             <div key={item.id} className={isCollapsed ? "flex justify-center items-center" : ""}>

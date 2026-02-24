@@ -558,7 +558,7 @@ export default function HomePage() {
               (() => {
                 if (hasChatMessages) {
                   return (
-              <div className="w-full px-3 sm:px-4 py-4 sm:py-6 pb-6 min-w-0 flex-1 min-h-0 overflow-y-auto">
+              <div className="w-full px-3 sm:px-4 pt-0 py-4 sm:py-6 pb-6 min-w-0 flex-1 min-h-0 overflow-y-auto">
                   {messages.map((msg) =>
                     msg.role === "user" ? (
                       <div key={msg.id} className="flex justify-end mb-4">
@@ -622,7 +622,7 @@ export default function HomePage() {
               <>
                 <div className="w-full max-w-2xl mx-auto min-w-0 mt-0">
                   {/* Main Prompt */}
-                  <h2 className="text-center text-base sm:text-lg md:text-xl font-medium mb-6 sm:mb-8 bg-gradient-to-r from-[#00A3EC] to-[#6988FF] bg-clip-text text-transparent px-1">
+                  <h2 className="text-center text-base sm:text-lg md:text-xl font-medium mb-6 sm:mb-8 bg-gradient-to-r from-[#00A3EC] to-[#6988FF] bg-clip-text text-transparent px-1 mt-0">
                     Lets build together a great course!
                   </h2>
 

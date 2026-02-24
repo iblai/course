@@ -351,11 +351,11 @@ export default function AuthPage() {
 
   return (
     <div className="w-full">
-      <div className="flex w-full flex-col xl:flex-row overflow-hidden">
+      <div className="flex w-full flex-col xl:flex-row xl:min-h-screen xl:h-screen overflow-hidden">
         {/* Left Column - Auth Form */}
         <div className="flex w-full flex-col xl:w-1/2 xl:h-full xl:min-h-0">
           <div
-            className="flex flex-col min-h-0 p-4 sm:p-6 md:p-4 lg:p-6 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] pb-0 overflow-y-auto scrollbar-hide"
+            className="flex flex-col min-h-0 xl:flex-1 p-4 sm:p-6 md:p-4 lg:p-6 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] pb-0 overflow-y-auto scrollbar-hide"
           >
             {/* Logo Section */}
             <div className={`flex justify-center flex-shrink-0 ${sizes.logoMarginBottom}`}>
@@ -376,7 +376,7 @@ export default function AuthPage() {
             </div>
 
             {/* Auth Container Section */}
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center xl:flex-1 xl:justify-center">
               {/* Title and Subtitle Section */}
               {!showConfirmation && !showPasswordForm && (
                 <div className="flex justify-center items-center w-full">
@@ -595,7 +595,7 @@ export default function AuthPage() {
         </div>
 
         {/* Right Column - Logo and Slides - Desktop Only */}
-        <div className="hidden xl:flex xl:w-1/2 flex-col rounded-lg m-4 xl:h-[calc(100vh-2rem)]" style={{ background: "linear-gradient(135deg, #E8F7FE 0%, #EEF0FF 100%)" }}>
+        <div className="hidden xl:flex xl:w-1/2 flex-col rounded-lg xl:m-0 xl:h-full" style={{ background: "linear-gradient(135deg, #E8F7FE 0%, #EEF0FF 100%)" }}>
           <div className="flex flex-col h-full p-6">
             <div className="flex justify-center w-full flex-shrink-0 mb-7">
               <div className="flex flex-col items-center gap-2">

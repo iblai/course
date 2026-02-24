@@ -50,7 +50,7 @@ export function PlatformFooter() {
       style={{ left: `${sidebarWidth}px` }}
     >
       <div className="px-4 sm:px-6 py-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-start gap-4 text-sm text-text-secondary">
+        <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 text-sm text-text-secondary">
           <div className="hidden sm:flex items-center gap-4">
             <Link href="#" className="hover:text-text-primary transition-colors">
               Privacy Policy
@@ -61,13 +61,13 @@ export function PlatformFooter() {
           </div>
           <div className="flex items-center gap-2">
             <Image
-              src="/images/iblai-logo.png"
-              alt="ibl.ai"
+              src="/images/os-logo.png"
+              alt="OS"
               width={80}
-              height={24}
-              className="w-auto h-[18px] mb-1.5"
+              height={22}
+              className="h-5 w-auto"
             />
-            <span>OS</span>
+            <span>ibl.ai OS</span>
           </div>
         </div>
       </div>
