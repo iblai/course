@@ -358,13 +358,13 @@ export default function AuthPage() {
         <div
           className={cn(
             "flex w-full flex-col xl:w-1/2 xl:h-full xl:min-h-0",
-            showConfirmation && "min-h-[100dvh]"
+            showConfirmation && "xl:min-h-[100dvh]"
           )}
         >
           <div
             className={cn(
               "flex flex-col min-h-0 p-4 sm:p-6 md:p-4 lg:p-6 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] pb-0 overflow-y-auto scrollbar-hide xl:overflow-hidden",
-              showConfirmation ? "flex-1 min-h-0" : "xl:flex-1"
+              showConfirmation ? "xl:flex-1 xl:min-h-0" : "xl:flex-1"
             )}
           >
             {/* Logo Section */}
@@ -386,7 +386,7 @@ export default function AuthPage() {
             </div>
 
             {/* Auth Container Section */}
-            <div className={cn("flex flex-col items-center pt-10 xl:pt-0", showConfirmation ? "flex-1 min-h-0 justify-center" : "xl:flex-1 xl:justify-center")}>
+            <div className={cn("flex flex-col items-center pt-10 xl:pt-0", showConfirmation ? "xl:flex-1 xl:min-h-0 xl:justify-center" : "xl:flex-1 xl:justify-center")}>
               {/* Title and Subtitle Section */}
               {!showConfirmation && !showPasswordForm && (
                 <div className="flex justify-center items-center w-full">
@@ -565,7 +565,7 @@ export default function AuthPage() {
                   )}
                 </>
               ) : (
-                <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto text-center min-h-0 px-4 sm:px-6">
+                <div className={`flex flex-col items-center justify-center w-full max-w-md mx-auto text-center min-h-0 px-4 sm:px-6`}>
                   <div className="mb-3 sm:mb-4">
                     <Image
                       src="/images/email-verify-icon.png"
@@ -590,7 +590,7 @@ export default function AuthPage() {
               )}
             </div>
 
-            <div className={`flex items-end ${sizes.footerPaddingTop} ${sizes.footerPaddingBottom}`}>
+            <div className={cn("flex items-end", sizes.footerPaddingBottom, showConfirmation ? "pt-10 mt-0" : sizes.footerPaddingTop)}>
               <div className="w-full px-2 flex justify-center">
                 <button
                   type="button"
