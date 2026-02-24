@@ -57,7 +57,7 @@ export function WatchSection() {
           <div className="relative flex items-center justify-center">
             {/* Video Container - YouTube 16:9 size (e.g. 640×360) */}
             <div
-              className="relative w-full max-w-[640px] aspect-video flex items-center justify-center overflow-hidden mx-4 shadow-sm rounded-[18px] rounded-bl-[18px] rounded-br-[36px] md:rounded-[35px] md:rounded-bl-[35px] md:rounded-br-[70px]"
+              className="relative w-full max-w-[640px] aspect-video flex items-center justify-center overflow-hidden mx-0 shadow-sm rounded-[18px] rounded-bl-[18px] rounded-br-[36px] md:rounded-[35px] md:rounded-bl-[35px] md:rounded-br-[70px]"
               style={{
                 background: "linear-gradient(135deg, rgba(0,163,236,0.09) 0%, rgba(105,136,255,0.09) 100%)",
               }}
