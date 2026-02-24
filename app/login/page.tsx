@@ -222,6 +222,7 @@ export default function AuthPage() {
   const [countdown, setCountdown] = useState(5)
   const router = useRouter()
   const [viewportHeight, setViewportHeight] = useState(0)
+  const [viewportWidth, setViewportWidth] = useState(0)
 
   const {
     email,
@@ -244,42 +245,40 @@ export default function AuthPage() {
 
   useEffect(() => {
     const updateViewport = () => {
-      const isMobile = window.innerWidth <= 768
+      const w = window.innerWidth
+      const isMobile = w <= 768
+      setViewportWidth(w)
       let newViewportHeight
-
       if (isMobile) {
         newViewportHeight = Math.min(window.screen.height * 0.85, 650)
       } else {
         newViewportHeight = window.innerHeight
       }
-
       setViewportHeight(newViewportHeight)
     }
 
     updateViewport()
-
-    const handleResize = () => {
-      const isMobile = window.innerWidth <= 768
-      if (!isMobile) {
-        updateViewport()
-      }
-    }
-
-    window.addEventListener("resize", handleResize)
-    return () => {
-      window.removeEventListener("resize", handleResize)
-    }
+    window.addEventListener("resize", updateViewport)
+    return () => window.removeEventListener("resize", updateViewport)
   }, [])
 
   const getResponsiveSizes = () => {
+    const isXl = viewportWidth >= 1280
+    const leftColumnWidth = isXl ? viewportWidth / 2 : viewportWidth
     const maxHeight = Math.min(viewportHeight, 730)
-    const isSmallScreen = maxHeight < 600
-    const isMediumScreen = maxHeight >= 600 && maxHeight < 700
+    const effectiveSize =
+      viewportWidth === 0
+        ? maxHeight
+        : isXl
+          ? Math.min(maxHeight, leftColumnWidth)
+          : maxHeight
+    const isSmallScreen = effectiveSize < 560
+    const isMediumScreen = effectiveSize >= 560 && effectiveSize < 700
 
     return {
       containerHeight: maxHeight,
       logoHeight: isSmallScreen ? "h-6" : isMediumScreen ? "h-8" : "h-10",
-      logoMarginBottom: "mb-3 sm:mb-4 md:mb-3 lg:mb-4",
+      logoMarginBottom: "mb-0",
       logoMarginTop: "mt-6",
       titleSize: isSmallScreen ? "text-lg" : isMediumScreen ? "text-xl" : "text-2xl",
       subtitleSize: isSmallScreen ? "text-xs" : isMediumScreen ? "text-sm" : "text-base",
@@ -290,11 +289,14 @@ export default function AuthPage() {
       margin: isSmallScreen ? "mb-3" : isMediumScreen ? "mb-4" : "mb-6",
       iconSize: isSmallScreen ? "w-4 h-4" : isMediumScreen ? "w-5 h-5" : "w-6 h-6",
       fontSize: isSmallScreen ? "text-xs" : isMediumScreen ? "text-sm" : "text-base",
-      titleBlockSpacing: "space-y-0.5 md:space-y-1 lg:space-y-2 pt-6 md:pt-4 pb-8 md:pb-4 lg:pb-5",
+      inputFontSize: "text-base",
+      titleBlockSpacing: "space-y-0.5 md:space-y-1 lg:space-y-2 pt-10 md:pt-10 pb-10 md:pb-10 lg:pb-10",
       titleBlockPadding: "py-0",
       titleHeadingSize: isSmallScreen ? "text-[22px] md:text-xl" : "text-[22px] md:text-xl lg:text-2xl xl:text-3xl",
       subtitleMargin: "mt-2.5 md:mt-1",
-      footerPaddingTop: "pt-0",
+      footerPaddingTop: "pt-10",
+      footerPaddingBottom: "pb-10",
+      maxFormWidth: isSmallScreen ? "max-w-[26rem]" : isMediumScreen ? "max-w-[28rem]" : "max-w-[31rem]",
     }
   }
 
@@ -400,7 +402,7 @@ export default function AuthPage() {
                 <>
                   {!showPasswordForm ? (
                     <div
-                      className={`rounded-[0.70rem] border-[0.25px] border-[rgba(0,163,236,0.25)] bg-[#F5F8FF] ${sizes.padding} shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(0,163,236,0.2)] w-full max-w-[31rem]`}
+                      className={`rounded-[0.70rem] border-[0.25px] border-[rgba(0,163,236,0.25)] bg-[#F5F8FF] ${sizes.padding} shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(0,163,236,0.2)] w-full ${sizes.maxFormWidth}`}
                     >
                       <div className={`flex flex-col justify-between ${sizes.spacing}`}>
                         <div className="w-full">
@@ -412,7 +414,7 @@ export default function AuthPage() {
                               setEmail(e.target.value)
                               if (emailError) setEmailError("")
                             }}
-                            className={`${sizes.inputHeight} rounded-md ${sizes.fontSize} ${emailError ? "border-2 border-[#00A3EC]" : "border-gray-200"}`}
+                            className={`${sizes.inputHeight} rounded-md ${sizes.inputFontSize} ${emailError ? "border-2 border-[#00A3EC]" : "border-gray-200"}`}
                           />
                           {emailError && (
                             <p style={{ color: "#00A3EC", fontSize: "0.7rem", marginTop: "0.25rem" }}>{emailError}</p>
@@ -470,7 +472,7 @@ export default function AuthPage() {
                     </div>
                   ) : (
                     <div
-                      className={`rounded-[0.70rem] border-[0.25px] border-[rgba(0,163,236,0.25)] bg-[#F5F8FF] ${sizes.padding} shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(0,163,236,0.2)] w-full max-w-[28rem]`}
+                      className={`rounded-[0.70rem] border-[0.25px] border-[rgba(0,163,236,0.25)] bg-[#F5F8FF] ${sizes.padding} shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(0,163,236,0.2)] w-full ${sizes.maxFormWidth}`}
                     >
                       <div className={`flex flex-col justify-between ${sizes.spacing}`}>
                         <div className="w-full">
@@ -482,7 +484,7 @@ export default function AuthPage() {
                               setEmail(e.target.value)
                               if (emailError) setEmailError("")
                             }}
-                            className={`${sizes.inputHeight} rounded-md ${sizes.fontSize} ${emailError ? "border-2 border-[#00A3EC]" : "border-gray-200"}`}
+                            className={`${sizes.inputHeight} rounded-md ${sizes.inputFontSize} ${emailError ? "border-2 border-[#00A3EC]" : "border-gray-200"}`}
                           />
                         </div>
 
@@ -495,7 +497,7 @@ export default function AuthPage() {
                               setPassword(e.target.value)
                               if (emailError) setEmailError("")
                             }}
-                            className={`${sizes.inputHeight} rounded-md ${sizes.fontSize} ${emailError ? "border-2 border-[#00A3EC]" : "border-gray-200"}`}
+                            className={`${sizes.inputHeight} rounded-md ${sizes.inputFontSize} ${emailError ? "border-2 border-[#00A3EC]" : "border-gray-200"}`}
                           />
                           {password.length > 0 && (
                             <button
@@ -578,12 +580,12 @@ export default function AuthPage() {
               )}
             </div>
 
-            <div className={`flex items-end ${sizes.footerPaddingTop} py-4 md:py-3`}>
+            <div className={`flex items-end ${sizes.footerPaddingTop} ${sizes.footerPaddingBottom}`}>
               <div className="w-full px-2 flex justify-center">
                 <button
                   type="button"
                   onClick={() => document.getElementById("watch-section")?.scrollIntoView({ behavior: "smooth" })}
-                  className={`${sizes.fontSize} text-sm md:text-base font-medium text-[#00A3EC] hover:text-[#6988FF] transition-colors border border-[#00A3EC] rounded-md px-3 pt-1.5 pb-1.5 hover:border-[#6988FF] mt-[40px] md:mt-4 mb-5`}
+                  className={`${sizes.fontSize} text-sm md:text-base font-medium text-[#00A3EC] hover:text-[#6988FF] transition-colors border border-[#00A3EC] rounded-md px-3 pt-1.5 pb-1.5 hover:border-[#6988FF]`}
                 >
                   Read more
                 </button>
