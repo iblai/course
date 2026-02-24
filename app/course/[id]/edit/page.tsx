@@ -652,7 +652,7 @@ export default function CourseEditPage() {
                         className={
                           hasPublished
                             ? "border-[#2563EB] text-[#2563EB] hover:bg-blue-50 text-sm font-medium px-4 py-2"
-                            : "text-white border-0 text-sm font-medium px-4 py-2 hover:opacity-90"
+                            : "text-white border-0 text-sm font-medium px-4 py-2 hover:opacity-90 hover:text-white"
                         }
                         style={!hasPublished ? { background: "linear-gradient(135deg, #00A3EC 0%, #6988FF 100%)" } : undefined}
                       >
