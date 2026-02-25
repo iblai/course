@@ -379,7 +379,7 @@ export function SidebarLearner({
                       alt={item.label}
                       className={cn(
                         item.id === "invite-user"
-                          ? "w-[21px] h-[19px] flex-shrink-0 p-0 transition-colors"
+                          ? "w-[18px] h-[18px] flex-shrink-0 p-0 transition-colors"
                           : "w-5 h-[19px] flex-shrink-0 p-0 transition-colors",
                         isItemHighlighted(item) && "opacity-100"
                       )}

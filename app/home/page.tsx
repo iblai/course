@@ -607,27 +607,34 @@ export default function HomePage() {
             {isCreatingCourse ? (
               <>
                 <CreatingCourseProgress
-                  courseName={courseForm.courseName || courseDetailsForm.displayName || "New course"}
+                  courseName={courseDetailsForm.displayName || courseForm.courseName || "New course"}
                   creationStep={creationStep}
                   creationProgress={creationProgress}
                   completedActions={completedActions}
                   courseCreated={showAcademyChoiceDialog}
                 />
                 {showAcademyChoiceDialog && (
-                  <div className="mt-8 w-full min-w-0 px-1 flex justify-center">
-                    <div className="w-full max-w-[420px] rounded-lg border border-gray-200 bg-white overflow-hidden flex flex-col shadow-sm">
+                  <div className="mt-8 w-full min-w-0 px-1">
+                    <div className="w-full rounded-lg border border-gray-200 bg-white overflow-hidden flex flex-col shadow-sm">
                       {academyCreationPhase === "form" ? (
                         <>
-                          <div className="flex-shrink-0 px-4 py-4 text-center sm:px-0 sm:py-0 sm:text-center">
-                            <h2 className="text-lg font-semibold text-[var(--sidebar-foreground)] pt-0 pb-0 sm:text-xl">
-                              Your course has been generated successfully.
-                            </h2>
-                            <p className="text-sm text-gray-600 mt-1 mb-0">
-                              Set up your academy below or skip to continue editing your course.
-                            </p>
+                          <div className="flex-shrink-0 p-4 sm:p-6 pb-0 sm:pb-4 border-b border-gray-100">
+                            <div className="flex items-start gap-3">
+                              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#eff6ff] border border-[#bfdbfe] flex items-center justify-center">
+                                <Check className="w-5 h-5 text-blue-600" strokeWidth={2.5} />
+                              </div>
+                              <div className="min-w-0">
+                                <h2 className="text-lg sm:text-xl font-semibold text-[var(--sidebar-foreground)]">
+                                  Your course has been generated successfully.
+                                </h2>
+                                <p className="text-sm text-gray-600 mt-1">
+                                  Set up your academy below or skip to continue editing your course.
+                                </p>
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex-1 min-h-0 overflow-y-auto">
-                            <div className="flex flex-col items-center px-4 pt-[10px] py-3 pb-0 box-content sm:px-0 sm:pt-[10px] sm:pb-0">
+                          <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6">
+                            <div className="flex flex-col items-center pt-4 py-3 pb-0">
                               <input
                                 id="academy-image-home"
                                 type="file"
@@ -677,9 +684,9 @@ export default function HomePage() {
                                 </button>
                               )}
                             </div>
-                            <div className="space-y-4 p-0 px-4 py-3 pb-[10px] sm:space-y-5 sm:px-0 sm:py-0 sm:pb-[10px]">
+                            <div className="space-y-4 py-3 pb-4 sm:space-y-5">
                               <div className="space-y-1.5">
-                                <Label htmlFor="academy-title-home" className="text-[11px] font-normal text-gray-500 sm:text-xs">
+                                <Label htmlFor="academy-title-home" className="text-xs font-normal text-gray-500 sm:text-sm">
                                   Name
                                 </Label>
                                 <Input
@@ -693,7 +700,7 @@ export default function HomePage() {
                                 />
                               </div>
                               <div className="space-y-1.5">
-                                <Label htmlFor="academy-subtitle-home" className="text-[11px] font-normal text-gray-500 sm:text-xs">
+                                <Label htmlFor="academy-subtitle-home" className="text-xs font-normal text-gray-500 sm:text-sm">
                                   Short description
                                 </Label>
                                 <div className="relative">
@@ -720,7 +727,7 @@ export default function HomePage() {
                                 </div>
                               </div>
                               <div className="space-y-1.5">
-                                <Label htmlFor="academy-pricing-home" className="text-[11px] font-normal text-gray-500 sm:text-xs">
+                                <Label htmlFor="academy-pricing-home" className="text-xs font-normal text-gray-500 sm:text-sm">
                                   Membership price
                                 </Label>
                                 <Input
@@ -740,7 +747,7 @@ export default function HomePage() {
                               </div>
                             </div>
                           </div>
-                          <div className="flex-shrink-0 flex flex-col-reverse sm:flex-row sm:justify-end gap-2 px-4 pb-0 pt-3 border-t border-gray-100 sm:px-6 sm:pb-0 sm:pt-0">
+                          <div className="flex-shrink-0 flex flex-col-reverse sm:flex-row sm:justify-end gap-2 px-4 sm:px-6 py-4 border-t border-gray-100">
                             <Button
                               variant="outline"
                               onClick={() => {
