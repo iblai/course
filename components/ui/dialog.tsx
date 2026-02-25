@@ -39,6 +39,7 @@ const DialogContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
     noPadding?: boolean
     maxWidth?: string
+    maxHeight?: string
     hideCloseButton?: boolean
     fullScreen?: boolean
     pagination?: React.ReactNode
@@ -51,6 +52,7 @@ const DialogContent = React.forwardRef<
       children,
       noPadding,
       maxWidth,
+      maxHeight,
       hideCloseButton = false,
       fullScreen = false,
       pagination,
@@ -72,7 +74,7 @@ const DialogContent = React.forwardRef<
           className,
         )}
         style={!fullScreen ? {
-          maxHeight: 'calc(100vh - max(2rem, env(safe-area-inset-top) + env(safe-area-inset-bottom) + 2rem))',
+          maxHeight: maxHeight ?? 'calc(100vh - max(2rem, env(safe-area-inset-top) + env(safe-area-inset-bottom) + 2rem))',
           maxWidth: maxWidth ?? 'calc(100vw - max(2rem, env(safe-area-inset-left) + env(safe-area-inset-right) + 2rem))',
           top: 'max(50%, calc(50% + env(safe-area-inset-top) / 2))',
         } : {

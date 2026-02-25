@@ -147,7 +147,7 @@ export function FAQSection() {
                 <Textarea
                   id="description"
                   rows={4}
-                  className="w-full border border-[#E5E7EB] rounded-md resize-none"
+                  className="w-full min-h-[120px] border border-[#E5E7EB] rounded-md resize-y"
                   placeholder="Please provide all relevant details, include steps to reproduce or screenshots of the issue if important"
                 />
               </div>

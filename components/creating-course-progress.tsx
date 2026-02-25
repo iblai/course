@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import { Check, ChevronDown, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
-
 export interface CreatingCourseProgressProps {
   courseName: string
   creationStep: 1 | 2 | 3
@@ -32,9 +31,9 @@ export function CreatingCourseProgress({
         <h1 className="text-xl sm:text-2xl font-bold text-[var(--sidebar-foreground)] break-words">
           {courseName}
         </h1>
-        <p className={cn("text-sm mt-1", courseCreated ? "text-[#00A3EC] font-medium" : "text-muted-foreground")}>
-          {courseCreated ? "Course created" : "Creating course"}
-        </p>
+        {!courseCreated && (
+          <p className="text-sm text-gray-500 mt-1">Creating course...</p>
+        )}
       </div>
 
       {!courseCreated && (

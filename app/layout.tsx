@@ -49,17 +49,27 @@ export default function RootLayout({
       <body className={`font-sans antialiased`}>
         <ScrollToTop />
         <AccessibilityProvider>{children}</AccessibilityProvider>
-        <Toaster 
-          position="top-center" 
-          richColors 
+        <Toaster
+          position="top-center"
+          richColors
           closeButton={false}
           expand={true}
           toastOptions={{
             style: {
+              background: "linear-gradient(135deg, #00A3EC 0%, #6988FF 100%)",
+              color: "white",
+              border: "none",
+              borderRadius: "12px",
+              padding: "14px 18px",
+              fontSize: "15px",
+              fontWeight: "600",
+              boxShadow: "0 4px 12px rgba(0, 163, 236, 0.3)",
               WebkitFontSmoothing: "antialiased",
               MozOsxFontSmoothing: "grayscale",
               WebkitTapHighlightColor: "transparent",
+              touchAction: "manipulation",
             },
+            duration: 3000,
             className: "sonner-toast",
           }}
         />

@@ -20,10 +20,10 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import { ViewAcademyDialog } from "@/components/view-academy-dialog"
+import { CreateAcademyDialog } from "@/components/create-academy-dialog"
 import "@/styles/colors.css"
 
 function CoursesPageContent() {
@@ -40,14 +40,9 @@ function CoursesPageContent() {
   const [isDeleteCourseDialogOpen, setIsDeleteCourseDialogOpen] = useState(false)
   const [courseToDelete, setCourseToDelete] = useState<{ id: number; title: string } | null>(null)
   const [isCreateAcademyDialogOpen, setIsCreateAcademyDialogOpen] = useState(false)
+  const [viewAcademyDialogOpen, setViewAcademyDialogOpen] = useState(false)
+  const [isEditAcademyMode, setIsEditAcademyMode] = useState(false)
   const [hasAcademy, setHasAcademy] = useState(false)
-  const [createAcademyForm, setCreateAcademyForm] = useState<{
-    imageFile: File | null
-    imagePreview: string | null
-    title: string
-    subtitle: string
-    membershipPricing: string
-  }>({ imageFile: null, imagePreview: null, title: "", subtitle: "", membershipPricing: "" })
 
   useEffect(() => {
     // Set logged in state - can be determined by other means (auth context, localStorage, etc.)
@@ -62,6 +57,7 @@ function CoursesPageContent() {
 
   useEffect(() => {
     if (searchParams.get("openCreateAcademy") === "1") {
+      setIsEditAcademyMode(false)
       setIsCreateAcademyDialogOpen(true)
       router.replace("/courses", { scroll: false })
     }
@@ -253,11 +249,6 @@ function CoursesPageContent() {
     console.log(`${action} clicked for course ${courseId}`)
   }
 
-  const handleRemoveAcademyImage = () => {
-    if (createAcademyForm.imagePreview) URL.revokeObjectURL(createAcademyForm.imagePreview)
-    setCreateAcademyForm((prev) => ({ ...prev, imageFile: null, imagePreview: null }))
-  }
-
   return (
     <div className="h-screen-dvh overflow-y-auto overflow-x-hidden bg-background">
       {/* Sidebar */}
@@ -291,9 +282,9 @@ function CoursesPageContent() {
             )}
           >
             <div className="flex min-w-0">
-              <div className="flex-1 px-5 sm:px-2 py-4 sm:py-8 w-full min-w-0 sm:pl-8 sm:pr-8 md:pr-20">
+              <div className="flex-1 px-5 sm:px-2 pt-3 pb-4 sm:pt-6 sm:pb-8 w-full min-w-0 sm:pl-8 sm:pr-8 md:pr-20">
               {/* Page Title */}
-              <div className="mb-4 sm:mb-6 mt-[15px] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="mb-4 sm:mb-6 mt-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
                   <h1 className="text-lg sm:text-xl font-semibold mb-1 sm:mb-2" style={{ color: "rgb(113,121,133)" }}>
                     All Courses
@@ -304,15 +295,18 @@ function CoursesPageContent() {
                 </div>
                 {hasAcademy ? (
                   <Button
-                    asChild
+                    onClick={() => setViewAcademyDialogOpen(true)}
                     className="shrink-0 gap-2 text-white border-0 hover:opacity-90"
                     style={{ background: "linear-gradient(135deg, #00A3EC 0%, #6988FF 100%)" }}
                   >
-                    <Link href="/courses">View academy</Link>
+                    View Academy
                   </Button>
                 ) : (
                   <Button
-                    onClick={() => setIsCreateAcademyDialogOpen(true)}
+                    onClick={() => {
+                    setIsEditAcademyMode(false)
+                    setIsCreateAcademyDialogOpen(true)
+                  }}
                     className="shrink-0 gap-2 text-white border-0 shadow-sm hover:opacity-90"
                     style={{ background: "linear-gradient(135deg, #00A3EC 0%, #6988FF 100%)" }}
                   >
@@ -648,165 +642,24 @@ function CoursesPageContent() {
         </DialogContent>
       </Dialog>
 
-      {/* Create Academy Dialog */}
-      <Dialog
+      <ViewAcademyDialog
+        open={viewAcademyDialogOpen}
+        onOpenChange={setViewAcademyDialogOpen}
+        onEdit={() => {
+          setViewAcademyDialogOpen(false)
+          setIsEditAcademyMode(true)
+          setIsCreateAcademyDialogOpen(true)
+        }}
+      />
+      <CreateAcademyDialog
         open={isCreateAcademyDialogOpen}
         onOpenChange={(open) => {
           setIsCreateAcademyDialogOpen(open)
-          if (!open) {
-            if (createAcademyForm.imagePreview) URL.revokeObjectURL(createAcademyForm.imagePreview)
-            setCreateAcademyForm({ imageFile: null, imagePreview: null, title: "", subtitle: "", membershipPricing: "" })
-          }
+          if (!open) setIsEditAcademyMode(false)
         }}
-      >
-        <DialogContent className="sm:max-w-[480px] p-3 sm:p-4 gap-4" maxWidth="480px">
-          <DialogHeader className="mb-0">
-            <DialogTitle className="text-xl font-semibold text-[var(--sidebar-foreground)]">
-              Create Academy
-            </DialogTitle>
-            <p className="text-sm text-gray-500 mt-0.5">Add a new academy with image, title, and membership pricing.</p>
-          </DialogHeader>
-          <div className="space-y-4 pt-0 pb-2 sm:pb-3">
-            {/* Academy Image */}
-            <div className="space-y-2">
-              <Label htmlFor="academy-image" className="text-sm font-medium text-gray-700">
-                Academy Image
-              </Label>
-              <div className="flex items-center gap-3">
-                {createAcademyForm.imagePreview ? (
-                  <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
-                    <Image
-                      src={createAcademyForm.imagePreview}
-                      alt="Academy preview"
-                      fill
-                      className="object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleRemoveAcademyImage}
-                      className="absolute top-1 right-1 w-5 h-5 rounded-full bg-gray-800/80 text-white flex items-center justify-center text-xs hover:bg-gray-800"
-                      aria-label="Remove image"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ) : null}
-                <div className="flex-1 min-w-0">
-                  <Input
-                    id="academy-image"
-                    type="file"
-                    accept="image/*"
-                    className="cursor-pointer file:cursor-pointer"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0]
-                      if (file) {
-                        const preview = URL.createObjectURL(file)
-                        setCreateAcademyForm((prev) => ({
-                          ...prev,
-                          imageFile: file,
-                          imagePreview: preview,
-                        }))
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-            {/* Title */}
-            <div className="space-y-2">
-              <Label htmlFor="academy-title" className="text-sm font-medium text-gray-700">
-                Title
-              </Label>
-              <Input
-                id="academy-title"
-                placeholder="e.g. Data Science Academy"
-                value={createAcademyForm.title}
-                onChange={(e) =>
-                  setCreateAcademyForm((prev) => ({ ...prev, title: e.target.value }))
-                }
-                className="w-full"
-              />
-            </div>
-            {/* Subtitle */}
-            <div className="space-y-2">
-              <Label htmlFor="academy-subtitle" className="text-sm font-medium text-gray-700">
-                Subtitle
-              </Label>
-              <Input
-                id="academy-subtitle"
-                placeholder="e.g. Learn data science from industry experts"
-                value={createAcademyForm.subtitle}
-                onChange={(e) =>
-                  setCreateAcademyForm((prev) => ({ ...prev, subtitle: e.target.value }))
-                }
-                className="w-full"
-              />
-            </div>
-            {/* Membership Pricing */}
-            <div className="space-y-2">
-              <Label htmlFor="academy-pricing" className="text-sm font-medium text-gray-700">
-                Membership Pricing
-              </Label>
-              <Input
-                id="academy-pricing"
-                placeholder="e.g. $9.99/month or Free"
-                value={createAcademyForm.membershipPricing}
-                onChange={(e) =>
-                  setCreateAcademyForm((prev) => ({ ...prev, membershipPricing: e.target.value }))
-                }
-                className="w-full"
-              />
-            </div>
-          </div>
-          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 pt-0">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsCreateAcademyDialogOpen(false)
-                setCreateAcademyForm({ imageFile: null, imagePreview: null, title: "", subtitle: "", membershipPricing: "" })
-              }}
-              className="w-full sm:w-auto px-4 py-2 text-sm font-medium border-gray-300 text-gray-700 hover:bg-gray-50"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                if (!createAcademyForm.title.trim()) {
-                  toast.error("Please enter a title for the academy.")
-                  return
-                }
-                try {
-                  localStorage.setItem("hasAcademy", "1")
-                } catch (_) {}
-                setHasAcademy(true)
-                setIsCreateAcademyDialogOpen(false)
-                setCreateAcademyForm({ imageFile: null, imagePreview: null, title: "", subtitle: "", membershipPricing: "" })
-                toast.success("Academy created successfully", {
-                  duration: 3000,
-                  style: {
-                    background: "linear-gradient(135deg, #00A3EC 0%, #6988FF 100%)",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "12px",
-                    padding: "14px 18px",
-                    fontSize: "15px",
-                    fontWeight: "600",
-                    boxShadow: "0 4px 12px rgba(0, 163, 236, 0.3)",
-                    WebkitFontSmoothing: "antialiased",
-                    MozOsxFontSmoothing: "grayscale",
-                    WebkitTapHighlightColor: "transparent",
-                    touchAction: "manipulation",
-                  },
-                  className: "toast-success",
-                })
-              }}
-              className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90"
-            >
-              Create Academy
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        onSuccess={() => setHasAcademy(true)}
+        isEdit={isEditAcademyMode}
+      />
     </div>
   )
 }

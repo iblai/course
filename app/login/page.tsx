@@ -264,15 +264,9 @@ export default function AuthPage() {
   }, [])
 
   const getResponsiveSizes = () => {
-    const isXl = viewportWidth >= 1280
-    const leftColumnWidth = isXl ? viewportWidth / 2 : viewportWidth
     const maxHeight = Math.min(viewportHeight, 730)
-    const effectiveSize =
-      viewportWidth === 0
-        ? maxHeight
-        : isXl
-          ? Math.min(maxHeight, leftColumnWidth)
-          : maxHeight
+    // Use same size tier as single-column (mobile/tablet) for desktop left column
+    const effectiveSize = maxHeight
     const isSmallScreen = effectiveSize < 560
     const isMediumScreen = effectiveSize >= 560 && effectiveSize < 700
 
@@ -280,7 +274,7 @@ export default function AuthPage() {
       containerHeight: maxHeight,
       logoHeight: isSmallScreen ? "h-6" : isMediumScreen ? "h-8" : "h-10",
       logoMarginBottom: "mb-0",
-      logoMarginTop: "mt-4 sm:mt-5 md:mt-6",
+      logoMarginTop: "mt-0",
       titleSize: isSmallScreen ? "text-lg" : isMediumScreen ? "text-xl" : "text-2xl",
       subtitleSize: isSmallScreen ? "text-xs" : isMediumScreen ? "text-sm" : "text-base",
       buttonHeight: isSmallScreen ? "h-9" : isMediumScreen ? "h-10" : "h-12",
@@ -291,14 +285,14 @@ export default function AuthPage() {
       iconSize: isSmallScreen ? "w-4 h-4" : isMediumScreen ? "w-5 h-5" : "w-6 h-6",
       fontSize: isSmallScreen ? "text-xs" : isMediumScreen ? "text-sm" : "text-base",
       inputFontSize: "text-base",
-      titleBlockSpacing: "space-y-0.5 md:space-y-1 lg:space-y-2 pt-4 pb-4 sm:pt-6 sm:pb-6 md:pt-8 md:pb-8 lg:pt-10 lg:pb-10",
+      titleBlockSpacing: "space-y-0.5 md:space-y-1 lg:space-y-2 pt-[3vh] pb-[3vh] sm:pt-[4vh] sm:pb-[4vh] md:pt-[4vh] md:pb-[4vh] lg:pt-[5vh] lg:pb-[5vh]",
       titleBlockPadding: "py-0",
       titleHeadingSize: isSmallScreen ? "text-[22px] md:text-xl" : "text-[22px] md:text-xl lg:text-2xl xl:text-3xl",
       subtitleMargin: "mt-2.5 md:mt-1",
-      footerPaddingTop: "pt-10",
-      footerPaddingBottom: "pb-10",
+      footerPaddingTop: "pt-[5vh]",
+      footerPaddingBottom: "pb-[5vh]",
       maxFormWidth: isSmallScreen ? "max-w-[26rem]" : isMediumScreen ? "max-w-[28rem]" : "max-w-[31rem]",
-      formBlockMarginTop: "mt-4 sm:mt-5 md:mt-6",
+      formBlockMarginTop: "mt-0",
     }
   }
 
@@ -358,17 +352,19 @@ export default function AuthPage() {
         <div
           className={cn(
             "flex w-full flex-col xl:w-1/2 xl:h-full xl:min-h-0",
-            showConfirmation && "xl:min-h-[100dvh]"
+            showConfirmation && "xl:min-h-[100dvh]",
+            showConfirmation && "max-xl:min-h-[100dvh]"
           )}
         >
           <div
             className={cn(
-              "flex flex-col min-h-0 p-4 sm:p-6 md:p-4 lg:p-6 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] pb-0 overflow-y-auto scrollbar-hide xl:overflow-hidden",
-              showConfirmation ? "xl:flex-1 xl:min-h-0" : "xl:flex-1"
+              "flex flex-col min-h-0 px-4 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-0 sm:px-6 md:px-4 lg:px-6 max-xl:pb-0 xl:overflow-hidden overflow-y-auto scrollbar-hide",
+              showConfirmation ? "xl:flex-1 xl:min-h-0" : "xl:flex-1",
+              showConfirmation && "max-xl:flex-1"
             )}
           >
             {/* Logo Section */}
-            <div className={`flex justify-center flex-shrink-0 ${sizes.logoMarginBottom}`}>
+            <div className={`flex justify-center flex-shrink-0 h-[5vh] ${sizes.logoMarginBottom}`}>
               <div className={`flex items-center gap-2 ${sizes.logoMarginTop}`}>
                 <Image
                   src="/images/skillsAI-logo.webp"
@@ -385,8 +381,14 @@ export default function AuthPage() {
               </div>
             </div>
 
-            {/* Auth Container Section */}
-            <div className={cn("flex flex-col items-center pt-10 xl:pt-0", showConfirmation ? "xl:flex-1 xl:min-h-0 xl:justify-center" : "xl:flex-1 xl:justify-center")}>
+            {/* Auth Container Section - no xl:flex-1 so form-to-Read-more gap matches mobile/tablet */}
+            <div
+              className={cn(
+                "flex flex-col items-center pt-0 xl:pt-0",
+                showConfirmation && "xl:flex-1 xl:min-h-0 xl:justify-center",
+                showConfirmation && "max-xl:flex-1 max-xl:justify-center"
+              )}
+            >
               {/* Title and Subtitle Section */}
               {!showConfirmation && !showPasswordForm && (
                 <div className="flex justify-center items-center w-full">
@@ -590,17 +592,19 @@ export default function AuthPage() {
               )}
             </div>
 
-            <div className={cn("flex items-end", sizes.footerPaddingBottom, showConfirmation ? "pt-10 mt-0" : sizes.footerPaddingTop)}>
-              <div className="w-full px-2 flex justify-center">
-                <button
-                  type="button"
-                  onClick={() => document.getElementById("watch-section")?.scrollIntoView({ behavior: "smooth" })}
-                  className={`${sizes.fontSize} text-sm md:text-base font-medium text-[#00A3EC] hover:text-[#6988FF] transition-colors border border-[#00A3EC] rounded-md px-3 pt-1.5 pb-1.5 hover:border-[#6988FF]`}
-                >
-                  Read more
-                </button>
+            {!showConfirmation && (
+              <div className={cn("flex items-end gap-0 justify-start", sizes.footerPaddingBottom, sizes.footerPaddingTop)}>
+                <div className="w-full px-2 flex justify-center items-center">
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById("watch-section")?.scrollIntoView({ behavior: "smooth" })}
+                    className={`${sizes.fontSize} text-sm md:text-base font-medium text-[#00A3EC] hover:text-[#6988FF] transition-colors border border-[#00A3EC] rounded-md px-3 pt-1.5 pb-1.5 hover:border-[#6988FF]`}
+                  >
+                    Read more
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -710,6 +714,7 @@ export default function AuthPage() {
 
 
       {/* Mobile/Tablet Slides Section */}
+      {!showConfirmation && (
       <div
         id="mobile-slides-section"
         className="xl:hidden w-full py-16 px-4"
@@ -811,11 +816,15 @@ export default function AuthPage() {
           </div>
         </div>
       </div>
+      )}
 
-
-      <WatchSection />
-      <PricingSection />
-      <FAQSection />
+      {!showConfirmation && (
+        <>
+          <WatchSection />
+          <PricingSection />
+          <FAQSection />
+        </>
+      )}
 
       <ScrollToTopButton scrollToTop={scrollToTop} />
     </div>

@@ -329,6 +329,20 @@ export function AccessibilityToolbar() {
             <RotateCcw className="h-4 w-4 mr-2" />
             Reset All Accessibility Settings
           </Button>
+
+          <Button
+            variant="outline"
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                localStorage.removeItem("hasAcademy")
+                localStorage.removeItem("academyDetails")
+                window.location.reload()
+              }
+            }}
+            className="w-full border-gray-200 text-gray-600 py-2.5 mt-2 text-sm flex-shrink-0"
+          >
+            Clear saved academy (for dev)
+          </Button>
         </div>
     </div>
   )

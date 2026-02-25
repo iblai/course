@@ -154,6 +154,9 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
   const resetSettings = () => {
     setSettings(defaultSettings)
     localStorage.removeItem("accessibility-settings")
+    // Clear temporarily saved academy so dev/testing can run create-academy flow again
+    localStorage.removeItem("hasAcademy")
+    localStorage.removeItem("academyDetails")
   }
 
   return (

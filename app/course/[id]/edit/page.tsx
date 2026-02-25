@@ -27,9 +27,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { TooltipFlowbite, TooltipProvider } from "@/components/ui/tooltip-flowbite"
-import { RotateCw, Pencil, Trash2, Plus, ChevronDown, ChevronRight, FileText, Upload, Sparkles, Link2 } from "lucide-react"
+import { RotateCw, Pencil, Trash2, Plus, ChevronDown, ChevronRight, FileText, Upload, Sparkles, Link2, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getCourseMetadata } from "@/lib/course-metadata"
+import { ViewAcademyDialog } from "@/components/view-academy-dialog"
+import { CreateAcademyDialog } from "@/components/create-academy-dialog"
 import { toast } from "sonner"
 
 const DATE_INPUT_CLASS =
@@ -175,7 +177,23 @@ export default function CourseEditPage() {
       displayName: "2 Advanced AI Applications in Business",
       startDate: "",
       dueDate: "",
-      subsections: [],
+      subsections: [
+        { id: "sub-2-1", name: "2.1 Implementing AI Solutions" },
+        { id: "sub-2-2", name: "2.2 Case Studies and Best Practices" },
+        { id: "sub-2-3", name: "2.3 Measuring ROI and Impact" },
+      ],
+    },
+    {
+      id: "sec-3",
+      name: "Future Trends and Capstone",
+      displayName: "3 Future Trends and Capstone",
+      startDate: "",
+      dueDate: "",
+      subsections: [
+        { id: "sub-3-1", name: "3.1 Emerging AI Technologies" },
+        { id: "sub-3-2", name: "3.2 Ethics and Governance" },
+        { id: "sub-3-3", name: "3.3 Capstone Project Overview" },
+      ],
     },
   ])
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>("sec-1")
@@ -197,6 +215,9 @@ export default function CourseEditPage() {
   const [isPublishSuccessOpen, setIsPublishSuccessOpen] = useState(false)
   const [hasPublished, setHasPublished] = useState(false)
   const [hasAcademy, setHasAcademy] = useState(false)
+  const [viewAcademyDialogOpen, setViewAcademyDialogOpen] = useState(false)
+  const [isCreateAcademyDialogOpen, setIsCreateAcademyDialogOpen] = useState(false)
+  const [isEditAcademyMode, setIsEditAcademyMode] = useState(false)
   const mainScrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -594,14 +615,15 @@ export default function CourseEditPage() {
         <div className="flex flex-1 min-h-0 min-w-0">
           <main className="flex-1 flex flex-col min-h-0 min-w-0 transition-all duration-300 pb-[200px] md:pb-[200px] overflow-x-hidden">
             <div className="flex flex-1 min-h-0 min-w-0">
-              <div className="flex-1 min-h-0 min-w-0 w-full pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:pl-8 sm:pr-8 md:pr-20 py-4 sm:py-8 overflow-x-hidden">
-                {/* Page header: title, subtitle, Add Section */}
+              <div className="flex-1 min-h-0 min-w-0 w-full pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:pl-8 sm:pr-8 md:pr-20 pt-2 sm:pt-4 pb-4 sm:pb-8 overflow-x-hidden">
+                {/* Page header: title, Add Section */}
                 <div className="pt-4 pb-4 mb-4 sm:mb-6 border-b border-gray-100">
                   <div className="flex flex-row items-center justify-between gap-3 mb-1">
                     <div className="min-w-0 flex-1">
-                      <h1 className="text-xl sm:text-2xl font-semibold mb-1 text-[var(--sidebar-foreground)] break-words truncate">
+                      <h1 className="text-xl sm:text-2xl font-semibold mb-0.5 text-[var(--sidebar-foreground)] break-words">
                         {courseTitle}
                       </h1>
+                      <p className="text-sm text-gray-500 mt-[5px] mb-[5px]">Edit Course</p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <Button
@@ -618,10 +640,7 @@ export default function CourseEditPage() {
                       </Button>
                     </div>
                   </div>
-                  <p className="text-sm mb-4" style={{ color: "rgb(113,121,133)" }}>
-                    Edit course content
-                  </p>
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2 mt-2.5">
                     <Button
                       onClick={() => setIsAddSectionOpen(true)}
                       variant="outline"
@@ -640,15 +659,18 @@ export default function CourseEditPage() {
                     {hasAcademy ? (
                       <Button
                         variant="outline"
-                        asChild
+                        onClick={() => setViewAcademyDialogOpen(true)}
                         className="border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium px-4 py-2"
                       >
-                        <Link href="/courses">View academy</Link>
+                        View Academy
                       </Button>
                     ) : (
                       <Button
                         variant="outline"
-                        asChild
+                        onClick={() => {
+                        setIsEditAcademyMode(false)
+                        setIsCreateAcademyDialogOpen(true)
+                      }}
                         className={
                           hasPublished
                             ? "border-[#2563EB] text-[#2563EB] hover:bg-blue-50 text-sm font-medium px-4 py-2"
@@ -656,10 +678,8 @@ export default function CourseEditPage() {
                         }
                         style={!hasPublished ? { background: "linear-gradient(135deg, #00A3EC 0%, #6988FF 100%)" } : undefined}
                       >
-                        <Link href="/courses?openCreateAcademy=1">
-                          <Plus className="w-4 h-4 mr-2" />
-                          Create academy
-                        </Link>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Create academy
                       </Button>
                     )}
                     {hasPublished && (
@@ -673,24 +693,26 @@ export default function CourseEditPage() {
                   </div>
                 </div>
 
-                {/* Section tabs */}
+                {/* Section tabs — scroll horizontally when many sections */}
                 {sections.length > 0 && (
-                  <div className="flex border-b border-gray-200 mb-6 gap-0">
-                    {sections.map((section, index) => (
-                      <button
-                        key={section.id}
-                        type="button"
-                        onClick={() => setSelectedSectionId(section.id)}
-                        className={cn(
-                          "py-3 px-4 text-sm font-medium border-b-2 -mb-px transition-colors",
-                          selectedSectionId === section.id
-                            ? "border-[#2563EB] text-[#2563EB] bg-gray-100 rounded-t-[8px]"
-                            : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 border-gray-200 hover:border-gray-300"
-                        )}
-                      >
-                        {index + 1} {section.name}
-                      </button>
-                    ))}
+                  <div className="overflow-x-auto overflow-y-hidden border-b border-gray-200 mb-6 -mx-1 px-1 sm:mx-0 sm:px-0">
+                    <div className="flex border-b-0 gap-0 flex-nowrap min-w-0">
+                      {sections.map((section, index) => (
+                        <button
+                          key={section.id}
+                          type="button"
+                          onClick={() => setSelectedSectionId(section.id)}
+                          className={cn(
+                            "py-3 px-4 text-sm font-medium border-b-2 -mb-px transition-colors shrink-0 whitespace-nowrap",
+                            selectedSectionId === section.id
+                              ? "border-[#2563EB] text-[#2563EB] bg-gray-100 rounded-t-[8px]"
+                              : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 border-gray-200 hover:border-gray-300"
+                          )}
+                        >
+                          {index + 1} {section.name}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
 
@@ -980,6 +1002,25 @@ export default function CourseEditPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ViewAcademyDialog
+        open={viewAcademyDialogOpen}
+        onOpenChange={setViewAcademyDialogOpen}
+        onEdit={() => {
+          setViewAcademyDialogOpen(false)
+          setIsEditAcademyMode(true)
+          setIsCreateAcademyDialogOpen(true)
+        }}
+      />
+      <CreateAcademyDialog
+        open={isCreateAcademyDialogOpen}
+        onOpenChange={(open) => {
+          setIsCreateAcademyDialogOpen(open)
+          if (!open) setIsEditAcademyMode(false)
+        }}
+        onSuccess={() => setHasAcademy(true)}
+        isEdit={isEditAcademyMode}
+      />
 
       {/* Add Subsection Dialog */}
       <Dialog
@@ -1293,20 +1334,20 @@ export default function CourseEditPage() {
 
       {/* Course outline dialog */}
       <Dialog open={isOutlineOpen} onOpenChange={setIsOutlineOpen}>
-        <DialogContent className="sm:max-w-[560px] gap-3" maxWidth="560px">
+        <DialogContent className="sm:max-w-[800px] gap-4 min-h-[70vh] flex flex-col" maxWidth="800px">
           <DialogHeader>
             <h2 className="text-lg font-bold pr-8 text-[var(--sidebar-foreground)]">{courseTitle}</h2>
             <p className="text-sm text-muted-foreground mt-0.5">Course structure outline</p>
           </DialogHeader>
-          <div className="pt-0 pb-2 max-h-[60vh] overflow-y-auto">
+          <div className="pt-0 pb-2 flex-1 min-h-[55vh] max-h-[75vh] overflow-y-auto">
             {sections.length === 0 ? (
               <p className="text-sm text-muted-foreground">No sections in the outline yet.</p>
             ) : (
-              <div className="space-y-0 min-w-0">
+              <div className="space-y-5 min-w-0">
                 {sections.map((section, sIdx) => (
                   <div key={section.id} className="relative min-w-0">
                     <div
-                      className="flex items-start gap-2 py-2 pl-3 sm:pl-4 border-l-4 border-[#3B82F6] min-w-0"
+                      className="flex items-start gap-3 py-3 pl-3 sm:pl-4 border-l-4 border-[#3B82F6] min-w-0"
                       style={{ borderColor: "rgb(59, 130, 246)" }}
                     >
                       <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground shrink-0 w-14 sm:w-16">Section</span>
@@ -1314,10 +1355,11 @@ export default function CourseEditPage() {
                         {sIdx + 1} {section.displayName || section.name}
                       </span>
                     </div>
+                    <div className="mt-1">
                     {section.subsections.map((sub, subIdx) => (
                       <div
                         key={sub.id}
-                        className="flex items-center gap-2 ml-4 sm:ml-6 pl-3 sm:pl-4 py-1.5 border-l-4 border-gray-300 min-w-0"
+                        className="flex items-center gap-2 ml-4 sm:ml-6 pl-3 sm:pl-4 py-2 border-l-4 border-gray-300 min-w-0"
                       >
                         <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground shrink-0 w-14 sm:w-20">Subsection</span>
                         <span className="text-sm text-[var(--sidebar-foreground)] min-w-0 truncate">
@@ -1325,6 +1367,7 @@ export default function CourseEditPage() {
                         </span>
                       </div>
                     ))}
+                    </div>
                   </div>
                 ))}
               </div>

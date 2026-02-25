@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { SidebarLearner } from "@/components/platform/sidebar-learner"
 import { Header } from "@/components/platform/header"
 import { PlatformFooter } from "@/components/platform/platform-footer"
-import { Plus, Mic, ArrowUp, Square, RotateCw, ArrowLeft, Bold, Italic, Link as LinkIcon, List, ListOrdered, Upload, Sparkles, FileImage, X, Check, Copy, Volume2, Reply, Wand2 } from "lucide-react"
+import { Plus, Mic, ArrowUp, Square, RotateCw, ArrowLeft, Bold, Italic, Link as LinkIcon, List, ListOrdered, Upload, Sparkles, FileImage, X, Check, Copy, Volume2, Reply, Building2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { JumpstartTemplates } from "@/components/jumpstart-templates"
 import { Textarea } from "@/components/ui/textarea"
@@ -86,6 +86,7 @@ export default function HomePage() {
   const [creationProgress, setCreationProgress] = useState(0)
   const [completedActions, setCompletedActions] = useState<{ label: string; time: string }[]>([])
   const [showAcademyChoiceDialog, setShowAcademyChoiceDialog] = useState(false)
+  const [academyCreationPhase, setAcademyCreationPhase] = useState<"form" | "creating" | "preview">("form")
   const [createAcademyForm, setCreateAcademyForm] = useState<{
     imageFile: File | null
     imagePreview: string | null
@@ -374,7 +375,7 @@ export default function HomePage() {
       imageDescriptionPrompt: generatedCourseName,
     }))
     setShowCourseForm(true)
-    setFormStep(1)
+    setFormStep(2)
   }
 
   const handleRegenerate = () => {
@@ -449,12 +450,8 @@ export default function HomePage() {
   }
 
   const handleBack = () => {
-    if (formStep === 2) {
-      setFormStep(1)
-    } else {
-      setShowCourseForm(false)
-      setInputValue("")
-    }
+    setShowCourseForm(false)
+    setInputValue("")
   }
 
   const handleNext = () => {
@@ -527,7 +524,15 @@ export default function HomePage() {
       const courseName = courseForm.courseName || courseDetailsForm.displayName || "New course"
       pendingCourseEditRef.current = { courseId, courseName }
       setTimeout(() => {
-        setShowAcademyChoiceDialog(true)
+        const hasAcademy = typeof window !== "undefined" && localStorage.getItem("hasAcademy") === "1"
+        if (hasAcademy) {
+          const pending = pendingCourseEditRef.current
+          if (pending) {
+            router.push(`/course/${pending.courseId}/edit?name=${encodeURIComponent(pending.courseName)}`)
+          }
+        } else {
+          setShowAcademyChoiceDialog(true)
+        }
       }, 800)
     }, 7000)
   }
@@ -609,44 +614,25 @@ export default function HomePage() {
                   courseCreated={showAcademyChoiceDialog}
                 />
                 {showAcademyChoiceDialog && (
-                  <div className="mt-8 w-full min-w-0 px-1">
-                    <div className="rounded-lg border border-gray-200 p-6 sm:p-8 bg-white shadow-sm">
-                      <h2 className="text-xl font-semibold text-[var(--sidebar-foreground)] mb-1">
-                        Your course has been generated successfully.
-                      </h2>
-                      <p className="text-sm text-gray-600 mb-6">
-                        Would you like to create an academy or skip?
-                      </p>
-                      <div className="space-y-4 mb-6 max-w-md">
-                        <div className="space-y-2">
-                          <Label htmlFor="academy-image-home" className="text-sm font-medium text-gray-700">
-                            Academy Image
-                          </Label>
-                          <div className="flex items-center gap-3">
-                            {createAcademyForm.imagePreview ? (
-                              <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
-                                <Image
-                                  src={createAcademyForm.imagePreview}
-                                  alt="Academy preview"
-                                  fill
-                                  className="object-cover"
-                                />
-                                <button
-                                  type="button"
-                                  onClick={handleRemoveAcademyImage}
-                                  className="absolute top-1 right-1 w-5 h-5 rounded-full bg-gray-800/80 text-white flex items-center justify-center text-xs hover:bg-gray-800"
-                                  aria-label="Remove image"
-                                >
-                                  ×
-                                </button>
-                              </div>
-                            ) : null}
-                            <div className="min-w-0 max-w-[240px]">
-                              <Input
+                  <div className="mt-8 w-full min-w-0 px-1 flex justify-center">
+                    <div className="w-full max-w-[420px] rounded-lg border border-gray-200 bg-white overflow-hidden flex flex-col shadow-sm">
+                      {academyCreationPhase === "form" ? (
+                        <>
+                          <div className="flex-shrink-0 px-4 py-4 text-center sm:px-0 sm:py-0 sm:text-center">
+                            <h2 className="text-lg font-semibold text-[var(--sidebar-foreground)] pt-0 pb-0 sm:text-xl">
+                              Your course has been generated successfully.
+                            </h2>
+                            <p className="text-sm text-gray-600 mt-1 mb-0">
+                              Set up your academy below or skip to continue editing your course.
+                            </p>
+                          </div>
+                          <div className="flex-1 min-h-0 overflow-y-auto">
+                            <div className="flex flex-col items-center px-4 pt-[10px] py-3 pb-0 box-content sm:px-0 sm:pt-[10px] sm:pb-0">
+                              <input
                                 id="academy-image-home"
                                 type="file"
-                                accept="image/*"
-                                className="cursor-pointer file:cursor-pointer"
+                                accept="image/png,image/jpeg,image/jpg,image/webp"
+                                className="sr-only"
                                 onChange={(e) => {
                                   const file = e.target.files?.[0]
                                   if (file) {
@@ -657,100 +643,236 @@ export default function HomePage() {
                                       imagePreview: preview,
                                     }))
                                   }
+                                  e.currentTarget.value = ""
                                 }}
                               />
+                              <div className="relative w-24 h-24 rounded-full overflow-hidden border border-gray-200 bg-gray-100 flex-shrink-0">
+                                {createAcademyForm.imagePreview ? (
+                                  <Image
+                                    src={createAcademyForm.imagePreview}
+                                    alt="Academy logo"
+                                    fill
+                                    className="object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                    <Building2 className="w-10 h-10" strokeWidth={1.25} />
+                                  </div>
+                                )}
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => document.getElementById("academy-image-home")?.click()}
+                                className="mt-3 text-sm font-medium text-[#0095F6] hover:text-[#00376B] underline underline-offset-1"
+                              >
+                                Edit Logo
+                              </button>
+                              {createAcademyForm.imagePreview && (
+                                <button
+                                  type="button"
+                                  onClick={handleRemoveAcademyImage}
+                                  className="mt-1 text-xs text-gray-500 hover:text-red-600"
+                                >
+                                  Remove photo
+                                </button>
+                              )}
+                            </div>
+                            <div className="space-y-4 p-0 px-4 py-3 pb-[10px] sm:space-y-5 sm:px-0 sm:py-0 sm:pb-[10px]">
+                              <div className="space-y-1.5">
+                                <Label htmlFor="academy-title-home" className="text-[11px] font-normal text-gray-500 sm:text-xs">
+                                  Name
+                                </Label>
+                                <Input
+                                  id="academy-title-home"
+                                  placeholder="e.g. Academy name"
+                                  value={createAcademyForm.title}
+                                  onChange={(e) =>
+                                    setCreateAcademyForm((prev) => ({ ...prev, title: e.target.value }))
+                                  }
+                                  className="w-full h-11 rounded-lg border-gray-200 bg-white text-base font-normal text-[var(--sidebar-foreground)] placeholder:font-normal placeholder:text-gray-400 placeholder:text-sm sm:placeholder:text-base focus-visible:ring-1 focus-visible:ring-gray-300"
+                                />
+                              </div>
+                              <div className="space-y-1.5">
+                                <Label htmlFor="academy-subtitle-home" className="text-[11px] font-normal text-gray-500 sm:text-xs">
+                                  Short description
+                                </Label>
+                                <div className="relative">
+                                  <Textarea
+                                    id="academy-subtitle-home"
+                                    placeholder="e.g. Learn from industry experts"
+                                    value={createAcademyForm.subtitle}
+                                    rows={2}
+                                    onChange={(e) => {
+                                      const text = e.target.value
+                                      const words = text.trim().split(/\s+/).filter(Boolean)
+                                      if (words.length <= 20) {
+                                        setCreateAcademyForm((prev) => ({ ...prev, subtitle: text }))
+                                      } else {
+                                        const truncated = words.slice(0, 20).join(" ")
+                                        setCreateAcademyForm((prev) => ({ ...prev, subtitle: truncated }))
+                                      }
+                                    }}
+                                    className="w-full min-h-[60px] max-h-[60px] rounded-lg border-gray-200 bg-white text-base font-normal text-[var(--sidebar-foreground)] placeholder:font-normal placeholder:text-gray-400 placeholder:text-sm sm:placeholder:text-base focus-visible:ring-1 focus-visible:ring-gray-300 pr-16 resize-none overflow-y-auto"
+                                  />
+                                  <span className="absolute bottom-2 right-3 text-[11px] font-normal text-gray-400 sm:text-xs">
+                                    {createAcademyForm.subtitle.trim().split(/\s+/).filter(Boolean).length} / 20 words
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="space-y-1.5">
+                                <Label htmlFor="academy-pricing-home" className="text-[11px] font-normal text-gray-500 sm:text-xs">
+                                  Membership price
+                                </Label>
+                                <Input
+                                  id="academy-pricing-home"
+                                  type="text"
+                                  inputMode="decimal"
+                                  placeholder="e.g. $9.99"
+                                  value={createAcademyForm.membershipPricing}
+                                  onChange={(e) => {
+                                    const v = e.target.value.replace(/[^0-9.]/g, "")
+                                    const parts = v.split(".")
+                                    const filtered = parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : v
+                                    setCreateAcademyForm((prev) => ({ ...prev, membershipPricing: filtered }))
+                                  }}
+                                  className="w-full h-11 rounded-lg border-gray-200 bg-white text-base font-normal text-[var(--sidebar-foreground)] placeholder:font-normal placeholder:text-gray-400 placeholder:text-sm sm:placeholder:text-base focus-visible:ring-1 focus-visible:ring-gray-300"
+                                />
+                              </div>
                             </div>
                           </div>
+                          <div className="flex-shrink-0 flex flex-col-reverse sm:flex-row sm:justify-end gap-2 px-4 pb-0 pt-3 border-t border-gray-100 sm:px-6 sm:pb-0 sm:pt-0">
+                            <Button
+                              variant="outline"
+                              onClick={() => {
+                                const pending = pendingCourseEditRef.current
+                                if (pending) {
+                                  try {
+                                    localStorage.setItem("hasAcademy", "0")
+                                  } catch (_) {}
+                                  pendingCourseEditRef.current = null
+                                  router.push(`/course/${pending.courseId}/edit?name=${encodeURIComponent(pending.courseName)}`)
+                                  // Don't reset state — avoids flashing home view before navigation completes
+                                }
+                              }}
+                              className="px-4 py-2 text-sm font-medium border-gray-200 text-gray-700 hover:bg-gray-50 rounded-lg"
+                            >
+                              Skip
+                            </Button>
+                            <Button
+                              onClick={async () => {
+                                if (!createAcademyForm.title.trim()) {
+                                  toast.error("Please enter a title for the academy.")
+                                  return
+                                }
+                                let imageDataUrl: string | undefined
+                                if (createAcademyForm.imageFile) {
+                                  try {
+                                    imageDataUrl = await new Promise<string>((resolve, reject) => {
+                                      const r = new FileReader()
+                                      r.onload = () => resolve(r.result as string)
+                                      r.onerror = reject
+                                      r.readAsDataURL(createAcademyForm.imageFile!)
+                                    })
+                                  } catch (_) {}
+                                }
+                                try {
+                                  localStorage.setItem("hasAcademy", "1")
+                                  localStorage.setItem(
+                                    "academyDetails",
+                                    JSON.stringify({
+                                      title: createAcademyForm.title,
+                                      subtitle: createAcademyForm.subtitle,
+                                      membershipPricing: createAcademyForm.membershipPricing,
+                                      ...(imageDataUrl && { imageDataUrl }),
+                                    })
+                                  )
+                                } catch (_) {}
+                                setAcademyCreationPhase("creating")
+                                setTimeout(() => setAcademyCreationPhase("preview"), 2000)
+                              }}
+                              className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 rounded-lg"
+                            >
+                              Create Academy
+                            </Button>
+                          </div>
+                        </>
+                      ) : academyCreationPhase === "creating" ? (
+                        <div className="py-8 flex flex-col items-center justify-center text-center">
+                          <div className="w-14 h-14 rounded-full border-4 border-[#00A3EC]/30 border-t-[#00A3EC] animate-spin mb-4" />
+                          <h2 className="text-xl font-semibold text-[var(--sidebar-foreground)] mb-1">
+                            Academy getting created...
+                          </h2>
+                          <p className="text-sm text-gray-600">Setting up your academy. This will only take a moment.</p>
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="academy-title-home" className="text-sm font-medium text-gray-700">
-                            Title
-                          </Label>
-                          <Input
-                            id="academy-title-home"
-                            placeholder="e.g. Data Science Academy"
-                            value={createAcademyForm.title}
-                            onChange={(e) =>
-                              setCreateAcademyForm((prev) => ({ ...prev, title: e.target.value }))
-                            }
-                            className="w-full"
-                          />
+                      ) : (
+                        /* preview */
+                        <div className="space-y-6">
+                          <h2 className="text-xl font-semibold text-[var(--sidebar-foreground)] mb-1">
+                            Your academy is ready
+                          </h2>
+                          <p className="text-sm text-gray-600 mb-4">
+                            Here’s how your academy looks:
+                          </p>
+                          <div
+                            className="rounded-2xl border border-gray-200/80 overflow-hidden bg-white max-w-md shadow-lg"
+                            style={{ boxShadow: "0 8px 30px rgba(0,163,236,0.08), 0 2px 8px rgba(0,0,0,0.04)" }}
+                          >
+                            <div
+                              className="px-6 pt-6 pb-5 bg-gradient-to-br from-[#E8F7FE] via-[#EEF4FF] to-[#EEF0FF]"
+                              style={{ minHeight: "120px" }}
+                            >
+                              <div className="flex items-start gap-4">
+                                {createAcademyForm.imagePreview ? (
+                                  <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border border-white/60 bg-white flex-shrink-0 shadow-sm">
+                                    <Image
+                                      src={createAcademyForm.imagePreview}
+                                      alt="Academy logo"
+                                      fill
+                                      className="object-cover"
+                                    />
+                                  </div>
+                                ) : (
+                                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-white/90 border border-white/60 flex items-center justify-center flex-shrink-0 shadow-sm">
+                                    <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-[#00A3EC] to-[#6988FF] bg-clip-text text-transparent">
+                                      {createAcademyForm.title?.charAt(0) || "A"}
+                                    </span>
+                                  </div>
+                                )}
+                                <div className="min-w-0 flex-1 pt-0.5">
+                                  <p className="text-xs font-medium uppercase tracking-wider text-[#00A3EC]/80 mb-1">Academy</p>
+                                  <h3 className="text-lg font-semibold text-[var(--sidebar-foreground)] leading-tight break-words">
+                                    {createAcademyForm.title || "My Academy"}
+                                  </h3>
+                                  {createAcademyForm.subtitle ? (
+                                    <p className="text-sm text-gray-600 mt-2 line-clamp-2 leading-snug">{createAcademyForm.subtitle}</p>
+                                  ) : null}
+                                </div>
+                              </div>
+                            </div>
+                            {createAcademyForm.membershipPricing ? (
+                              <div className="px-6 py-3 bg-gray-50/80 border-t border-gray-100 flex items-center justify-between">
+                                <span className="text-sm text-gray-500">Membership</span>
+                                <span className="text-sm font-semibold text-[#00A3EC]">${createAcademyForm.membershipPricing}<span className="font-normal text-gray-500">/month</span></span>
+                              </div>
+                            ) : null}
+                          </div>
+                          <div className="flex justify-start">
+                            <Button
+                              onClick={() => {
+                                const pending = pendingCourseEditRef.current
+                                if (pending) {
+                                  pendingCourseEditRef.current = null
+                                  router.push(`/course/${pending.courseId}/edit?name=${encodeURIComponent(pending.courseName)}`)
+                                  // Don't reset state here — avoids flashing home view before navigation completes
+                                }
+                              }}
+                              className="w-full sm:w-auto px-6 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90"
+                            >
+                              Continue editing the course
+                            </Button>
+                          </div>
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="academy-subtitle-home" className="text-sm font-medium text-gray-700">
-                            Subtitle
-                          </Label>
-                          <Input
-                            id="academy-subtitle-home"
-                            placeholder="e.g. Learn data science from industry experts"
-                            value={createAcademyForm.subtitle}
-                            onChange={(e) =>
-                              setCreateAcademyForm((prev) => ({ ...prev, subtitle: e.target.value }))
-                            }
-                            className="w-full"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="academy-pricing-home" className="text-sm font-medium text-gray-700">
-                            Membership subscription
-                          </Label>
-<Input
-                                id="academy-pricing-home"
-                                type="text"
-                                inputMode="decimal"
-                                placeholder="e.g. 9.99"
-                                value={createAcademyForm.membershipPricing}
-                                onChange={(e) => {
-                                  const v = e.target.value.replace(/[^0-9.]/g, "")
-                                  const parts = v.split(".")
-                                  const filtered = parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : v
-                                  setCreateAcademyForm((prev) => ({ ...prev, membershipPricing: filtered }))
-                                }}
-                                className="w-full"
-                              />
-                        </div>
-                      </div>
-                      <div className="flex flex-col-reverse sm:flex-row gap-2">
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            setShowAcademyChoiceDialog(false)
-                            setIsCreatingCourse(false)
-                            setShowCourseForm(false)
-                            setFormStep(1)
-                            setInputValue("")
-                            const pending = pendingCourseEditRef.current
-                            if (pending) {
-                              pendingCourseEditRef.current = null
-                              router.push(`/course/${pending.courseId}/edit?name=${encodeURIComponent(pending.courseName)}`)
-                            }
-                          }}
-                          className="border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium px-4 py-2"
-                        >
-                          Skip
-                        </Button>
-                        <Button
-                          onClick={() => {
-                            if (!createAcademyForm.title.trim()) {
-                              toast.error("Please enter a title for the academy.")
-                              return
-                            }
-                            try {
-                              localStorage.setItem("hasAcademy", "1")
-                            } catch (_) {}
-                            setCreateAcademyForm({ imageFile: null, imagePreview: null, title: "", subtitle: "", membershipPricing: "" })
-                            toast.success("Academy created successfully", successToastStyle)
-                            const pending = pendingCourseEditRef.current
-                            if (pending) {
-                              pendingCourseEditRef.current = null
-                              router.push(`/course/${pending.courseId}/edit?name=${encodeURIComponent(pending.courseName)}`)
-                            }
-                          }}
-                          className="bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white text-sm font-medium px-4 py-2"
-                        >
-                          Create Academy
-                        </Button>
-                      </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -906,18 +1028,6 @@ export default function HomePage() {
                     <div className="flex items-center justify-between gap-2 px-3 sm:px-4 border-gray-200 rounded-b-2xl py-3 min-w-0">
                       <TooltipProvider>
                         <div className="flex items-center gap-1.5 flex-shrink-0">
-                          <TooltipFlowbite content="Create a course" position="top">
-                            <button
-                              type="button"
-                              onClick={() => setShowCourseForm(true)}
-                              className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-gray-100 border border-gray-200"
-                              style={{ color: "rgb(113,121,133)" }}
-                              aria-label="Create a course"
-                            >
-                              <Wand2 className="w-4 h-4" />
-                              <span className="hidden min-[360px]:inline">Create a course</span>
-                            </button>
-                          </TooltipFlowbite>
                           <TooltipFlowbite content="Add Source" position="top">
                             <button
                               onClick={() => setIsAddSourcesDialogOpen(true)}
@@ -986,112 +1096,8 @@ export default function HomePage() {
               </>
                 );
               })()
-            ) : formStep === 1 ? (
-              /* Step 1: Course Creation Form */
-              <div className="rounded-lg border border-gray-200 p-4 sm:p-6 md:p-8 shadow-sm w-full max-w-full min-w-0" style={{ backgroundColor: "#F9FAFB" }}>
-                <h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6" style={{ color: "rgb(113,121,133)" }}>
-                  Create a new course
-                </h2>
-
-                <div className="space-y-4 sm:space-y-6">
-                  {/* Course name */}
-                  <div className="space-y-2">
-                    <Label htmlFor="course-name" className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
-                      Course name
-                    </Label>
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <Input
-                        id="course-name"
-                        value={courseForm.courseName}
-                        onChange={(e) => setCourseForm({ ...courseForm, courseName: e.target.value })}
-                        className="flex-1 bg-white"
-                      />
-                      <Button
-                        onClick={handleRegenerate}
-                        variant="outline"
-                        className="px-4 py-2 text-sm font-medium border-gray-300 text-gray-700 hover:bg-gray-50 whitespace-nowrap"
-                        disabled={isRegenerating}
-                      >
-                        <RotateCw
-                          className={cn("w-4 h-4 mr-2", isRegenerating && "animate-spin")}
-                        />
-                        Regenerate
-                      </Button>
-                    </div>
-                    <p className="text-xs text-gray-500">
-                      The public display name for your course. This cannot be changed, but you can set a different display name in advanced settings later.
-                    </p>
-                  </div>
-
-                  {/* Organization */}
-                  <div className="space-y-2">
-                    <Label htmlFor="organization" className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
-                      Organization
-                    </Label>
-                    <Input
-                      id="organization"
-                      value={courseForm.organization}
-                      disabled
-                      className="bg-white border-gray-200 cursor-not-allowed"
-                    />
-                    <p className="text-xs text-gray-500">
-                      Note: The organization is automatically set to your username and cannot be changed. This is part of the course URL.
-                    </p>
-                  </div>
-
-                  {/* Course number */}
-                  <div className="space-y-2">
-                    <Label htmlFor="course-number" className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
-                      Course number
-                    </Label>
-                    <Input
-                      id="course-number"
-                      value={courseForm.courseNumber}
-                      onChange={(e) => setCourseForm({ ...courseForm, courseNumber: e.target.value })}
-                      className="uppercase bg-white"
-                    />
-                    <p className="text-xs text-gray-500">
-                      Note: This is part of your course URL, so no spaces or special characters are allowed and it cannot be changed.
-                    </p>
-                  </div>
-
-                  {/* Course run */}
-                  <div className="space-y-2">
-                    <Label htmlFor="course-run" className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
-                      Course run
-                    </Label>
-                    <Input
-                      id="course-run"
-                      value={courseForm.courseRun}
-                      onChange={(e) => setCourseForm({ ...courseForm, courseRun: e.target.value })}
-                      className="bg-white"
-                    />
-                    <p className="text-xs text-gray-500">
-                      Note: This is part of your course URL, so no spaces or special characters are allowed and it cannot be changed.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6 sm:mt-8">
-                  <Button
-                    variant="outline"
-                    onClick={handleBack}
-                    className="w-full sm:w-auto px-6 py-2 text-sm font-medium border-gray-300 text-gray-700 hover:bg-gray-50"
-                  >
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back
-                  </Button>
-                  <Button
-                    onClick={handleNext}
-                    className="w-full sm:w-auto px-6 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90"
-                  >
-                    Next
-                  </Button>
-                </div>
-              </div>
             ) : (
-              /* Step 2: Edit Course Details Form */
+              /* Edit Course Details Form */
               <div className="rounded-lg border border-gray-200 p-4 sm:p-6 md:p-8 shadow-sm w-full max-w-full min-w-0" style={{ backgroundColor: "#F9FAFB" }}>
                 <h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6" style={{ color: "rgb(113,121,133)" }}>
                   Edit Course Details
