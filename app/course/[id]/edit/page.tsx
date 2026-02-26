@@ -253,6 +253,7 @@ export default function CourseEditPage() {
   const [generatingSubsectionId, setGeneratingSubsectionId] = useState<string | null>(null)
   const [generatingUnitId, setGeneratingUnitId] = useState<string | null>(null)
   const [isEditSubsectionOpen, setIsEditSubsectionOpen] = useState(false)
+  const [showDeleteUnitConfirm, setShowDeleteUnitConfirm] = useState(false)
   const [editingSubsectionId, setEditingSubsectionId] = useState<string | null>(null)
   const [editingSubsectionParentId, setEditingSubsectionParentId] = useState<string | null>(null)
   const [editSubsectionDisplayName, setEditSubsectionDisplayName] = useState("")
@@ -1251,6 +1252,7 @@ export default function CourseEditPage() {
           if (!open) {
             setEditingSubsectionId(null)
             setEditingSubsectionParentId(null)
+            setShowDeleteUnitConfirm(false)
             setNewBlockTitle("")
             setNewBlockType("html")
             setNewBlockHtml("")
@@ -1377,7 +1379,7 @@ export default function CourseEditPage() {
             <div className="flex flex-row gap-2 sm:mr-auto min-w-0 shrink-0">
               <Button
                 variant="outline"
-                onClick={handleDeleteSubsection}
+                onClick={() => setShowDeleteUnitConfirm(true)}
                 className="px-4 py-2 text-sm font-medium bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100 shrink-0"
               >
                 Delete
@@ -1402,6 +1404,46 @@ export default function CourseEditPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Delete Unit confirmation */}
+      <Dialog
+        open={showDeleteUnitConfirm}
+        onOpenChange={(open) => {
+          if (!open) setShowDeleteUnitConfirm(false)
+        }}
+      >
+        <DialogContent className="sm:max-w-[480px] p-3 sm:p-4 gap-3" maxWidth="480px">
+          <DialogHeader className="mb-0">
+            <DialogTitle className="text-xl font-semibold text-[var(--sidebar-foreground)]">
+              Delete Unit
+            </DialogTitle>
+            <p className="text-sm text-gray-500 mt-0.5">This action cannot be undone.</p>
+          </DialogHeader>
+          <div className="pt-0 pb-2">
+            <p className="text-sm text-gray-700 leading-relaxed">
+              Are you sure you want to delete this unit?
+            </p>
+          </div>
+          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 pt-0">
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteUnitConfirm(false)}
+              className="w-full sm:w-auto px-4 py-2 text-sm font-medium border-gray-300 text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                handleDeleteSubsection()
+                setShowDeleteUnitConfirm(false)
+              }}
+              className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90"
+            >
+              Delete Unit
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Course outline dialog */}
       <Dialog open={isOutlineOpen} onOpenChange={setIsOutlineOpen}>
         <DialogContent className="sm:max-w-[800px] gap-4 min-h-[70vh] flex flex-col" maxWidth="800px">
@@ -1413,26 +1455,26 @@ export default function CourseEditPage() {
             {sections.length === 0 ? (
               <p className="text-sm text-muted-foreground">No sections in the outline yet.</p>
             ) : (
-              <div className="space-y-5 min-w-0">
+              <div className="space-y-5 min-w-0 overflow-hidden">
                 {sections.map((section, sIdx) => (
-                  <div key={section.id} className="relative min-w-0">
+                  <div key={section.id} className="relative min-w-0 overflow-hidden">
                     <div
-                      className="flex items-start gap-3 py-3 pl-3 sm:pl-4 border-l-4 border-[#3B82F6] min-w-0"
+                      className="flex items-center gap-2 py-3 pl-2 sm:pl-4 pr-2 border-l-4 border-[#3B82F6] min-w-0 overflow-hidden"
                       style={{ borderColor: "rgb(59, 130, 246)" }}
                     >
-                      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground shrink-0 w-14 sm:w-16">Section</span>
-                      <span className="text-sm font-medium text-[var(--sidebar-foreground)] min-w-0 truncate">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground shrink-0 w-12 sm:w-16">Section</span>
+                      <span className="text-sm font-medium text-[var(--sidebar-foreground)] min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
                         {sIdx + 1} {section.displayName || section.name}
                       </span>
                     </div>
-                    <div className="mt-1">
+                    <div className="mt-1 min-w-0 overflow-hidden">
                     {section.subsections.map((sub, subIdx) => (
                       <div
                         key={sub.id}
-                        className="flex items-center gap-2 ml-4 sm:ml-6 pl-3 sm:pl-4 py-2 border-l-4 border-gray-300 min-w-0"
+                        className="flex items-center gap-2 ml-2 sm:ml-6 pl-2 sm:pl-4 pr-2 py-2 border-l-4 border-gray-300 min-w-0 overflow-hidden"
                       >
-                        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground shrink-0 w-14 sm:w-20">Subsection</span>
-                        <span className="text-sm text-[var(--sidebar-foreground)] min-w-0 truncate">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground shrink-0 w-12 sm:w-20">Subsection</span>
+                        <span className="text-sm text-[var(--sidebar-foreground)] min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
                           {sIdx + 1}.{subIdx + 1} {sub.name}
                         </span>
                       </div>
@@ -1606,7 +1648,7 @@ export default function CourseEditPage() {
       >
         <DialogContent className="sm:max-w-[480px] p-3 sm:p-4 gap-3" maxWidth="480px">
           <DialogHeader className="mb-0">
-            <DialogTitle className="text-xl font-semibold text-[var(--sidebar-foreground)]">
+            <DialogTitle className="text-xl font-semibold text-[var(--sidebar-foreground)] pb-2.5">
               Delete Section
             </DialogTitle>
             <p className="text-sm text-gray-500 mt-0.5">This action cannot be undone</p>
@@ -1617,19 +1659,19 @@ export default function CourseEditPage() {
               <span className="font-semibold text-[var(--sidebar-foreground)]">{sectionToDelete?.name}</span>?
             </p>
           </div>
-          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 pt-0">
+          <DialogFooter className="flex flex-row flex-wrap gap-2 pt-0">
             <Button
               variant="outline"
               onClick={() => setSectionToDelete(null)}
-              className="w-full sm:w-auto px-4 py-2 text-sm font-medium border-gray-300 text-gray-700 hover:bg-gray-50"
+              className="w-full sm:w-auto px-4 py-2 text-sm font-medium border-gray-300 text-gray-700 hover:bg-gray-50 shrink-0"
             >
               Cancel
             </Button>
             <Button
               onClick={() => sectionToDelete && handleDeleteSection(sectionToDelete.id)}
-              className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90"
+              className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 shrink-0"
             >
-              Delete Section
+              Delete
             </Button>
           </DialogFooter>
         </DialogContent>

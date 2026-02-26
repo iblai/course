@@ -595,7 +595,11 @@ export default function HomePage() {
             {isCreatingCourse ? (
               <>
                 <CreatingCourseProgress
-                  courseName={courseDetailsForm.displayName || courseForm.courseName || "New course"}
+                  courseName={
+                    showAcademyChoiceDialog
+                      ? "Your course has been generated successfully."
+                      : courseDetailsForm.displayName || courseForm.courseName || "New course"
+                  }
                   creationStep={creationStep}
                   creationProgress={creationProgress}
                   completedActions={completedActions}

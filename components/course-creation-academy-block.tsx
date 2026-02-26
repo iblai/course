@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import Image from "next/image"
-import { Building2, Check, Pencil, Share2, Sparkles } from "lucide-react"
+import { Building2, Pencil, Settings, Share2, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -144,7 +144,9 @@ export function CourseCreationAcademyBlock({
       )
     } catch (_) {}
     setAcademyCreationPhase("creating")
-    setTimeout(() => setAcademyCreationPhase("preview"), 2000)
+    setTimeout(() => {
+      onContinueToCourse?.()
+    }, 2000)
   }
 
   const handleSaveChanges = async () => {
@@ -209,14 +211,14 @@ export function CourseCreationAcademyBlock({
               ) : (
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#eff6ff] border border-[#bfdbfe] flex items-center justify-center">
-                    <Check className="w-5 h-5 text-blue-600" strokeWidth={2.5} />
+                    <Settings className="w-5 h-5 text-blue-600" strokeWidth={2.5} />
                   </div>
                   <div className="min-w-0">
                     <h2 className="text-lg sm:text-xl font-semibold text-[var(--sidebar-foreground)]">
-                      Your course has been generated successfully.
+                      Set up your Academy
                     </h2>
                     <p className="text-sm text-gray-600 mt-1">
-                      Set up your academy below or skip to continue editing your course.
+                      Provide your academy details, or skip and customize them later.
                     </p>
                   </div>
                 </div>

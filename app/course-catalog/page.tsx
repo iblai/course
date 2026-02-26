@@ -1,16 +1,18 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, Share2, Link2 } from "lucide-react"
+import { Search, Share2, Link2, Plus } from "lucide-react"
 import Image from "next/image"
 import { toast } from "sonner"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { SidebarLearner } from "@/components/platform/sidebar-learner"
 import { Header } from "@/components/platform/header"
 import { PlatformFooter } from "@/components/platform/platform-footer"
 import { DocumentSidebar } from "@/components/document-sidebar"
-
 import { VoiceColumn } from "@/components/voice-column"
+import { Button } from "@/components/ui/button"
+import { ViewAcademyDialog } from "@/components/view-academy-dialog"
+import { CreateAcademyDialog } from "@/components/create-academy-dialog"
 import { cn } from "@/lib/utils"
 import "@/styles/colors.css"
 
@@ -24,7 +26,26 @@ function CourseCatalogContent() {
   const [isVoiceSidebarOpen, setIsVoiceSidebarOpen] = useState(false)
 
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [isLoggedIn, setIsLoggedIn] = useState(true)
+  const [viewAcademyDialogOpen, setViewAcademyDialogOpen] = useState(false)
+  const [isCreateAcademyDialogOpen, setIsCreateAcademyDialogOpen] = useState(false)
+  const [isEditAcademyMode, setIsEditAcademyMode] = useState(false)
+  const [hasAcademy, setHasAcademy] = useState(false)
+
+  useEffect(() => {
+    try {
+      setHasAcademy(typeof window !== "undefined" && localStorage.getItem("hasAcademy") === "1")
+    } catch (_) {}
+  }, [])
+
+  useEffect(() => {
+    if (searchParams.get("openCreateAcademy") === "1") {
+      setIsEditAcademyMode(false)
+      setIsCreateAcademyDialogOpen(true)
+      router.replace("/course-catalog", { scroll: false })
+    }
+  }, [searchParams, router])
 
   useEffect(() => {
     const checkMobile = () => {
@@ -250,9 +271,9 @@ function CourseCatalogContent() {
             <div className="flex">
               {/* Left side - main content */}
               <div className="flex-1 px-5 sm:px-2 py-4 sm:py-8 w-full sm:pl-8 sm:pr-8 md:pr-20">
-                {/* Search Bar */}
-                <div className="mb-6 sm:mb-8 max-w-md">
-                  <div className="relative">
+                {/* Search Bar and View Academy */}
+                <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                  <div className="relative w-full min-w-0 sm:flex-1 sm:max-w-md">
                     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                       <Search className="w-5 h-5 text-gray-400" />
                     </div>
@@ -265,6 +286,29 @@ function CourseCatalogContent() {
                       readOnly={!isLoggedIn}
                       className="w-full pl-10 pr-4 py-2 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
+                  </div>
+                  <div className="shrink-0 sm:ml-auto">
+                    {hasAcademy ? (
+                      <Button
+                        onClick={() => setViewAcademyDialogOpen(true)}
+                        className="gap-2 text-white border-0 hover:opacity-90 w-full sm:w-auto"
+                        style={{ background: "linear-gradient(135deg, #00A3EC 0%, #6988FF 100%)" }}
+                      >
+                        View Academy
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => {
+                          setIsEditAcademyMode(false)
+                          setIsCreateAcademyDialogOpen(true)
+                        }}
+                        className="gap-2 text-white border-0 shadow-sm hover:opacity-90 w-full sm:w-auto"
+                        style={{ background: "linear-gradient(135deg, #00A3EC 0%, #6988FF 100%)" }}
+                      >
+                        <Plus className="w-4 h-4" strokeWidth={2} />
+                        Create Academy
+                      </Button>
+                    )}
                   </div>
                 </div>
 
@@ -341,6 +385,25 @@ function CourseCatalogContent() {
           )}
         </div>
       </div>
+
+      <ViewAcademyDialog
+        open={viewAcademyDialogOpen}
+        onOpenChange={setViewAcademyDialogOpen}
+        onEdit={() => {
+          setViewAcademyDialogOpen(false)
+          setIsEditAcademyMode(true)
+          setIsCreateAcademyDialogOpen(true)
+        }}
+      />
+      <CreateAcademyDialog
+        open={isCreateAcademyDialogOpen}
+        onOpenChange={(open) => {
+          setIsCreateAcademyDialogOpen(open)
+          if (!open) setIsEditAcademyMode(false)
+        }}
+        onSuccess={() => setHasAcademy(true)}
+        isEdit={isEditAcademyMode}
+      />
     </div>
   )
 }
