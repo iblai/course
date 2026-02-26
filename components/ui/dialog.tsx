@@ -74,9 +74,9 @@ const DialogContent = React.forwardRef<
           className,
         )}
         style={!fullScreen ? {
-          maxHeight: maxHeight ?? 'calc(100vh - max(2rem, env(safe-area-inset-top) + env(safe-area-inset-bottom) + 2rem))',
-          maxWidth: maxWidth ?? 'calc(100vw - max(2rem, env(safe-area-inset-left) + env(safe-area-inset-right) + 2rem))',
-          top: 'max(50%, calc(50% + env(safe-area-inset-top) / 2))',
+          maxHeight: maxHeight ?? 'calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 2rem)',
+          ...(maxWidth != null && { maxWidth }),
+          top: '50%',
         } : {
           paddingTop: 'env(safe-area-inset-top)',
           paddingBottom: 'env(safe-area-inset-bottom)',

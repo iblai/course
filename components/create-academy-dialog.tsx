@@ -36,7 +36,11 @@ export function CreateAcademyDialog({
     subtitle: string
     membershipPricing: string
   }>({ imageFile: null, imagePreview: null, title: "", subtitle: "", membershipPricing: "" })
+  const [isImageUploading, setIsImageUploading] = useState(false)
+  const [imageUploadProgress, setImageUploadProgress] = useState(0)
+  const [isSaving, setIsSaving] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const uploadProgressRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
     if (open && isEdit && typeof window !== "undefined") {
@@ -67,6 +71,13 @@ export function CreateAcademyDialog({
     }
     if (!next) {
       setCreateAcademyForm({ imageFile: null, imagePreview: null, title: "", subtitle: "", membershipPricing: "" })
+      setIsImageUploading(false)
+      setImageUploadProgress(0)
+      setIsSaving(false)
+      if (uploadProgressRef.current) {
+        clearInterval(uploadProgressRef.current)
+        uploadProgressRef.current = null
+      }
     }
     onOpenChange(next)
   }
@@ -76,11 +87,63 @@ export function CreateAcademyDialog({
     setCreateAcademyForm((prev) => ({ ...prev, imageFile: null, imagePreview: null }))
   }
 
+  const handleLogoFileChange = (file: File | undefined) => {
+    if (!file) return
+    if (createAcademyForm.imagePreview?.startsWith("blob:")) {
+      URL.revokeObjectURL(createAcademyForm.imagePreview)
+    }
+    setIsImageUploading(true)
+    setImageUploadProgress(0)
+    const duration = 800
+    const start = Date.now()
+    if (uploadProgressRef.current) clearInterval(uploadProgressRef.current)
+    uploadProgressRef.current = setInterval(() => {
+      const elapsed = Date.now() - start
+      const p = Math.min(95, (elapsed / duration) * 95)
+      setImageUploadProgress(p)
+    }, 50)
+    const reader = new FileReader()
+    reader.onload = () => {
+      if (uploadProgressRef.current) {
+        clearInterval(uploadProgressRef.current)
+        uploadProgressRef.current = null
+      }
+      setImageUploadProgress(100)
+      const dataUrl = reader.result as string
+      setTimeout(() => {
+        setCreateAcademyForm((prev) => ({
+          ...prev,
+          imageFile: file,
+          imagePreview: dataUrl,
+        }))
+        setIsImageUploading(false)
+        setImageUploadProgress(0)
+      }, 200)
+    }
+    reader.onerror = () => {
+      if (uploadProgressRef.current) {
+        clearInterval(uploadProgressRef.current)
+        uploadProgressRef.current = null
+      }
+      setIsImageUploading(false)
+      setImageUploadProgress(0)
+      toast.error("Failed to load image.")
+    }
+    reader.readAsDataURL(file)
+  }
+
+  useEffect(() => {
+    return () => {
+      if (uploadProgressRef.current) clearInterval(uploadProgressRef.current)
+    }
+  }, [])
+
   const handleSubmit = async () => {
     if (!createAcademyForm.title.trim()) {
       toast.error("Please enter a title for the academy.")
       return
     }
+    setIsSaving(true)
     let imageDataUrl: string | undefined
     if (createAcademyForm.imageFile) {
       try {
@@ -106,8 +169,10 @@ export function CreateAcademyDialog({
         })
       )
     } catch (_) {}
+    await new Promise((r) => setTimeout(r, 3000))
     handleOpenChange(false)
     setCreateAcademyForm({ imageFile: null, imagePreview: null, title: "", subtitle: "", membershipPricing: "" })
+    setIsSaving(false)
     toast.success(isEdit ? "Academy updated successfully" : "Academy created successfully", {
       duration: 3000,
       style: {
@@ -131,43 +196,16 @@ export function CreateAcademyDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[420px] flex flex-col p-0 gap-0 overflow-hidden bg-white" maxWidth="420px">
-        <DialogHeader className="flex-shrink-0 px-4 py-4 text-center sm:px-0 sm:py-0 sm:text-center">
+      <DialogContent className="max-w-[420px] sm:max-w-[560px] flex flex-col p-0 gap-0 overflow-hidden bg-white min-h-0 max-h-[calc(100dvh-2rem)] sm:min-h-[min(560px,85vh)]" maxHeight="calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 2rem)">
+        <DialogHeader className="flex-shrink-0 px-4 py-4 text-center sm:pl-0 sm:pt-0 sm:pr-6 sm:pb-4 sm:text-left border-b border-gray-100">
           <DialogTitle className="text-lg font-semibold text-[var(--sidebar-foreground)] pt-0 pb-0 sm:text-xl">
             {isEdit ? "Edit Academy" : "Create Academy"}
           </DialogTitle>
         </DialogHeader>
 
-        {/* Scrollable middle: profile + form */}
-        <div className="flex-1 min-h-0 overflow-y-auto">
-        {/* Instagram-style profile section */}
-        <div className="flex flex-col items-center px-4 pt-[10px] py-3 pb-0 box-content sm:px-0 sm:pt-[10px] sm:pb-0">
-          <div className="flex items-center justify-center">
-            {/* Academy logo (photo) */}
-            <div className="relative w-24 h-24 rounded-full overflow-hidden border border-gray-200 bg-gray-100 flex-shrink-0">
-              {createAcademyForm.imagePreview ? (
-                createAcademyForm.imagePreview.startsWith("data:") ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={createAcademyForm.imagePreview}
-                    alt="Academy logo"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <Image
-                    src={createAcademyForm.imagePreview}
-                    alt="Academy logo"
-                    fill
-                    className="object-cover"
-                  />
-                )
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-400">
-                  <Building2 className="w-10 h-10" strokeWidth={1.25} />
-                </div>
-              )}
-            </div>
-          </div>
+        {/* Desktop: same layout as course creation flow (gray block + form) */}
+        <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-0">
+        <div className="flex flex-col items-center sm:flex-row sm:items-center sm:justify-start sm:gap-6 pt-4 py-3 pb-4 sm:rounded-xl sm:bg-[#F0F2F5] sm:p-4">
           <input
             ref={fileInputRef}
             id="academy-image"
@@ -176,39 +214,88 @@ export function CreateAcademyDialog({
             className="sr-only"
             onChange={(e) => {
               const file = e.target.files?.[0]
-              if (file) {
-                const preview = URL.createObjectURL(file)
-                setCreateAcademyForm((prev) => ({
-                  ...prev,
-                  imageFile: file,
-                  imagePreview: preview,
-                }))
-              }
+              handleLogoFileChange(file)
               e.target.value = ""
             }}
           />
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="mt-3 text-sm font-medium text-[#0095F6] hover:text-[#00376B] underline underline-offset-1"
-          >
-            Edit Logo
-          </button>
-          {createAcademyForm.imagePreview && (
+          {/* Academy logo (photo) - with Instagram-style upload progress */}
+          <div className="relative w-24 h-24 rounded-full overflow-hidden border border-gray-200 bg-gray-50 flex-shrink-0">
+            {createAcademyForm.imagePreview ? (
+              createAcademyForm.imagePreview.startsWith("data:") ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={createAcademyForm.imagePreview}
+                  alt="Academy logo"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Image
+                  src={createAcademyForm.imagePreview}
+                  alt="Academy logo"
+                  fill
+                  className="object-cover"
+                />
+              )
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-gray-400">
+                <Building2 className="w-10 h-10" strokeWidth={1.25} />
+              </div>
+            )}
+            {isImageUploading && (
+              <>
+                <div className="absolute inset-0 bg-black/40 rounded-full" />
+                <div className="absolute inset-0 flex items-center justify-center rounded-full">
+                  <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="46"
+                      fill="none"
+                      stroke="rgba(255,255,255,0.3)"
+                      strokeWidth="4"
+                    />
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="46"
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                      strokeDasharray={2 * Math.PI * 46}
+                      strokeDashoffset={2 * Math.PI * 46 * (1 - imageUploadProgress / 100)}
+                      className="transition-[stroke-dashoffset] duration-75"
+                    />
+                  </svg>
+                </div>
+              </>
+            )}
+          </div>
+          <div className="mt-3 sm:mt-0 flex flex-wrap items-center justify-center sm:justify-start gap-2">
             <button
               type="button"
-              onClick={handleRemoveAcademyImage}
-              className="mt-1 text-xs text-gray-500 hover:text-red-600"
+              disabled={isImageUploading}
+              onClick={() => fileInputRef.current?.click()}
+              className="gap-1.5 px-3 py-2 text-sm font-medium border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 rounded-lg disabled:opacity-60 disabled:pointer-events-none"
             >
-              Remove photo
+              {createAcademyForm.imagePreview ? "Change Logo" : "Choose logo"}
             </button>
-          )}
+            {createAcademyForm.imagePreview && (
+              <button
+                type="button"
+                disabled={isImageUploading}
+                onClick={handleRemoveAcademyImage}
+                className="gap-1.5 px-3 py-2 text-sm font-medium border border-gray-200 text-gray-500 hover:bg-gray-50 rounded-lg disabled:opacity-60 disabled:pointer-events-none"
+              >
+                Remove photo
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Instagram-style form fields */}
-        <div className="space-y-4 p-0 px-4 pt-4 py-3 pb-[10px] sm:space-y-5 sm:px-0 sm:pt-0 sm:py-0 sm:pb-[10px]">
+        <div className="space-y-4 pt-4 py-3 pb-[10px] sm:space-y-5">
           <div className="space-y-1.5">
-            <Label htmlFor="academy-title" className="text-[11px] font-normal text-gray-500 sm:text-xs">
+            <Label htmlFor="academy-title" className="text-sm font-normal text-gray-500">
               Name
             </Label>
             <Input
@@ -222,7 +309,7 @@ export function CreateAcademyDialog({
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="academy-subtitle" className="text-[11px] font-normal text-gray-500 sm:text-xs">
+            <Label htmlFor="academy-subtitle" className="text-sm font-normal text-gray-500">
               Short description
             </Label>
             <div className="relative">
@@ -249,7 +336,7 @@ export function CreateAcademyDialog({
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="academy-pricing" className="text-[11px] font-normal text-gray-500 sm:text-xs">
+            <Label htmlFor="academy-pricing" className="text-sm font-normal text-gray-500">
               Membership price
             </Label>
             <Input
@@ -270,7 +357,7 @@ export function CreateAcademyDialog({
         </div>
         </div>
 
-        <DialogFooter className="flex-shrink-0 flex justify-end gap-2 px-4 pt-4 pb-4 pr-6 border-t border-gray-100 sm:px-6 sm:pt-0 sm:pb-0 sm:pr-0">
+        <DialogFooter className="flex-shrink-0 flex justify-end gap-2 px-4 pt-4 pb-4 pr-6 border-t border-gray-100 sm:pl-6 sm:pr-0 sm:pt-4 sm:pb-4">
           <Button
             variant="outline"
             onClick={() => handleOpenChange(false)}
@@ -280,9 +367,10 @@ export function CreateAcademyDialog({
           </Button>
           <Button
             onClick={handleSubmit}
-            className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 rounded-lg"
+            disabled={isSaving}
+            className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 rounded-lg disabled:opacity-70"
           >
-            {isEdit ? "Save" : "Create Academy"}
+            {isSaving ? (isEdit ? "Saving…" : "Creating…") : isEdit ? "Save changes" : "Create Academy"}
           </Button>
         </DialogFooter>
       </DialogContent>

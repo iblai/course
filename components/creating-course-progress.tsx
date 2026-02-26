@@ -8,7 +8,7 @@ export interface CreatingCourseProgressProps {
   creationStep: 1 | 2 | 3
   creationProgress: number
   completedActions: { label: string; time: string }[]
-  /** When true, hide the step block and show executions expanded (course created state) */
+  /** When true, hide the step block and show execution expanded (course created state) */
   courseCreated?: boolean
 }
 
@@ -39,7 +39,7 @@ export function CreatingCourseProgress({
       {!courseCreated && (
         <div className="rounded-lg border border-gray-200 p-4 sm:p-6 bg-white shadow-sm">
           <p className="text-sm font-medium text-gray-700 mb-2">
-            Step {creationStep}
+            Step {creationStep} of 3
             <span className="text-muted-foreground font-normal ml-1.5">· Estimated time: 1–2 minutes</span>
           </p>
           <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-4">
@@ -52,7 +52,7 @@ export function CreatingCourseProgress({
             Generating a course. Please stay on this page until the course is generated
           </p>
           <p className="text-sm font-medium text-[#00A3EC] mb-2">
-            Step 3: Generating course content
+            Step 3 of 3: Generating course content
           </p>
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <span>
@@ -77,7 +77,7 @@ export function CreatingCourseProgress({
           className="w-full flex items-center justify-between gap-2 px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 border-b border-gray-200 transition-colors"
         >
           <span className="text-sm font-medium text-gray-700">
-            {showExecutions ? "Hide" : "Show"} executions
+            {showExecutions ? "Hide" : "Show"} execution
           </span>
           {showExecutions ? (
             <ChevronDown className="w-4 h-4 text-gray-500 shrink-0" />
