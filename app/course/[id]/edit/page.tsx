@@ -1264,7 +1264,7 @@ export default function CourseEditPage() {
               Edit Unit
             </DialogTitle>
           </DialogHeader>
-          <div className="flex-1 min-h-0 overflow-y-auto space-y-4 border-t border-gray-100 pt-4 pb-2 min-w-0">
+          <div className="flex-1 min-h-0 overflow-y-auto space-y-4 border-t border-gray-100 pt-4 pb-2 min-w-0 px-1">
             <div className="space-y-1.5 min-w-0">
               <Label className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
                 Display Name
@@ -1562,7 +1562,7 @@ export default function CourseEditPage() {
                   value={editBlockHtml}
                   onChange={(e) => setEditBlockHtml(e.target.value)}
                   placeholder="Enter HTML content..."
-                  className="min-h-[200px] w-full min-w-0 border-gray-200 text-sm font-mono resize-y"
+                  className="min-h-[200px] w-full min-w-0 border-gray-200 text-[16px] md:text-sm font-mono resize-y"
                   rows={10}
                 />
                 <Button
