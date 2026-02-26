@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { Search, Share2, Link2, Plus } from "lucide-react"
 import Image from "next/image"
 import { toast } from "sonner"
@@ -409,5 +409,9 @@ function CourseCatalogContent() {
 }
 
 export default function CourseCatalogPage() {
-  return <CourseCatalogContent />
+  return (
+    <Suspense fallback={null}>
+      <CourseCatalogContent />
+    </Suspense>
+  )
 }
