@@ -4,6 +4,13 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Remove tap highlight / cursor indicator on click (mobile and desktop) */
+html,
+body {
+  -webkit-tap-highlight-color: transparent;
+  tap-highlight-color: transparent;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #616a76;
@@ -233,16 +240,13 @@ body.accessibility-line-height * {
   line-height: inherit;
 }
 
-/* Custom cursor + size */
+/* Custom cursor (accessibility) – body only; reset on children so no cursor indicator on every element */
 body.accessibility-custom-cursor {
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath fill='%23000' d='M4 4 L4 28 L12 22 L16 28 L20 26 L16 20 L26 20 Z'/%3E%3C/svg%3E") 4 4, auto;
-}
-body.accessibility-custom-cursor,
-body.accessibility-custom-cursor * {
-  cursor: inherit;
-}
-body.accessibility-custom-cursor {
   --accessibility-cursor-size: 24px;
+}
+body.accessibility-custom-cursor * {
+  cursor: revert;
 }
 
 /* Highlight links */
