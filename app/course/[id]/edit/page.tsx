@@ -209,6 +209,7 @@ export default function CourseEditPage() {
   const [editSectionDisplayName, setEditSectionDisplayName] = useState("")
   const [editSectionStartDate, setEditSectionStartDate] = useState("")
   const [editSectionDueDate, setEditSectionDueDate] = useState("")
+  const [editSectionNewUnitName, setEditSectionNewUnitName] = useState("")
   const [expandedSectionIds, setExpandedSectionIds] = useState<Set<string>>(new Set(["sec-1"]))
   const [isOutlineOpen, setIsOutlineOpen] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
@@ -259,6 +260,12 @@ export default function CourseEditPage() {
   const [editSubsectionHasScore, setEditSubsectionHasScore] = useState<"Yes" | "No">("No")
   const [editSubsectionFormat, setEditSubsectionFormat] = useState("")
   const [editSubsectionShowCorrectness, setEditSubsectionShowCorrectness] = useState<"Always" | "Never" | "Past due">("Always")
+  const [newBlockTitle, setNewBlockTitle] = useState("")
+  const [newBlockType, setNewBlockType] = useState<"html" | "video" | "quiz">("html")
+  const [newBlockHtml, setNewBlockHtml] = useState("")
+  const [newBlockQuizQuestion, setNewBlockQuizQuestion] = useState("")
+  const [newBlockQuizChoices, setNewBlockQuizChoices] = useState("")
+  const [newBlockQuizCorrectIndex, setNewBlockQuizCorrectIndex] = useState("0")
   const [editingBlock, setEditingBlock] = useState<{
     sectionId: string
     subsectionId: string
@@ -332,6 +339,7 @@ export default function CourseEditPage() {
     setEditSectionDisplayName(section.displayName)
     setEditSectionStartDate(section.startDate || "2030-01-01T00:30")
     setEditSectionDueDate(section.dueDate || "")
+    setEditSectionNewUnitName("")
     setIsEditSectionOpen(true)
   }
 
@@ -340,18 +348,31 @@ export default function CourseEditPage() {
     setSections((prev) =>
       prev.map((s) =>
         s.id === editingSectionId
-          ? {
-              ...s,
-              displayName: editSectionDisplayName,
-              startDate: editSectionStartDate,
-              dueDate: editSectionDueDate,
-            }
+          ? { ...s, displayName: editSectionDisplayName.trim() || s.displayName }
           : s
       )
     )
     setIsEditSectionOpen(false)
     setEditingSectionId(null)
+    setEditSectionNewUnitName("")
     toast.success("Section updated.", successToastStyle)
+  }
+
+  const handleAddUnitFromEditSection = () => {
+    const name = editSectionNewUnitName.trim()
+    if (!name || !editingSectionId) return
+    setSections((prev) =>
+      prev.map((s) =>
+        s.id === editingSectionId
+          ? {
+              ...s,
+              subsections: [...(s.subsections || []), { id: `sub-${Date.now()}`, name }],
+            }
+          : s
+      )
+    )
+    setEditSectionNewUnitName("")
+    toast.success("Unit added.", successToastStyle)
   }
 
   const handleAddSection = () => {
@@ -448,6 +469,9 @@ export default function CourseEditPage() {
     setEditSubsectionHasScore("No")
     setEditSubsectionFormat("")
     setEditSubsectionShowCorrectness("Always")
+    setNewBlockTitle("")
+    setNewBlockType("html")
+    setNewBlockHtml("")
     setIsEditSubsectionOpen(true)
   }
 
@@ -465,10 +489,60 @@ export default function CourseEditPage() {
           : s
       )
     )
-    toast.success("Subsection updated.", successToastStyle)
+    toast.success("Unit updated.", successToastStyle)
     setIsEditSubsectionOpen(false)
     setEditingSubsectionId(null)
     setEditingSubsectionParentId(null)
+  }
+
+  const handleAddBlockFromEditUnit = () => {
+    const title = newBlockTitle.trim()
+    if (!title || !editingSubsectionId || !editingSubsectionParentId) return
+    const blockId = `block-${Date.now()}`
+    const unitId = `unit-${Date.now()}`
+    const newUnit: UnitItem = {
+      id: unitId,
+      name: title,
+      blocks: [
+        {
+          id: blockId,
+          title,
+          type: newBlockType,
+          ...(newBlockType === "html" && { html: newBlockHtml || "" }),
+          ...(newBlockType === "quiz" && {
+            quiz: {
+              question: newBlockQuizQuestion.trim(),
+              choices: newBlockQuizChoices
+                .split("\n")
+                .map((c) => c.trim())
+                .filter(Boolean),
+              correctIndex: Math.max(0, parseInt(newBlockQuizCorrectIndex, 10) || 0),
+            },
+          }),
+        },
+      ],
+    }
+    setSections((prev) =>
+      prev.map((s) =>
+        s.id === editingSubsectionParentId && s.subsections.some((sub) => sub.id === editingSubsectionId)
+          ? {
+              ...s,
+              subsections: s.subsections.map((sub) =>
+                sub.id === editingSubsectionId
+                  ? { ...sub, units: [...(sub.units || []), newUnit] }
+                  : sub
+              ),
+            }
+          : s
+      )
+    )
+    setNewBlockTitle("")
+    setNewBlockType("html")
+    setNewBlockHtml("")
+    setNewBlockQuizQuestion("")
+    setNewBlockQuizChoices("")
+    setNewBlockQuizCorrectIndex("0")
+    toast.success("Block added.", successToastStyle)
   }
 
   const handleRegenerateSubsectionDisplayName = () => {
@@ -486,7 +560,7 @@ export default function CourseEditPage() {
           : s
       )
     )
-    toast.success("Subsection deleted.", successToastStyle)
+    toast.success("Unit deleted.", successToastStyle)
     setIsEditSubsectionOpen(false)
     setEditingSubsectionId(null)
     setEditingSubsectionParentId(null)
@@ -1083,13 +1157,16 @@ export default function CourseEditPage() {
       <Dialog
         open={isEditSectionOpen}
         onOpenChange={(open) => {
-          if (!open) setEditingSectionId(null)
+          if (!open) {
+            setEditingSectionId(null)
+            setEditSectionNewUnitName("")
+          }
           setIsEditSectionOpen(open)
         }}
       >
         <DialogContent className="sm:max-w-[500px] gap-3" maxWidth="500px">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-[var(--sidebar-foreground)]">
+            <DialogTitle className="text-xl font-semibold text-[var(--sidebar-foreground)] pb-2.5">
               Edit Section
             </DialogTitle>
             <p className="text-sm text-gray-500 mt-0.5">Edit section details</p>
@@ -1099,53 +1176,39 @@ export default function CourseEditPage() {
               <Label className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
                 Display Name
               </Label>
-              <div className="flex flex-wrap gap-2">
-                <Input
-                  value={editSectionDisplayName}
-                  onChange={(e) => setEditSectionDisplayName(e.target.value)}
-                  className="border-gray-200 flex-1 min-w-0"
-                />
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="shrink-0 border-gray-300 text-gray-700 hover:bg-gray-50"
-                  aria-label="Regenerate"
-                >
-                  <RotateCw className="w-4 h-4" />
-                </Button>
-              </div>
+              <Input
+                value={editSectionDisplayName}
+                onChange={(e) => setEditSectionDisplayName(e.target.value)}
+                className="border-gray-200 w-full min-w-0 bg-white"
+              />
             </div>
-            <div className={DATE_FIELD_WRAPPER_CLASS}>
-              <Label className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
-                Start Date
-              </Label>
-              <div className={DATE_INPUT_INNER_CLASS}>
+            <div className="space-y-3 border-t border-gray-100 pt-4">
+              <h3 className="text-sm font-semibold text-[var(--sidebar-foreground)]">Add Unit</h3>
+              <div className="space-y-1.5">
+                <Label className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
+                  Unit Name
+                </Label>
                 <Input
-                  type="datetime-local"
-                  value={editSectionStartDate}
-                  onChange={(e) => setEditSectionStartDate(e.target.value)}
-                  className={DATE_INPUT_CLASS}
-                  placeholder="yyyy-mm-dd, --:--"
+                  value={editSectionNewUnitName}
+                  onChange={(e) => setEditSectionNewUnitName(e.target.value)}
+                  placeholder="Enter unit name"
+                  className="border-gray-200 bg-white"
                 />
               </div>
-            </div>
-            <div className={DATE_FIELD_WRAPPER_CLASS}>
-              <Label className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
-                Due Date
-              </Label>
-              <div className={DATE_INPUT_INNER_CLASS}>
-                <Input
-                  type="datetime-local"
-                  value={editSectionDueDate}
-                  onChange={(e) => setEditSectionDueDate(e.target.value)}
-                  className={DATE_INPUT_CLASS}
-                  placeholder="yyyy-mm-dd, --:--"
-                />
-              </div>
+              <Button
+                variant="outline"
+                type="button"
+                onClick={handleAddUnitFromEditSection}
+                disabled={!editSectionNewUnitName.trim()}
+                className="border-[#2563EB] text-[#2563EB] hover:bg-blue-50"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Unit
+              </Button>
             </div>
           </div>
-          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 pt-2 border-t border-gray-100">
-            <div className="flex gap-2 sm:mr-auto order-2 sm:order-1">
+          <DialogFooter className="flex flex-row flex-wrap gap-2 pt-2 px-0 border-t border-gray-100 min-w-0">
+            <div className="flex flex-row gap-2 sm:mr-auto min-w-0 shrink-0">
               <Button
                 variant="outline"
                 onClick={() => {
@@ -1157,31 +1220,22 @@ export default function CourseEditPage() {
                     }
                   }
                 }}
-                className="px-4 py-2 text-sm font-medium border-gray-200 text-gray-600 hover:bg-gray-50"
+                className="px-4 py-2 text-sm font-medium bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100 shrink-0"
               >
                 Delete
               </Button>
-              <Button
-                onClick={() => {
-                  if (editingSectionId) setSubsectionParentId(editingSectionId)
-                  setIsAddSubsectionOpen(true)
-                }}
-                className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90"
-              >
-                Add Subsection
-              </Button>
             </div>
-            <div className="flex gap-2 order-1 sm:order-2">
+            <div className="flex flex-row gap-2 min-w-0 shrink-0">
               <Button
                 variant="outline"
                 onClick={() => setIsEditSectionOpen(false)}
-                className="w-full sm:w-auto px-4 py-2 text-sm font-medium border-gray-300 text-gray-700 hover:bg-gray-50"
+                className="px-4 py-2 text-sm font-medium border-gray-300 text-gray-700 hover:bg-gray-50 shrink-0"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleSaveEditSection}
-                className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90"
+                className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 shrink-0"
               >
                 Save Changes
               </Button>
@@ -1190,140 +1244,156 @@ export default function CourseEditPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Subsection Dialog */}
+      {/* Edit Unit Dialog */}
       <Dialog
         open={isEditSubsectionOpen}
         onOpenChange={(open) => {
           if (!open) {
             setEditingSubsectionId(null)
             setEditingSubsectionParentId(null)
+            setNewBlockTitle("")
+            setNewBlockType("html")
+            setNewBlockHtml("")
           }
           setIsEditSubsectionOpen(open)
         }}
       >
-        <DialogContent className="sm:max-w-[500px] gap-3" maxWidth="500px">
+        <DialogContent className="sm:max-w-[500px] gap-3 max-h-[90vh] flex flex-col" maxWidth="500px">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-[var(--sidebar-foreground)]">
-              Edit Subsection
+            <DialogTitle className="text-xl font-semibold text-[var(--sidebar-foreground)] pb-2.5">
+              Edit Unit
             </DialogTitle>
-            <p className="text-sm text-gray-500 mt-0.5">Edit subsection details</p>
           </DialogHeader>
-          <div className="pb-2 space-y-4 border-t border-gray-100 pt-4 min-w-0">
+          <div className="flex-1 min-h-0 overflow-y-auto space-y-4 border-t border-gray-100 pt-4 pb-2 min-w-0">
             <div className="space-y-1.5 min-w-0">
               <Label className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
                 Display Name
               </Label>
-              <div className="flex flex-wrap gap-2">
-                <Input
-                  value={editSubsectionDisplayName}
-                  onChange={(e) => setEditSubsectionDisplayName(e.target.value)}
-                  className="border-gray-200 flex-1 min-w-0 bg-white"
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="shrink-0 border-gray-300 text-gray-700 hover:bg-gray-50"
-                  onClick={handleRegenerateSubsectionDisplayName}
-                  aria-label="Regenerate"
-                >
-                  <RotateCw className="w-4 h-4 mr-1.5" />
-                  Regenerate
-                </Button>
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
-                Graded
-              </Label>
-              <Select value={editSubsectionGraded} onValueChange={(v) => setEditSubsectionGraded(v as "Yes" | "No")}>
-                <SelectTrigger className="w-full border-gray-200 bg-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="No">No</SelectItem>
-                  <SelectItem value="Yes">Yes</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
-                Has Score
-              </Label>
-              <Select value={editSubsectionHasScore} onValueChange={(v) => setEditSubsectionHasScore(v as "Yes" | "No")}>
-                <SelectTrigger className="w-full border-gray-200 bg-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="No">No</SelectItem>
-                  <SelectItem value="Yes">Yes</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
-                Format
-              </Label>
               <Input
-                value={editSubsectionFormat}
-                onChange={(e) => setEditSubsectionFormat(e.target.value)}
-                placeholder="e.g., Homework, Lab"
-                className="border-gray-200 bg-white"
+                value={editSubsectionDisplayName}
+                onChange={(e) => setEditSubsectionDisplayName(e.target.value)}
+                className="border-gray-200 w-full min-w-0 bg-white"
               />
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
-                Show Correctness
-              </Label>
-              <Select
-                value={editSubsectionShowCorrectness}
-                onValueChange={(v) => setEditSubsectionShowCorrectness(v as "Always" | "Never" | "Past due")}
+            <div className="space-y-3 border-t border-gray-100 pt-4">
+              <h3 className="text-sm font-semibold text-[var(--sidebar-foreground)]">Add Block</h3>
+              <div className="space-y-1.5">
+                <Label className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
+                  Display Name
+                </Label>
+                <Input
+                  value={newBlockTitle}
+                  onChange={(e) => setNewBlockTitle(e.target.value)}
+                  placeholder="Block title"
+                  className="border-gray-200 bg-white"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
+                  Block Type
+                </Label>
+                <Select value={newBlockType} onValueChange={(v) => setNewBlockType(v as "html" | "video" | "quiz")}>
+                  <SelectTrigger className="w-full border-gray-200 bg-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="z-[110]" position="popper">
+                    <SelectItem value="html">HTML</SelectItem>
+                    <SelectItem value="video">Video</SelectItem>
+                    <SelectItem value="quiz">Quiz(Multiple Choice)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {newBlockType === "html" && (
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
+                    HTML Content
+                  </Label>
+                  <Textarea
+                    value={newBlockHtml}
+                    onChange={(e) => setNewBlockHtml(e.target.value)}
+                    placeholder="Enter HTML content"
+                    rows={6}
+                    className="border-gray-200 bg-white resize-none"
+                  />
+                </div>
+              )}
+              {newBlockType === "quiz" && (
+                <>
+                  <div className="space-y-1.5">
+                    <Label className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
+                      Question
+                    </Label>
+                    <Input
+                      value={newBlockQuizQuestion}
+                      onChange={(e) => setNewBlockQuizQuestion(e.target.value)}
+                      placeholder="Enter the quiz question"
+                      className="border-gray-200 bg-white"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
+                      Choices (one per line)
+                    </Label>
+                    <Textarea
+                      value={newBlockQuizChoices}
+                      onChange={(e) => setNewBlockQuizChoices(e.target.value)}
+                      placeholder={"Choice 1\nChoice 2\nChoice 3"}
+                      rows={4}
+                      className="border-gray-200 bg-white resize-none"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
+                      Correct Answer Index (0-based)
+                    </Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={newBlockQuizCorrectIndex}
+                      onChange={(e) => setNewBlockQuizCorrectIndex(e.target.value)}
+                      className="border-gray-200 bg-white"
+                    />
+                  </div>
+                </>
+              )}
+              <Button
+                variant="outline"
+                type="button"
+                onClick={handleAddBlockFromEditUnit}
+                disabled={
+                  !newBlockTitle.trim() ||
+                  (newBlockType === "quiz" &&
+                    (!newBlockQuizQuestion.trim() ||
+                      !newBlockQuizChoices.split("\n").map((c) => c.trim()).filter(Boolean).length))
+                }
+                className="border-[#2563EB] text-[#2563EB] hover:bg-blue-50 hover:text-[#2563EB]"
               >
-                <SelectTrigger className="w-full border-gray-200 bg-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Always">Always</SelectItem>
-                  <SelectItem value="Never">Never</SelectItem>
-                  <SelectItem value="Past due">Past due</SelectItem>
-                </SelectContent>
-              </Select>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Block
+              </Button>
             </div>
           </div>
-          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 pt-2 border-t border-gray-100">
-            <div className="flex gap-2 sm:mr-auto order-2 sm:order-1">
+          <DialogFooter className="flex flex-row flex-wrap gap-2 pt-2 px-0 border-t border-gray-100 min-w-0 shrink-0">
+            <div className="flex flex-row gap-2 sm:mr-auto min-w-0 shrink-0">
               <Button
                 variant="outline"
                 onClick={handleDeleteSubsection}
-                className="px-4 py-2 text-sm font-medium border-gray-200 text-gray-600 hover:bg-gray-50"
+                className="px-4 py-2 text-sm font-medium bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100 shrink-0"
               >
                 Delete
               </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  if (editingSubsectionParentId) {
-                    setSubsectionParentId(editingSubsectionParentId)
-                    setIsEditSubsectionOpen(false)
-                    setIsAddSubsectionOpen(true)
-                  }
-                }}
-                className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 border-0"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Unit
-              </Button>
             </div>
-            <div className="flex gap-2 order-1 sm:order-2">
+            <div className="flex flex-row gap-2 min-w-0 shrink-0">
               <Button
                 variant="outline"
                 onClick={() => setIsEditSubsectionOpen(false)}
-                className="w-full sm:w-auto px-4 py-2 text-sm font-medium border-gray-300 text-gray-700 hover:bg-gray-50"
+                className="px-4 py-2 text-sm font-medium border-gray-300 text-gray-700 hover:bg-gray-50 shrink-0"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleSaveEditSubsection}
-                className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90"
+                className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 shrink-0"
               >
                 Save Changes
               </Button>
@@ -1509,17 +1579,17 @@ export default function CourseEditPage() {
               </div>
             )}
           </div>
-          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 pt-2 border-t border-gray-100">
+          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 pt-2 px-0 border-t border-gray-100 min-w-0">
             <Button
               variant="outline"
               onClick={handleCloseEditBlock}
-              className="w-full sm:w-auto border-gray-300 text-gray-700 hover:bg-gray-50"
+              className="w-full sm:w-auto border-gray-300 text-gray-700 hover:bg-gray-50 shrink-0"
             >
               Cancel
             </Button>
             <Button
               onClick={handleSaveEditBlock}
-              className="w-full sm:w-auto bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white"
+              className="w-full sm:w-auto bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white shrink-0"
             >
               Save Changes
             </Button>
