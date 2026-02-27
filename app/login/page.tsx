@@ -285,7 +285,7 @@ export default function AuthPage() {
       iconSize: isSmallScreen ? "w-4 h-4" : isMediumScreen ? "w-5 h-5" : "w-6 h-6",
       fontSize: isSmallScreen ? "text-xs" : isMediumScreen ? "text-sm" : "text-base",
       inputFontSize: "text-base",
-      titleBlockSpacing: "space-y-0.5 md:space-y-1 lg:space-y-2 pt-[3vh] pb-[3vh] sm:pt-[4vh] sm:pb-[4vh] md:pt-[4vh] md:pb-[4vh] lg:pt-[5vh] lg:pb-[5vh]",
+      titleBlockSpacing: "space-y-0.5 md:space-y-1 lg:space-y-2 pt-[40px] pb-[40px] sm:pt-[4vh] sm:pb-[4vh] md:pt-[4vh] md:pb-[4vh] lg:pt-[5vh] lg:pb-[5vh]",
       titleBlockPadding: "py-0",
       titleHeadingSize: isSmallScreen ? "text-lg md:text-xl" : "text-[22px] md:text-xl lg:text-2xl xl:text-3xl",
       subtitleMargin: "mt-2.5 md:mt-1",
@@ -358,7 +358,7 @@ export default function AuthPage() {
         >
           <div
             className={cn(
-              "flex flex-col min-h-0 px-4 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-6 md:px-4 lg:px-6 sm:pb-8 xl:pb-8 xl:overflow-hidden overflow-y-auto scrollbar-hide xl:min-h-0",
+              "flex flex-col min-h-0 px-4 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-0 sm:px-6 md:px-4 lg:px-6 sm:pb-8 xl:pb-8 xl:overflow-hidden overflow-y-auto scrollbar-hide xl:min-h-0",
               showConfirmation ? "xl:flex-1 xl:min-h-0" : "xl:flex-1",
               showConfirmation && "max-xl:flex-1"
             )}
