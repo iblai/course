@@ -279,7 +279,7 @@ export function SidebarLearner({
             height={32}
             className="object-contain flex-shrink-0"
           />
-          {!isCollapsed && (
+          {(!isCollapsed || isMobile) && (
               <span className="text-lg font-semibold bg-gradient-to-r from-[#00A3EC] to-[#6988FF] bg-clip-text text-transparent">
                 ibl.ai Wink
               </span>
@@ -374,24 +374,26 @@ export function SidebarLearner({
                 }}
               >
                 {item.icon && (
-                    <img
-                      src={item.icon}
-                      alt={item.label}
-                      className={cn(
-                        item.id === "invite-user"
-                          ? "w-[18px] h-[18px] flex-shrink-0 p-0 transition-colors"
-                          : "w-5 h-[19px] flex-shrink-0 p-0 transition-colors",
-                        isItemHighlighted(item) && "opacity-100"
-                      )}
-                      style={
-                        isItemHighlighted(item)
-                          ? {
-                              filter:
-                                "brightness(0) saturate(100%) invert(27%) sepia(96%) saturate(1352%) hue-rotate(202deg) brightness(98%) contrast(96%)",
-                            }
-                          : {}
-                      }
-                    />
+                    <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center">
+                      <img
+                        src={item.icon}
+                        alt={item.label}
+                        className={cn(
+                          item.id === "invite-user"
+                            ? "w-4 h-4 p-0 transition-colors"
+                            : "w-5 h-[19px] p-0 transition-colors",
+                          isItemHighlighted(item) && "opacity-100"
+                        )}
+                        style={
+                          isItemHighlighted(item)
+                            ? {
+                                filter:
+                                  "brightness(0) saturate(100%) invert(27%) sepia(96%) saturate(1352%) hue-rotate(202deg) brightness(98%) contrast(96%)",
+                              }
+                            : {}
+                        }
+                      />
+                    </span>
                   )}
                 {!isCollapsed && <span className="flex-1 text-left">{item.label}</span>}
               </Button>
@@ -410,12 +412,12 @@ export function SidebarLearner({
         })}
 
         {/* Separator before Chats / Projects */}
-        {!isCollapsed && (
+        {(!isCollapsed || isMobile) && (
           <div className="my-2 border-t" style={{ borderColor: "#D0E0FF" }} />
         )}
 
         {/* Chats Section */}
-        {!isCollapsed && (
+        {(!isCollapsed || isMobile) && (
           <div key="chats" className="mb-1">
             <Button
               variant="ghost"
@@ -430,17 +432,19 @@ export function SidebarLearner({
                 if (!expandedItems.includes("chats")) setExpandedItems((prev) => [...prev, "chats"])
               }}
             >
-              <img
-                src={`${SIDEBAR_ICONS}/chat.svg`}
-                alt=""
-                className="w-5 h-5 flex-shrink-0"
-                style={
+              <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center">
+                <img
+                  src={`${SIDEBAR_ICONS}/chat.svg`}
+                  alt=""
+                  className="w-4 h-4"
+                  style={
                   expandedItems.includes("chats") || pathname === "/chat"
                     ? { filter: "brightness(0) saturate(100%) invert(27%) sepia(96%) saturate(1352%) hue-rotate(202deg) brightness(98%) contrast(96%)" }
                     : {}
-                }
-                aria-hidden
-              />
+                  }
+                  aria-hidden
+                />
+              </span>
               <span className="flex-1 text-left">Chats</span>
               <img
                 src={expandedItems.includes("chats") || pathname === "/chat" ? `${SIDEBAR_ICONS}/chevron-down.svg` : `${SIDEBAR_ICONS}/chevron-right.svg`}
@@ -532,7 +536,7 @@ export function SidebarLearner({
                   )}
                   onClick={() => router.push("/chat?new=1")}
                 >
-                  <img src={`${SIDEBAR_ICONS}/chat.svg`} alt="Chats" className="w-5 h-5 flex-shrink-0" aria-hidden />
+                  <img src={`${SIDEBAR_ICONS}/chat.svg`} alt="Chats" className="w-4 h-4 flex-shrink-0" aria-hidden />
                 </Button>
               </div>
             </TooltipFlowbite>
@@ -563,24 +567,26 @@ export function SidebarLearner({
                 }}
               >
                 {item.icon && (
-                    <img
-                      src={item.icon}
-                      alt={item.label}
-                      className={cn(
-                        "w-5 h-[19px] flex-shrink-0 p-0 transition-colors",
-                        isItemHighlighted(item) && "opacity-100"
-                      )}
-                      style={
-                        isItemHighlighted(item)
-                          ? {
-                              filter:
-                                "brightness(0) saturate(100%) invert(27%) sepia(96%) saturate(1352%) hue-rotate(202deg) brightness(98%) contrast(96%)",
-                            }
-                          : {}
-                      }
-                    />
+                    <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center">
+                      <img
+                        src={item.icon}
+                        alt={item.label}
+                        className={cn(
+                          item.id === "projects" ? "w-4 h-4 p-0 transition-colors" : "w-5 h-[19px] p-0 transition-colors",
+                          isItemHighlighted(item) && "opacity-100"
+                        )}
+                        style={
+                          isItemHighlighted(item)
+                            ? {
+                                filter:
+                                  "brightness(0) saturate(100%) invert(27%) sepia(96%) saturate(1352%) hue-rotate(202deg) brightness(98%) contrast(96%)",
+                              }
+                            : {}
+                        }
+                      />
+                    </span>
                   )}
-                {!isCollapsed && (
+                {(!isCollapsed || isMobile) && (
                   <>
                     <span className="flex-1 text-left">{item.label}</span>
                     {item.children &&
@@ -756,24 +762,26 @@ export function SidebarLearner({
                 }}
               >
                 {item.icon && (
-                    <img
-                      src={item.icon}
-                      alt={item.label}
-                      className={cn(
-                        "w-5 h-[19px] flex-shrink-0 p-0 transition-colors",
-                        isItemHighlighted(item) && "opacity-100"
-                      )}
-                      style={
-                        isItemHighlighted(item)
-                          ? {
-                              filter:
-                                "brightness(0) saturate(100%) invert(27%) sepia(96%) saturate(1352%) hue-rotate(202deg) brightness(98%) contrast(96%)",
-                            }
-                          : {}
-                      }
-                    />
+                    <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center">
+                      <img
+                        src={item.icon}
+                        alt={item.label}
+                        className={cn(
+                          "w-4 h-4 p-0 transition-colors",
+                          isItemHighlighted(item) && "opacity-100"
+                        )}
+                        style={
+                          isItemHighlighted(item)
+                            ? {
+                                filter:
+                                  "brightness(0) saturate(100%) invert(27%) sepia(96%) saturate(1352%) hue-rotate(202deg) brightness(98%) contrast(96%)",
+                              }
+                            : {}
+                        }
+                      />
+                    </span>
                   )}
-                {!isCollapsed && (
+                {(!isCollapsed || isMobile) && (
                   <>
                     <span className="flex-1 text-left">{item.label}</span>
                     {item.children &&
@@ -915,7 +923,7 @@ export function SidebarLearner({
                       }
                     />
                   )}
-                {!isCollapsed && (
+                {(!isCollapsed || isMobile) && (
                   <>
                     <span className="flex-1 text-left">{item.label}</span>
                     {item.children &&
@@ -1081,10 +1089,10 @@ export function SidebarLearner({
   return (
     <>
       {isMobileOpen && (
-        <div className="fixed inset-0 z-40 md:hidden">
+        <div className="fixed inset-0 z-[50] md:hidden">
           <div className="fixed inset-0 bg-black/50" onClick={onMobileClose}></div>
           <TooltipProvider>
-            <div id="mobile-sidebar" className="fixed left-0 top-0 h-[100dvh] w-64 z-40 bg-white shadow-lg overflow-hidden">
+            <div id="mobile-sidebar" className="fixed left-0 top-0 h-[100dvh] w-64 z-[50] bg-white shadow-lg overflow-hidden">
               <SidebarContent isMobile={true} />
             </div>
           </TooltipProvider>
