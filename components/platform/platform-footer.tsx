@@ -9,8 +9,10 @@ import { FloatingAccessibilityButton } from "@/components/accessibility/floating
 import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 
+const HIDE_VOICE_AND_ACCESSIBILITY_BUTTONS = true
+
 export function PlatformFooter({
-  hideFloatingButtons = false,
+  hideFloatingButtons = HIDE_VOICE_AND_ACCESSIBILITY_BUTTONS,
   promptBarVisible = false,
 }: { hideFloatingButtons?: boolean; promptBarVisible?: boolean }) {
   const pathname = usePathname()
