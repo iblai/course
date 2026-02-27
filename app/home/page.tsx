@@ -1221,7 +1221,7 @@ export default function HomePage() {
 
             {/* Footer */}
             <PlatformFooter
-              hideFloatingButtons={isCreatingCourse}
+              hideFloatingButtons={true}
               promptBarVisible={hasChatMessages && !showCourseForm && !isCreatingCourse}
             />
         </main>
