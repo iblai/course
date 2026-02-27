@@ -760,7 +760,7 @@ export default function CourseEditPage() {
                         style={!hasPublished ? { background: "linear-gradient(135deg, #00A3EC 0%, #6988FF 100%)" } : undefined}
                       >
                         <Plus className="w-4 h-4 mr-2" />
-                        Create academy
+                        Create Academy
                       </Button>
                     )}
                     {hasPublished && (
