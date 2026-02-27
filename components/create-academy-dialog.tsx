@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import Image from "next/image"
 import { Building2 } from "lucide-react"
+import Cropper, { type Area } from "react-easy-crop"
 import {
   Dialog,
   DialogContent,
@@ -15,6 +16,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
+import { getCroppedImg } from "@/lib/crop-image"
 
 const ACADEMY_DETAILS_KEY = "academyDetails"
 
@@ -39,8 +41,22 @@ export function CreateAcademyDialog({
   const [isImageUploading, setIsImageUploading] = useState(false)
   const [imageUploadProgress, setImageUploadProgress] = useState(0)
   const [isSaving, setIsSaving] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const [cropOpen, setCropOpen] = useState(false)
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null)
+  const [crop, setCrop] = useState({ x: 0, y: 0 })
+  const [zoom, setZoom] = useState(1)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const uploadProgressRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const croppedAreaPixelsRef = useRef<Area | null>(null)
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener("resize", check)
+    return () => window.removeEventListener("resize", check)
+  }, [])
 
   useEffect(() => {
     if (open && isEdit && typeof window !== "undefined") {
@@ -87,49 +103,55 @@ export function CreateAcademyDialog({
     setCreateAcademyForm((prev) => ({ ...prev, imageFile: null, imagePreview: null }))
   }
 
+  const onCropComplete = useCallback((_croppedArea: Area, croppedAreaPixels: Area) => {
+    croppedAreaPixelsRef.current = croppedAreaPixels
+  }, [])
+
   const handleLogoFileChange = (file: File | undefined) => {
     if (!file) return
-    if (createAcademyForm.imagePreview?.startsWith("blob:")) {
-      URL.revokeObjectURL(createAcademyForm.imagePreview)
-    }
-    setIsImageUploading(true)
-    setImageUploadProgress(0)
-    const duration = 800
-    const start = Date.now()
-    if (uploadProgressRef.current) clearInterval(uploadProgressRef.current)
-    uploadProgressRef.current = setInterval(() => {
-      const elapsed = Date.now() - start
-      const p = Math.min(95, (elapsed / duration) * 95)
-      setImageUploadProgress(p)
-    }, 50)
     const reader = new FileReader()
     reader.onload = () => {
-      if (uploadProgressRef.current) {
-        clearInterval(uploadProgressRef.current)
-        uploadProgressRef.current = null
-      }
-      setImageUploadProgress(100)
       const dataUrl = reader.result as string
-      setTimeout(() => {
-        setCreateAcademyForm((prev) => ({
-          ...prev,
-          imageFile: file,
-          imagePreview: dataUrl,
-        }))
-        setIsImageUploading(false)
-        setImageUploadProgress(0)
-      }, 200)
-    }
-    reader.onerror = () => {
-      if (uploadProgressRef.current) {
-        clearInterval(uploadProgressRef.current)
-        uploadProgressRef.current = null
+      if (isMobile) {
+        if (createAcademyForm.imagePreview?.startsWith("blob:")) {
+          URL.revokeObjectURL(createAcademyForm.imagePreview)
+        }
+        setCreateAcademyForm((prev) => ({ ...prev, imageFile: file, imagePreview: dataUrl }))
+      } else {
+        setCropImageSrc(dataUrl)
+        setCropOpen(true)
+        setCrop({ x: 0, y: 0 })
+        setZoom(1)
+        croppedAreaPixelsRef.current = null
       }
-      setIsImageUploading(false)
-      setImageUploadProgress(0)
-      toast.error("Failed to load image.")
     }
+    reader.onerror = () => toast.error("Failed to load image.")
     reader.readAsDataURL(file)
+  }
+
+  const handleCropDone = async () => {
+    if (!cropImageSrc || !croppedAreaPixelsRef.current) return
+    setIsImageUploading(true)
+    try {
+      const blob = await getCroppedImg(cropImageSrc, croppedAreaPixelsRef.current, "image/jpeg")
+      const file = new File([blob], "academy-logo.jpg", { type: "image/jpeg" })
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const r = new FileReader()
+        r.onload = () => resolve(r.result as string)
+        r.onerror = reject
+        r.readAsDataURL(blob)
+      })
+      if (createAcademyForm.imagePreview?.startsWith("blob:")) {
+        URL.revokeObjectURL(createAcademyForm.imagePreview)
+      }
+      setCreateAcademyForm((prev) => ({ ...prev, imageFile: file, imagePreview: dataUrl }))
+      setCropOpen(false)
+      setCropImageSrc(null)
+    } catch (e) {
+      toast.error("Failed to crop image.")
+    } finally {
+      setIsImageUploading(false)
+    }
   }
 
   useEffect(() => {
@@ -195,6 +217,7 @@ export function CreateAcademyDialog({
   }
 
   return (
+    <>
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-[420px] sm:max-w-[560px] flex flex-col p-0 gap-0 overflow-hidden bg-white min-h-0 max-h-[calc(100dvh-2rem)] sm:min-h-[min(560px,85vh)]" maxHeight="calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 2rem)">
         <DialogHeader className="flex-shrink-0 px-4 py-4 text-center sm:pl-0 sm:pt-0 sm:pr-6 sm:pb-4 sm:text-left border-b border-gray-100">
@@ -210,7 +233,7 @@ export function CreateAcademyDialog({
             ref={fileInputRef}
             id="academy-image"
             type="file"
-            accept="image/png,image/jpeg,image/jpg,image/webp"
+            accept={isMobile ? "image/*" : "image/png,image/jpeg,image/jpg,image/webp"}
             className="sr-only"
             onChange={(e) => {
               const file = e.target.files?.[0]
@@ -375,5 +398,59 @@ export function CreateAcademyDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    {/* Crop modal */}
+    <Dialog open={cropOpen} onOpenChange={(open) => !open && setCropOpen(false)}>
+      <DialogContent className="max-w-[min(100vw,420px)] p-0 gap-0 overflow-hidden bg-white" maxHeight="85vh">
+        <DialogHeader className="flex-shrink-0 px-4 pt-4 pb-2">
+          <DialogTitle className="text-lg font-semibold text-[var(--sidebar-foreground)]">Crop logo</DialogTitle>
+        </DialogHeader>
+        <div className="relative w-full min-h-[50vh] max-h-[60vh] bg-black" style={{ touchAction: "none" }}>
+          <Cropper
+            image={cropImageSrc ?? ""}
+            crop={crop}
+            zoom={zoom}
+            aspect={1}
+            cropShape="round"
+            showGrid={false}
+            zoomWithScroll={true}
+            minZoom={1}
+            maxZoom={3}
+            onCropChange={setCrop}
+            onZoomChange={setZoom}
+            onCropComplete={onCropComplete}
+          />
+        </div>
+        <div className="flex-shrink-0 px-4 py-3 border-t border-gray-100 bg-gray-50">
+          <p className="text-xs font-medium text-gray-500 mb-2">Zoom (pinch or use slider)</p>
+          <input
+            type="range"
+            min={1}
+            max={3}
+            step={0.1}
+            value={zoom}
+            onChange={(e) => setZoom(Number(e.target.value))}
+            className="w-full h-2 rounded-lg appearance-none bg-gray-200 accent-[#00A3EC]"
+            aria-label="Zoom in or out"
+          />
+        </div>
+        <DialogFooter className="flex-shrink-0 flex justify-end gap-2 px-4 py-4 border-t border-gray-100">
+          <Button
+            variant="outline"
+            onClick={() => setCropOpen(false)}
+            className="px-4 py-2 text-sm font-medium border-gray-200 text-gray-700 hover:bg-gray-50 rounded-lg"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleCropDone}
+            className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 rounded-lg"
+          >
+            Done
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   )
 }

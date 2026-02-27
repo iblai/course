@@ -19,7 +19,6 @@ import { ChatInputForm } from "@/components/chat-input-form"
 import { LoadingMessage } from "@/components/loading-message"
 import { TooltipFlowbite, TooltipProvider } from "@/components/ui/tooltip-flowbite"
 import { CreatingCourseProgress } from "@/components/creating-course-progress"
-import { CourseCreationAcademyBlock } from "@/components/course-creation-academy-block"
 import { toast } from "sonner"
 
 interface ChatMessage {
@@ -86,7 +85,6 @@ export default function HomePage() {
   const [creationStep, setCreationStep] = useState<1 | 2 | 3>(1)
   const [creationProgress, setCreationProgress] = useState(0)
   const [completedActions, setCompletedActions] = useState<{ label: string; time: string }[]>([])
-  const [showAcademyChoiceDialog, setShowAcademyChoiceDialog] = useState(false)
   const pendingCourseEditRef = useRef<{ courseId: string; courseName: string } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const recognitionRef = useRef<any>(null)
@@ -514,17 +512,17 @@ export default function HomePage() {
         { label: "Step 3: Generated course content", time: formatTime() },
       ])
       const courseId = `course-v1:${(courseForm.courseNumber || "ACI")}+UTA+${courseForm.courseRun || "2026_03"}`
-      const courseName = courseForm.courseName || courseDetailsForm.displayName || "New course"
+      const courseName = courseDetailsForm.displayName || courseForm.courseName || "New course"
       pendingCourseEditRef.current = { courseId, courseName }
       setTimeout(() => {
-        const hasAcademy = typeof window !== "undefined" && localStorage.getItem("hasAcademy") === "1"
-        if (hasAcademy) {
-          const pending = pendingCourseEditRef.current
-          if (pending) {
-            router.push(`/course/${pending.courseId}/edit?name=${encodeURIComponent(pending.courseName)}`)
+        const pending = pendingCourseEditRef.current
+        if (pending) {
+          if (typeof window !== "undefined") {
+            try {
+              sessionStorage.setItem(`course-name-${pending.courseId}`, pending.courseName)
+            } catch (_) {}
           }
-        } else {
-          setShowAcademyChoiceDialog(true)
+          router.push(`/course/${pending.courseId}/edit?name=${encodeURIComponent(pending.courseName)}`)
         }
       }, 800)
     }, 7000)
@@ -595,37 +593,12 @@ export default function HomePage() {
             {isCreatingCourse ? (
               <>
                 <CreatingCourseProgress
-                  courseName={
-                    showAcademyChoiceDialog
-                      ? "Your course has been generated successfully."
-                      : courseDetailsForm.displayName || courseForm.courseName || "New course"
-                  }
+                  courseName={courseDetailsForm.displayName || courseForm.courseName || "New course"}
                   creationStep={creationStep}
                   creationProgress={creationProgress}
                   completedActions={completedActions}
-                  courseCreated={showAcademyChoiceDialog}
+                  courseCreated={false}
                 />
-                {showAcademyChoiceDialog && (
-                  <CourseCreationAcademyBlock
-                    onSkip={() => {
-                      const pending = pendingCourseEditRef.current
-                      if (pending) {
-                        try {
-                          localStorage.setItem("hasAcademy", "0")
-                        } catch (_) {}
-                        pendingCourseEditRef.current = null
-                        router.push(`/course/${pending.courseId}/edit?name=${encodeURIComponent(pending.courseName)}`)
-                      }
-                    }}
-                    onContinueToCourse={() => {
-                      const pending = pendingCourseEditRef.current
-                      if (pending) {
-                        pendingCourseEditRef.current = null
-                        router.push(`/course/${pending.courseId}/edit?name=${encodeURIComponent(pending.courseName)}`)
-                      }
-                    }}
-                  />
-                )}
               </>
             ) : !showCourseForm ? (
               (() => {
@@ -1220,7 +1193,7 @@ export default function HomePage() {
               <TooltipProvider>
                 <div
                   className={cn(
-                    "fixed right-0 left-0 z-40 bg-white/95 backdrop-blur px-3 sm:px-4 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] transition-[left] duration-300",
+                    "fixed right-0 left-0 z-30 md:z-40 bg-white/95 backdrop-blur px-3 sm:px-4 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] transition-[left] duration-300",
                     sidebarCollapsed ? "md:left-16" : "md:left-64",
                   )}
                   style={{ borderColor: "#F1F2F3", bottom: inputBarBottom }}
@@ -1247,7 +1220,10 @@ export default function HomePage() {
             )}
 
             {/* Footer */}
-            <PlatformFooter />
+            <PlatformFooter
+              hideFloatingButtons={isCreatingCourse}
+              promptBarVisible={hasChatMessages && !showCourseForm && !isCreatingCourse}
+            />
         </main>
         </div>
       </div>

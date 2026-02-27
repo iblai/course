@@ -9,7 +9,10 @@ import { FloatingAccessibilityButton } from "@/components/accessibility/floating
 import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 
-export function PlatformFooter() {
+export function PlatformFooter({
+  hideFloatingButtons = false,
+  promptBarVisible = false,
+}: { hideFloatingButtons?: boolean; promptBarVisible?: boolean }) {
   const pathname = usePathname()
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(256) // default expanded width (w-64 = 256px)
@@ -77,12 +80,13 @@ export function PlatformFooter() {
       </div>
 
       {!isChatOpen &&
+        !hideFloatingButtons &&
         typeof document !== "undefined" &&
         createPortal(
           <div
             className={cn(
               "fixed bottom-6 right-6 flex flex-col gap-3 z-50 pointer-events-none [&>*]:pointer-events-auto",
-              isChatListView && "hidden min-[1221px]:flex"
+              (isChatListView || promptBarVisible) && "max-[1200px]:hidden"
             )}
           >
             <FloatingMicrophoneButton />

@@ -73,7 +73,13 @@ export default function CourseEditPage() {
   const params = useParams()
   const searchParams = useSearchParams()
   const id = params.id as string
-  const courseTitle = searchParams.get("name") || getCourseMetadata(id).title
+  const [storedCourseName, setStoredCourseName] = useState<string | null>(null)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setStoredCourseName(sessionStorage.getItem(`course-name-${id}`))
+    }
+  }, [id])
+  const courseTitle = searchParams.get("name") || storedCourseName || getCourseMetadata(id).title
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -1451,30 +1457,30 @@ export default function CourseEditPage() {
             <h2 className="text-lg font-bold pr-8 text-[var(--sidebar-foreground)]">{courseTitle}</h2>
             <p className="text-sm text-muted-foreground mt-0.5">Course structure outline</p>
           </DialogHeader>
-          <div className="pt-0 pb-2 flex-1 min-h-[55vh] max-h-[75vh] overflow-y-auto">
+          <div className="pt-0 pb-2 flex-1 min-h-[55vh] max-h-[75vh] overflow-y-auto overflow-x-hidden px-2 sm:px-0">
             {sections.length === 0 ? (
               <p className="text-sm text-muted-foreground">No sections in the outline yet.</p>
             ) : (
-              <div className="space-y-5 min-w-0 overflow-hidden">
+              <div className="space-y-5 min-w-0 max-w-full overflow-hidden">
                 {sections.map((section, sIdx) => (
-                  <div key={section.id} className="relative min-w-0 overflow-hidden">
+                  <div key={section.id} className="relative min-w-0 max-w-full overflow-hidden">
                     <div
-                      className="flex items-center gap-2 py-3 pl-2 sm:pl-4 pr-2 border-l-4 border-[#3B82F6] min-w-0 overflow-hidden"
+                      className="flex flex-wrap sm:flex-nowrap items-center gap-1.5 sm:gap-2 py-3 pl-2 sm:pl-4 pr-2 border-l-4 border-[#3B82F6] min-w-0 max-w-full overflow-hidden"
                       style={{ borderColor: "rgb(59, 130, 246)" }}
                     >
-                      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground shrink-0 w-12 sm:w-16">Section</span>
-                      <span className="text-sm font-medium text-[var(--sidebar-foreground)] min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground shrink-0 w-full sm:w-16 whitespace-nowrap">Section</span>
+                      <span className="text-sm font-medium text-[var(--sidebar-foreground)] w-full sm:min-w-0 sm:flex-1 overflow-hidden text-ellipsis line-clamp-2 sm:line-clamp-none whitespace-normal sm:whitespace-nowrap pl-0 pr-0">
                         {sIdx + 1} {section.displayName || section.name}
                       </span>
                     </div>
-                    <div className="mt-1 min-w-0 overflow-hidden">
+                    <div className="mt-1 min-w-0 max-w-full overflow-hidden space-y-0.5">
                     {section.subsections.map((sub, subIdx) => (
                       <div
                         key={sub.id}
-                        className="flex items-center gap-2 ml-2 sm:ml-6 pl-2 sm:pl-4 pr-2 py-2 border-l-4 border-gray-300 min-w-0 overflow-hidden"
+                        className="flex flex-wrap sm:flex-nowrap items-center gap-1.5 sm:gap-2 ml-1 sm:ml-6 pl-2 sm:pl-4 pr-2 py-2.5 sm:py-2 border-l-4 border-gray-300 min-w-0 max-w-full overflow-hidden"
                       >
-                        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground shrink-0 w-12 sm:w-20">Subsection</span>
-                        <span className="text-sm text-[var(--sidebar-foreground)] min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground shrink-0 w-full sm:w-20 whitespace-nowrap">Subsection</span>
+                        <span className="text-sm text-[var(--sidebar-foreground)] w-full sm:min-w-0 sm:flex-1 overflow-hidden text-ellipsis line-clamp-2 sm:line-clamp-none whitespace-normal sm:whitespace-nowrap pl-0 pr-0">
                           {sIdx + 1}.{subIdx + 1} {sub.name}
                         </span>
                       </div>
