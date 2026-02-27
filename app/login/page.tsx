@@ -287,7 +287,7 @@ export default function AuthPage() {
       inputFontSize: "text-base",
       titleBlockSpacing: "space-y-0.5 md:space-y-1 lg:space-y-2 pt-[3vh] pb-[3vh] sm:pt-[4vh] sm:pb-[4vh] md:pt-[4vh] md:pb-[4vh] lg:pt-[5vh] lg:pb-[5vh]",
       titleBlockPadding: "py-0",
-      titleHeadingSize: isSmallScreen ? "text-[22px] md:text-xl" : "text-[22px] md:text-xl lg:text-2xl xl:text-3xl",
+      titleHeadingSize: isSmallScreen ? "text-lg md:text-xl" : "text-[22px] md:text-xl lg:text-2xl xl:text-3xl",
       subtitleMargin: "mt-2.5 md:mt-1",
       footerPaddingTop: "pt-[5vh]",
       footerPaddingBottom: "pb-[5vh]",
