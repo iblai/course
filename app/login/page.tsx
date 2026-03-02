@@ -358,7 +358,7 @@ export default function AuthPage() {
         >
           <div
             className={cn(
-              "flex flex-col min-h-0 px-4 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-0 sm:px-6 md:px-4 lg:px-6 sm:pb-8 xl:pb-8 xl:overflow-hidden overflow-y-auto scrollbar-hide xl:min-h-0",
+              "flex flex-col min-h-0 px-4 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-0 sm:px-6 md:px-4 lg:px-6 xl:overflow-hidden overflow-y-auto scrollbar-hide xl:min-h-0",
               showConfirmation ? "xl:flex-1 xl:min-h-0" : "xl:flex-1",
               showConfirmation && "max-xl:flex-1"
             )}
