@@ -401,7 +401,7 @@ export default function AuthPage() {
                         <br />
                         engaging courses
                       </h1>
-                      <p className={`text-[#4E5460] ${sizes.subtitleMargin} ${sizes.subtitleSize} leading-tight`}>
+                      <p className={`text-[#4E5460] ${sizes.subtitleMargin} xl:mt-2 ${sizes.subtitleSize} leading-tight`}>
                         Launch a subscription-based learning
                         <br />
                         community on a top platform
