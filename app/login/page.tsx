@@ -224,6 +224,7 @@ export default function AuthPage() {
   const router = useRouter()
   const [viewportHeight, setViewportHeight] = useState(0)
   const [viewportWidth, setViewportWidth] = useState(0)
+  const [showScrollTop, setShowScrollTop] = useState(false)
 
   const {
     email,
@@ -263,6 +264,15 @@ export default function AuthPage() {
     return () => window.removeEventListener("resize", updateViewport)
   }, [])
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300)
+    }
+
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
   const getResponsiveSizes = () => {
     const maxHeight = Math.min(viewportHeight, 730)
     // Use same size tier as single-column (mobile/tablet) for desktop left column
@@ -285,7 +295,7 @@ export default function AuthPage() {
       iconSize: isSmallScreen ? "w-4 h-4" : isMediumScreen ? "w-5 h-5" : "w-6 h-6",
       fontSize: isSmallScreen ? "text-xs" : isMediumScreen ? "text-sm" : "text-base",
       inputFontSize: "text-base",
-      titleBlockSpacing: "space-y-0 pt-[40px] pb-[40px] sm:pt-[4vh] sm:pb-[4vh] md:pt-[4vh] md:pb-[4vh] lg:pt-[5vh] lg:pb-[5vh]",
+      titleBlockSpacing: "space-y-0 pt-[40px] pb-[45px] sm:pt-[4vh] sm:pb-[4vh] md:pt-[4vh] md:pb-[4vh] lg:pt-[5vh] lg:pb-[5vh]",
       titleBlockPadding: "py-0",
       titleHeadingSize: isSmallScreen ? "text-lg md:text-xl" : "text-[22px] md:text-xl lg:text-2xl xl:text-3xl",
       subtitleMargin: isSmallScreen ? "mt-[4px]" : "mt-[6px]",
@@ -401,7 +411,7 @@ export default function AuthPage() {
                         <br />
                         engaging courses
                       </h1>
-                      <p className={`text-[#4E5460] mt-px xl:mt-1 ${sizes.subtitleSize} leading-tight`}>
+                      <p className={`text-[#4E5460] mt-[10px] xl:mt-1 ${sizes.subtitleSize} leading-tight`}>
                         Launch a subscription-based learning
                         <br />
                         community on a top platform
@@ -826,7 +836,7 @@ export default function AuthPage() {
         </>
       )}
 
-      <ScrollToTopButton scrollToTop={scrollToTop} />
+      <ScrollToTopButton scrollToTop={scrollToTop} showScrollTop={showScrollTop} />
     </div>
   )
 }
