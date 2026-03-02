@@ -288,7 +288,7 @@ export default function AuthPage() {
       titleBlockSpacing: "space-y-0 pt-[40px] pb-[40px] sm:pt-[4vh] sm:pb-[4vh] md:pt-[4vh] md:pb-[4vh] lg:pt-[5vh] lg:pb-[5vh]",
       titleBlockPadding: "py-0",
       titleHeadingSize: isSmallScreen ? "text-lg md:text-xl" : "text-[22px] md:text-xl lg:text-2xl xl:text-3xl",
-      subtitleMargin: "mt-[4px]",
+      subtitleMargin: isSmallScreen ? "mt-[4px]" : "mt-[6px]",
       footerPaddingTop: "pt-[5vh]",
       footerPaddingBottom: "pb-[5vh]",
       maxFormWidth: isSmallScreen ? "max-w-[26rem]" : isMediumScreen ? "max-w-[28rem]" : "max-w-[31rem]",
@@ -346,165 +346,7 @@ export default function AuthPage() {
   }, [showConfirmation, router])
 
   return (
-    <>
-      {!showConfirmation && (
-        <>
-          {!showPasswordForm ? (
-            <div
-              className={`rounded-[0.70rem] border-[0.25px] border-[rgba(0,163,236,0.25)] bg-[#F5F8FF] ${sizes.padding} shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(0,163,236,0.2)] w-full ${sizes.maxFormWidth} ${sizes.formBlockMarginTop}`}
-            >
-              <div className={`flex flex-col justify-between ${sizes.spacing}`}>
-                <div className="w-full">
-                  <Input
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value)
-                      if (emailError) setEmailError("")
-                    }}
-                    className={`${sizes.inputHeight} rounded-md ${sizes.inputFontSize} ${emailError ? "border-2 border-[#00A3EC]" : "border-gray-200"}`}
-                  />
-                  {emailError && (
-                    <p style={{ color: "#00A3EC", fontSize: "0.7rem", marginTop: "0.25rem" }}>{emailError}</p>
-                  )}
-                </div>
-
-                <Button
-                  className={`w-full ${sizes.buttonHeight} bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white rounded-md ${sizes.fontSize}`}
-                  onClick={handleContinue}
-                >
-                  Continue
-                </Button>
-
-                <div className={`text-center text-[#4E5460] ${sizes.fontSize} py-0.5`}>OR</div>
-
-                <Button
-                  variant="outline"
-                  className={`w-full ${sizes.buttonHeight} flex items-center justify-center gap-1 border border-gray-200 rounded-md ${sizes.fontSize}`}
-                >
-                  <GoogleIcon />
-                  Continue with Google
-                </Button>
-
-                <Button
-                  variant="outline"
-                  className={`w-full ${sizes.buttonHeight} flex items-center justify-center gap-1 border border-gray-200 rounded-md ${sizes.fontSize}`}
-                >
-                  <AppleIcon />
-                  Continue with Apple
-                </Button>
-
-                <Button
-                  variant="outline"
-                  className={`w-full ${sizes.buttonHeight} flex items-center justify-center gap-1 border border-gray-200 rounded-md ${sizes.fontSize}`}
-                  onClick={handlePasswordLogin}
-                >
-                  <svg width="1.25rem" height="1.25rem" viewBox="0 -960 960 960" fill="#383838">
-                    <path d="M80-200v-80h800v80H80Zm46-242-52-30 34-60H40v-60h68l-34-58 52-30 34 58 34-58 52 30-34 58h68v60h-68l34 60-52 30-34-58-34 60Zm320 0-52-30 34-60h-68v-60h68l-34-58 52-30 34 58 34-58 52 30-34 58h68v60h-68l34 60-52 30-34-58-34 60Zm320 0-52-30 34-60h-68v-60h68l-34-58 52-30 34 58 34-58 52 30-34 58h68v60h-68l34 60-52 30-34-58-34 60Z"></path>
-                  </svg>
-                  Continue with Password
-                </Button>
-
-                <div className="w-full text-center">
-                  <div className="text-xs text-[#4E5460] pt-2.5 pb-2.5">
-                    <Link href="/terms" className="hover:underline">
-                      Terms of Use
-                    </Link>
-                    <span className="mx-2">|</span>
-                    <Link href="/privacy" className="hover:underline">
-                      Privacy Policy
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div
-              className={`rounded-[0.70rem] border-[0.25px] border-[rgba(0,163,236,0.25)] bg-[#F5F8FF] ${sizes.padding} shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(0,163,236,0.2)] w-full ${sizes.maxFormWidth} ${sizes.formBlockMarginTop}`}
-            >
-              <div className={`flex flex-col justify-between ${sizes.spacing}`}>
-                <div className="w-full">
-                  <Input
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value)
-                      if (emailError) setEmailError("")
-                    }}
-                    className={`${sizes.inputHeight} rounded-md ${sizes.inputFontSize} ${emailError ? "border-2 border-[#00A3EC]" : "border-gray-200"}`}
-                  />
-                </div>
-
-                <div className="w-full relative">
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => {
-                      setPassword(e.target.value)
-                      if (emailError) setEmailError("")
-                    }}
-                    className={`${sizes.inputHeight} rounded-md ${sizes.inputFontSize} ${emailError ? "border-2 border-[#00A3EC]" : "border-gray-200"}`}
-                  />
-                  {password.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={togglePasswordVisibility}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#4E5460] hover:opacity-80"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                    >
-                      {showPassword ? <EyeOffIcon /> : <EyeIcon />}
-                    </button>
-                  )}
-                </div>
-                {emailError && (
-                  <p style={{ color: "#00A3EC", fontSize: "0.7rem", marginTop: "0.25rem" }}>{emailError}</p>
-                )}
-
-                <Button
-                  className={`w-full ${sizes.buttonHeight} bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white rounded-md ${sizes.fontSize}`}
-                  onClick={handlePasswordContinue}
-                >
-                  Continue
-                </Button>
-
-                <div className="flex justify-center w-full">
-                  <button
-                    onClick={handleBackToMain}
-                    className="flex items-center text-[#00A3EC] hover:text-[#6988FF]"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className={`${sizes.iconSize} mr-1`}
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                    <span className={`text-[#00A3EC] ${sizes.fontSize}`}>Back</span>
-                  </button>
-                </div>
-
-                <div className="w-full text-center">
-                  <div className="text-xs text-[#4E5460] pt-2.5 pb-2.5">
-                    <Link href="/terms" className="hover:underline">
-                      Terms of Use
-                    </Link>
-                    <span className="mx-2">|</span>
-                    <Link href="/privacy" className="hover:underline">
-                      Privacy Policy
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-      <div className="w-full">
+    <div className="w-full">
       <div className="flex w-full flex-col xl:flex-row xl:min-h-[100dvh] xl:h-[100dvh] overflow-hidden">
         {/* Left Column - Auth Form */}
         <div
@@ -568,7 +410,163 @@ export default function AuthPage() {
                   </div>
                 </div>
               )}
-              {showConfirmation && (
+              {!showConfirmation ? (
+                <>
+                  {!showPasswordForm ? (
+                    <div
+                      className={`rounded-[0.70rem] border-[0.25px] border-[rgba(0,163,236,0.25)] bg-[#F5F8FF] ${sizes.padding} shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(0,163,236,0.2)] w-full ${sizes.maxFormWidth} ${sizes.formBlockMarginTop}`}
+                    >
+                      <div className={`flex flex-col justify-between ${sizes.spacing}`}>
+                        <div className="w-full">
+                          <Input
+                            type="email"
+                            placeholder="Enter your email"
+                            value={email}
+                            onChange={(e) => {
+                              setEmail(e.target.value)
+                              if (emailError) setEmailError("")
+                            }}
+                            className={`${sizes.inputHeight} rounded-md ${sizes.inputFontSize} ${emailError ? "border-2 border-[#00A3EC]" : "border-gray-200"}`}
+                          />
+                          {emailError && (
+                            <p style={{ color: "#00A3EC", fontSize: "0.7rem", marginTop: "0.25rem" }}>{emailError}</p>
+                          )}
+                        </div>
+
+                        <Button
+                          className={`w-full ${sizes.buttonHeight} bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white rounded-md ${sizes.fontSize}`}
+                          onClick={handleContinue}
+                        >
+                          Continue
+                        </Button>
+
+                        <div className={`text-center text-[#4E5460] ${sizes.fontSize} py-0.5`}>OR</div>
+
+                        <Button
+                          variant="outline"
+                          className={`w-full ${sizes.buttonHeight} flex items-center justify-center gap-1 border border-gray-200 rounded-md ${sizes.fontSize}`}
+                        >
+                          <GoogleIcon />
+                          Continue with Google
+                        </Button>
+
+                        <Button
+                          variant="outline"
+                          className={`w-full ${sizes.buttonHeight} flex items-center justify-center gap-1 border border-gray-200 rounded-md ${sizes.fontSize}`}
+                        >
+                          <AppleIcon />
+                          Continue with Apple
+                        </Button>
+
+                        <Button
+                          variant="outline"
+                          className={`w-full ${sizes.buttonHeight} flex items-center justify-center gap-1 border border-gray-200 rounded-md ${sizes.fontSize}`}
+                          onClick={handlePasswordLogin}
+                        >
+                          <svg width="1.25rem" height="1.25rem" viewBox="0 -960 960 960" fill="#383838">
+                            <path d="M80-200v-80h800v80H80Zm46-242-52-30 34-60H40v-60h68l-34-58 52-30 34 58 34-58 52 30-34 58h68v60h-68l34 60-52 30-34-58-34 60Zm320 0-52-30 34-60h-68v-60h68l-34-58 52-30 34 58 34-58 52 30-34 58h68v60h-68l34 60-52 30-34-58-34 60Zm320 0-52-30 34-60h-68v-60h68l-34-58 52-30 34 58 34-58 52 30-34 58h68v60h-68l34 60-52 30-34-58-34 60Z"></path>
+                          </svg>
+                          Continue with Password
+                        </Button>
+
+                        <div className="w-full text-center">
+                          <div className="text-xs text-[#4E5460] pt-2.5 pb-2.5">
+                            <Link href="/terms" className="hover:underline">
+                              Terms of Use
+                            </Link>
+                            <span className="mx-2">|</span>
+                            <Link href="/privacy" className="hover:underline">
+                              Privacy Policy
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      className={`rounded-[0.70rem] border-[0.25px] border-[rgba(0,163,236,0.25)] bg-[#F5F8FF] ${sizes.padding} shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(0,163,236,0.2)] w-full ${sizes.maxFormWidth} ${sizes.formBlockMarginTop}`}
+                    >
+                      <div className={`flex flex-col justify-between ${sizes.spacing}`}>
+                        <div className="w-full">
+                          <Input
+                            type="email"
+                            placeholder="Enter your email"
+                            value={email}
+                            onChange={(e) => {
+                              setEmail(e.target.value)
+                              if (emailError) setEmailError("")
+                            }}
+                            className={`${sizes.inputHeight} rounded-md ${sizes.inputFontSize} ${emailError ? "border-2 border-[#00A3EC]" : "border-gray-200"}`}
+                          />
+                        </div>
+
+                        <div className="w-full relative">
+                          <Input
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => {
+                              setPassword(e.target.value)
+                              if (emailError) setEmailError("")
+                            }}
+                            className={`${sizes.inputHeight} rounded-md ${sizes.inputFontSize} ${emailError ? "border-2 border-[#00A3EC]" : "border-gray-200"}`}
+                          />
+                          {password.length > 0 && (
+                            <button
+                              type="button"
+                              onClick={togglePasswordVisibility}
+                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#4E5460] hover:opacity-80"
+                              aria-label={showPassword ? "Hide password" : "Show password"}
+                            >
+                              {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                            </button>
+                          )}
+                        </div>
+                        {emailError && (
+                          <p style={{ color: "#00A3EC", fontSize: "0.7rem", marginTop: "0.25rem" }}>{emailError}</p>
+                        )}
+
+                        <Button
+                          className={`w-full ${sizes.buttonHeight} bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white rounded-md ${sizes.fontSize}`}
+                          onClick={handlePasswordContinue}
+                        >
+                          Continue
+                        </Button>
+
+                        <div className="flex justify-center w-full">
+                          <button
+                            onClick={handleBackToMain}
+                            className="flex items-center text-[#00A3EC] hover:text-[#6988FF]"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className={`${sizes.iconSize} mr-1`}
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                            <span className={`text-[#00A3EC] ${sizes.fontSize}`}>Back</span>
+                          </button>
+                        </div>
+
+                        <div className="w-full text-center">
+                          <div className="text-xs text-[#4E5460] pt-2.5 pb-2.5">
+                            <Link href="/terms" className="hover:underline">
+                              Terms of Use
+                            </Link>
+                            <span className="mx-2">|</span>
+                            <Link href="/privacy" className="hover:underline">
+                              Privacy Policy
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
                 <div className={`flex flex-col items-center justify-center w-full max-w-md mx-auto text-center min-h-0 px-4 sm:px-6`}>
                   <div className="mb-3 sm:mb-4">
                     <Image
@@ -830,6 +828,5 @@ export default function AuthPage() {
 
       <ScrollToTopButton scrollToTop={scrollToTop} />
     </div>
-    </>
   )
 }
