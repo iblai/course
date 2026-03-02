@@ -285,10 +285,10 @@ export default function AuthPage() {
       iconSize: isSmallScreen ? "w-4 h-4" : isMediumScreen ? "w-5 h-5" : "w-6 h-6",
       fontSize: isSmallScreen ? "text-xs" : isMediumScreen ? "text-sm" : "text-base",
       inputFontSize: "text-base",
-      titleBlockSpacing: "space-y-0.5 md:space-y-1 lg:space-y-2 pt-[40px] pb-[40px] sm:pt-[4vh] sm:pb-[4vh] md:pt-[4vh] md:pb-[4vh] lg:pt-[5vh] lg:pb-[5vh]",
+      titleBlockSpacing: "space-y-0 pt-[40px] pb-[40px] sm:pt-[4vh] sm:pb-[4vh] md:pt-[4vh] md:pb-[4vh] lg:pt-[5vh] lg:pb-[5vh]",
       titleBlockPadding: "py-0",
       titleHeadingSize: isSmallScreen ? "text-lg md:text-xl" : "text-[22px] md:text-xl lg:text-2xl xl:text-3xl",
-      subtitleMargin: "mt-2.5 md:mt-1",
+      subtitleMargin: isSmallScreen ? "mt-5" : "mt-[6px]",
       footerPaddingTop: "pt-[5vh]",
       footerPaddingBottom: "pb-[5vh]",
       maxFormWidth: isSmallScreen ? "max-w-[26rem]" : isMediumScreen ? "max-w-[28rem]" : "max-w-[31rem]",
@@ -395,7 +395,7 @@ export default function AuthPage() {
                   <div className={`text-center w-full ${sizes.titleBlockPadding}`}>
                     <div className={sizes.titleBlockSpacing}>
                       <h1
-                        className={`${sizes.titleHeadingSize} text-[#4E5460] leading-tight font-normal`}
+                        className={`${sizes.titleHeadingSize} text-[#4E5460] leading-none font-normal`}
                       >
                         Instantly create and sell
                         <br />
