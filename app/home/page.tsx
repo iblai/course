@@ -21,10 +21,20 @@ import { TooltipFlowbite, TooltipProvider } from "@/components/ui/tooltip-flowbi
 import { CreatingCourseProgress } from "@/components/creating-course-progress"
 import { toast } from "sonner"
 
+interface ChatMessageAttachment {
+  id: string
+  name: string
+  type: string
+  /** Object URL for image preview (revoke on unmount) */
+  url?: string
+}
+
 interface ChatMessage {
   id: string
   role: "user" | "assistant"
   content: string
+  /** Attachments sent with this user message (images show as thumbnails) */
+  attachments?: ChatMessageAttachment[]
   /** When true, show a "Start course setup" button under this assistant message */
   createCourseCta?: boolean
   /** User's text used to prefill course form when CTA is clicked */
@@ -80,6 +90,7 @@ export default function HomePage() {
   const [inputBarBottom, setInputBarBottom] = useState(56)
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null)
   const [replyingTo, setReplyingTo] = useState<{ id: string; content: string } | null>(null)
+  const [fullscreenImageUrl, setFullscreenImageUrl] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [isCreatingCourse, setIsCreatingCourse] = useState(false)
   const [creationStep, setCreationStep] = useState<1 | 2 | 3>(1)
@@ -115,6 +126,19 @@ export default function HomePage() {
   const router = useRouter()
 
   const isLoggedIn = true
+
+  const messagesRef = useRef(messages)
+  messagesRef.current = messages
+  // Revoke object URLs for image attachments on unmount
+  useEffect(() => {
+    return () => {
+      messagesRef.current.forEach((msg) => {
+        msg.attachments?.forEach((att) => {
+          if (att.url) URL.revokeObjectURL(att.url)
+        })
+      })
+    }
+  }, [])
 
   // Cleanup speech recognition on unmount
   useEffect(() => {
@@ -298,16 +322,30 @@ export default function HomePage() {
 
   const handleSubmit = () => {
     const text = inputValue.trim()
-    if (!text) return
+    const hasAttachments = selectedAttachments.length > 0
+    if (!text && !hasAttachments) return
+
+    // Build attachments for this message (object URLs for images so they show in chat)
+    const attachments: ChatMessageAttachment[] = selectedAttachments.map((src) => {
+      const isImage = src.file && src.file.type.startsWith("image/")
+      return {
+        id: src.id,
+        name: src.name,
+        type: src.type,
+        ...(isImage && src.file ? { url: URL.createObjectURL(src.file) } : {}),
+      }
+    })
 
     // Always show chat list view: add user message first
     const userMessage: ChatMessage = {
       id: `user-${Date.now()}`,
       role: "user",
-      content: text,
+      content: text || "",
+      ...(attachments.length > 0 ? { attachments } : {}),
     }
     setMessages((prev) => [...prev, userMessage])
     setInputValue("")
+    setSelectedAttachments([])
     setReplyingTo(null)
     setIsAssistantTyping(true)
 
@@ -553,6 +591,36 @@ export default function HomePage() {
 
   return (
     <div className="h-screen-dvh overflow-y-auto bg-background">
+      {/* Fullscreen image overlay */}
+      {fullscreenImageUrl && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Image fullscreen view"
+        >
+          <button
+            type="button"
+            onClick={() => setFullscreenImageUrl(null)}
+            className="absolute top-4 right-4 z-10 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white"
+            aria-label="Close"
+          >
+            <X className="h-6 w-6" />
+          </button>
+          <img
+            src={fullscreenImageUrl}
+            alt="Full size"
+            className="max-h-full max-w-full object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <button
+            type="button"
+            className="absolute inset-0 -z-10"
+            onClick={() => setFullscreenImageUrl(null)}
+            aria-label="Close"
+          />
+        </div>
+      )}
       {/* Sidebar */}
       <SidebarLearner
         isCollapsed={sidebarCollapsed}
@@ -607,10 +675,45 @@ export default function HomePage() {
               <div className="w-full pt-0 py-4 sm:py-6 pb-6 min-w-0 flex-1 min-h-0 overflow-y-auto scrollbar-hide">
                   {messages.map((msg) =>
                     msg.role === "user" ? (
-                      <div key={msg.id} className="flex justify-end mb-4">
-                        <div className="rounded-xl px-4 py-2.5 max-w-[85%] sm:max-w-[75%] bg-gray-100">
-                          <p className="text-base sm:text-sm text-slate-800">{msg.content}</p>
-                        </div>
+                      <div key={msg.id} className="flex flex-col items-end gap-2 mb-4">
+                        {msg.attachments && msg.attachments.length > 0 ? (
+                          <div className="flex justify-end">
+                            <div className="rounded-xl px-0 py-0 max-w-[85%] sm:max-w-[75%] border border-gray-200">
+                              <div className="flex flex-wrap gap-2">
+                                {msg.attachments.map((att) =>
+                                  att.url ? (
+                                    <button
+                                      key={att.id}
+                                      type="button"
+                                      onClick={() => setFullscreenImageUrl(att.url ?? null)}
+                                      className="block rounded-lg overflow-hidden border border-gray-200 max-w-[200px] max-h-[200px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#00A3EC] focus:ring-offset-1"
+                                    >
+                                      <img src={att.url} alt={att.name} className="w-full h-auto object-cover pointer-events-none" />
+                                    </button>
+                                  ) : (
+                                    <div
+                                      key={att.id}
+                                      className="flex items-center gap-2 rounded-md bg-gray-200/80 py-1.5 pl-2 pr-3 text-slate-700"
+                                    >
+                                      <FileImage className="h-4 w-4 shrink-0 text-[#2563EB]" />
+                                      <span className="text-sm truncate max-w-[140px]" title={att.name}>
+                                        {att.name}
+                                      </span>
+                                      <span className="text-xs text-slate-500">{att.type}</span>
+                                    </div>
+                                  ),
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ) : null}
+                        {msg.content ? (
+                          <div className="flex justify-end">
+                            <div className="rounded-xl px-4 py-2.5 max-w-[85%] sm:max-w-[75%] bg-gray-100">
+                              <p className="text-base sm:text-sm text-slate-800">{msg.content}</p>
+                            </div>
+                          </div>
+                        ) : null}
                       </div>
                     ) : (
                       <div key={msg.id} className="mb-6">
