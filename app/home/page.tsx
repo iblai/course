@@ -1295,8 +1295,8 @@ export default function HomePage() {
                       </div>
                       <div className="min-w-0 flex-1 py-0.5">
                         <span className="text-sm font-semibold text-[var(--sidebar-foreground)] block">Live</span>
-                        <span className="text-xs text-gray-500 mt-0.5 block line-clamp-2 sm:line-clamp-none">
-                          Live sessions with an introductory video, course description, and scheduled meetings (community/cohort style).
+                        <span className="text-xs text-gray-500 mt-0.5 block line-clamp-2">
+                          Intro video, description, and live sessions.
                         </span>
                       </div>
                       <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center">
@@ -1327,7 +1327,7 @@ export default function HomePage() {
                       </div>
                       <div className="min-w-0 flex-1 py-0.5">
                         <span className="text-sm font-semibold text-[var(--sidebar-foreground)] block">Traditional</span>
-                        <span className="text-xs text-gray-500 mt-0.5 block line-clamp-2 sm:line-clamp-none">
+                        <span className="text-xs text-gray-500 mt-0.5 block line-clamp-2">
                           Self-paced course with sections, units, and content blocks (current format).
                         </span>
                       </div>
