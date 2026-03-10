@@ -1269,12 +1269,14 @@ export default function HomePage() {
                 </div>
 
                 {/* Course Type */}
-                <div className="mt-6 sm:mt-8 space-y-2 sm:space-y-3">
-                  <Label className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
-                    Course type
-                  </Label>
-                  <p className="text-xs text-gray-500">Choose how your course is delivered.</p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                <div className="mt-6 sm:mt-8 pt-6 sm:pt-6 border-t border-gray-200">
+                  <div className="rounded-xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm">
+                    <div className="space-y-3 sm:space-y-4">
+                      <Label className="text-sm font-medium block" style={{ color: "rgb(113,121,133)" }}>
+                        Course type
+                      </Label>
+                      <p className="text-xs text-gray-500">Choose how your course is delivered.</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-0.5">
                     <button
                       type="button"
                       onClick={() => setCourseDetailsForm((prev) => ({ ...prev, courseType: "live" }))}
@@ -1295,7 +1297,7 @@ export default function HomePage() {
                       </div>
                       <div className="min-w-0 flex-1 py-0.5">
                         <span className="text-sm font-semibold text-[var(--sidebar-foreground)] block">Live</span>
-                        <span className="text-xs text-gray-500 mt-0.5 block line-clamp-2">
+                        <span className="text-xs text-gray-500 mt-1 block line-clamp-2">
                           Intro video, description, and live sessions.
                         </span>
                       </div>
@@ -1327,7 +1329,7 @@ export default function HomePage() {
                       </div>
                       <div className="min-w-0 flex-1 py-0.5">
                         <span className="text-sm font-semibold text-[var(--sidebar-foreground)] block">Traditional</span>
-                        <span className="text-xs text-gray-500 mt-0.5 block line-clamp-2">
+                        <span className="text-xs text-gray-500 mt-1 block line-clamp-2">
                           Self-paced course with sections, units, and content blocks (current format).
                         </span>
                       </div>
@@ -1339,24 +1341,26 @@ export default function HomePage() {
                         )}
                       </div>
                     </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row justify-end gap-3 mt-8">
+                <div className="flex flex-row justify-end gap-2 sm:gap-3 mt-8">
                   <Button
                     variant="outline"
                     onClick={handleBack}
-                    className="w-full sm:w-auto px-6 py-2 text-sm font-medium border-gray-300 text-gray-700 hover:bg-gray-50"
+                    className="flex-1 sm:flex-initial min-w-0 px-4 sm:px-6 py-2 text-sm font-medium border-gray-300 text-gray-700 hover:bg-gray-50"
                   >
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back
+                    <ArrowLeft className="w-4 h-4 mr-1.5 sm:mr-2 shrink-0" />
+                    <span className="truncate">Back</span>
                   </Button>
                   <Button
                     onClick={handleCreateCourse}
-                    className="w-full sm:w-auto px-6 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90"
+                    className="flex-1 sm:flex-initial min-w-0 px-4 sm:px-6 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90"
                   >
-                    Create Course
+                    <span className="truncate">Create Course</span>
                   </Button>
                 </div>
               </div>
