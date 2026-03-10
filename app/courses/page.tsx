@@ -26,6 +26,16 @@ import { ViewAcademyDialog } from "@/components/view-academy-dialog"
 import { CreateAcademyDialog } from "@/components/create-academy-dialog"
 import "@/styles/colors.css"
 
+/* Consistent course list action buttons – modern hover */
+const COURSE_ACTION_BTN =
+  "inline-flex items-center justify-center rounded-lg w-8 h-8 border border-gray-200 bg-white text-gray-600 shadow-sm transition-all duration-200 ease-out hover:bg-blue-50/80 hover:border-blue-200 hover:text-[#2563EB] hover:shadow-md hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 focus-visible:ring-offset-1"
+const COURSE_ACTION_BTN_MOBILE =
+  "inline-flex items-center justify-center rounded-lg w-7 h-7 border border-gray-200 bg-white text-gray-600 shadow-sm transition-all duration-200 ease-out hover:bg-blue-50/80 hover:border-blue-200 hover:text-[#2563EB] hover:shadow-md hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 focus-visible:ring-offset-1"
+const COURSE_ACTION_BTN_DANGER =
+  "inline-flex items-center justify-center rounded-lg w-8 h-8 border border-gray-200 bg-white text-gray-500 shadow-sm transition-all duration-200 ease-out hover:bg-red-50 hover:border-red-200 hover:text-red-600 hover:shadow-md hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:ring-offset-1"
+const COURSE_ACTION_BTN_DANGER_MOBILE =
+  "inline-flex items-center justify-center rounded-lg w-7 h-7 border border-gray-200 bg-white text-gray-500 shadow-sm transition-all duration-200 ease-out hover:bg-red-50 hover:border-red-200 hover:text-red-600 hover:shadow-md hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 focus-visible:ring-offset-1"
+
 function CoursesPageContent() {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -380,55 +390,55 @@ function CoursesPageContent() {
                               <TooltipProvider>
                                 <TooltipFlowbite content="Schedule and Detail" position="top">
                                   <button
+                                    type="button"
                                     onClick={() => handleActionClick("schedule", course.id)}
-                                    className="w-8 h-8 flex items-center justify-center rounded transition-colors hover:bg-blue-100 cursor-pointer"
-                                    style={{ backgroundColor: "#F0F4F8" }}
+                                    className={COURSE_ACTION_BTN}
                                   >
-                                    <Calendar className="w-4 h-4" style={{ color: "#2563EB" }} strokeWidth={1.5} />
+                                    <Calendar className="w-4 h-4" strokeWidth={1.5} />
                                   </button>
                                 </TooltipFlowbite>
                               </TooltipProvider>
                               <TooltipProvider>
                                 <TooltipFlowbite content="Edit Content" position="top">
                                   <button
+                                    type="button"
                                     onClick={() => handleActionClick("edit", course.id)}
-                                    className="w-8 h-8 flex items-center justify-center rounded transition-colors hover:bg-blue-100 cursor-pointer"
-                                    style={{ backgroundColor: "#F0F4F8" }}
+                                    className={COURSE_ACTION_BTN}
                                   >
-                                    <Pencil className="w-4 h-4" style={{ color: "#2563EB" }} strokeWidth={1.5} />
+                                    <Pencil className="w-4 h-4" strokeWidth={1.5} />
                                   </button>
                                 </TooltipFlowbite>
                               </TooltipProvider>
                               <TooltipProvider>
                                 <TooltipFlowbite content="View Creation User Prompt" position="top">
                                   <button
+                                    type="button"
                                     onClick={() => handleActionClick("view", course.id)}
-                                    className="w-8 h-8 flex items-center justify-center rounded transition-colors hover:bg-blue-100 cursor-pointer"
-                                    style={{ backgroundColor: "#F0F4F8" }}
+                                    className={COURSE_ACTION_BTN}
                                   >
-                                    <FileText className="w-4 h-4" style={{ color: "#2563EB" }} strokeWidth={1.5} />
+                                    <FileText className="w-4 h-4" strokeWidth={1.5} />
                                   </button>
                                 </TooltipFlowbite>
                               </TooltipProvider>
                               <TooltipProvider>
                                 <TooltipFlowbite content="View Course in Studio" position="top">
                                   <button
+                                    type="button"
                                     onClick={() => handleActionClick("preview", course.id)}
-                                    className="w-8 h-8 flex items-center justify-center rounded transition-colors hover:bg-blue-100 cursor-pointer"
-                                    style={{ backgroundColor: "#F0F4F8" }}
+                                    className={COURSE_ACTION_BTN}
                                   >
-                                    <Eye className="w-4 h-4" style={{ color: "#2563EB" }} strokeWidth={1.5} />
+                                    <Eye className="w-4 h-4" strokeWidth={1.5} />
                                   </button>
                                 </TooltipFlowbite>
                               </TooltipProvider>
                               <TooltipProvider>
                                 <TooltipFlowbite content="Delete Course" position="top">
                                   <button
+                                    type="button"
                                     onClick={() => handleActionClick("delete", course.id)}
-                                    className="w-8 h-8 flex items-center justify-center rounded transition-colors hover:bg-gray-200 cursor-pointer"
-                                    style={{ backgroundColor: "#F5F5F5" }}
+                                    className={COURSE_ACTION_BTN_DANGER}
                                   >
-                                    <Trash2 className="w-4 h-4 text-gray-500" strokeWidth={1.5} />
+                                    <Trash2 className="w-4 h-4" strokeWidth={1.5} />
                                   </button>
                                 </TooltipFlowbite>
                               </TooltipProvider>
@@ -497,66 +507,66 @@ function CoursesPageContent() {
                         <TooltipProvider>
                           <TooltipFlowbite content="About Course" position="top">
                             <button
+                              type="button"
                               onClick={() => handleActionClick("viewAbout", course.id)}
-                              className="w-7 h-7 flex items-center justify-center rounded transition-colors hover:bg-blue-100 cursor-pointer"
-                              style={{ backgroundColor: "#F0F4F8" }}
+                              className={COURSE_ACTION_BTN_MOBILE}
                             >
-                              <Info className="w-3.5 h-3.5" style={{ color: "#2563EB" }} strokeWidth={1.5} />
+                              <Info className="w-3.5 h-3.5" strokeWidth={1.5} />
                             </button>
                           </TooltipFlowbite>
                         </TooltipProvider>
                         <TooltipProvider>
                           <TooltipFlowbite content="Schedule and Detail" position="top">
                             <button
+                              type="button"
                               onClick={() => handleActionClick("schedule", course.id)}
-                              className="w-7 h-7 flex items-center justify-center rounded transition-colors hover:bg-blue-100 cursor-pointer"
-                              style={{ backgroundColor: "#F0F4F8" }}
+                              className={COURSE_ACTION_BTN_MOBILE}
                             >
-                              <Calendar className="w-3.5 h-3.5" style={{ color: "#2563EB" }} strokeWidth={1.5} />
+                              <Calendar className="w-3.5 h-3.5" strokeWidth={1.5} />
                             </button>
                           </TooltipFlowbite>
                         </TooltipProvider>
                         <TooltipProvider>
                           <TooltipFlowbite content="Edit Content" position="top">
                             <button
+                              type="button"
                               onClick={() => handleActionClick("edit", course.id)}
-                              className="w-7 h-7 flex items-center justify-center rounded transition-colors hover:bg-blue-100 cursor-pointer"
-                              style={{ backgroundColor: "#F0F4F8" }}
+                              className={COURSE_ACTION_BTN_MOBILE}
                             >
-                              <Pencil className="w-3.5 h-3.5" style={{ color: "#2563EB" }} strokeWidth={1.5} />
+                              <Pencil className="w-3.5 h-3.5" strokeWidth={1.5} />
                             </button>
                           </TooltipFlowbite>
                         </TooltipProvider>
                         <TooltipProvider>
                           <TooltipFlowbite content="View Creation User Prompt" position="top">
                             <button
+                              type="button"
                               onClick={() => handleActionClick("view", course.id)}
-                              className="w-7 h-7 flex items-center justify-center rounded transition-colors hover:bg-blue-100 cursor-pointer"
-                              style={{ backgroundColor: "#F0F4F8" }}
+                              className={COURSE_ACTION_BTN_MOBILE}
                             >
-                              <FileText className="w-3.5 h-3.5" style={{ color: "#2563EB" }} strokeWidth={1.5} />
+                              <FileText className="w-3.5 h-3.5" strokeWidth={1.5} />
                             </button>
                           </TooltipFlowbite>
                         </TooltipProvider>
                         <TooltipProvider>
                           <TooltipFlowbite content="View Course in Studio" position="top">
                             <button
+                              type="button"
                               onClick={() => handleActionClick("preview", course.id)}
-                              className="w-7 h-7 flex items-center justify-center rounded transition-colors hover:bg-blue-100 cursor-pointer"
-                              style={{ backgroundColor: "#F0F4F8" }}
+                              className={COURSE_ACTION_BTN_MOBILE}
                             >
-                              <Eye className="w-3.5 h-3.5" style={{ color: "#2563EB" }} strokeWidth={1.5} />
+                              <Eye className="w-3.5 h-3.5" strokeWidth={1.5} />
                             </button>
                           </TooltipFlowbite>
                         </TooltipProvider>
                         <TooltipProvider>
                           <TooltipFlowbite content="Delete Course" position="top">
                             <button
+                              type="button"
                               onClick={() => handleActionClick("delete", course.id)}
-                              className="w-7 h-7 flex items-center justify-center rounded transition-colors hover:bg-gray-200 cursor-pointer"
-                              style={{ backgroundColor: "#F5F5F5" }}
+                              className={COURSE_ACTION_BTN_DANGER_MOBILE}
                             >
-                              <Trash2 className="w-3.5 h-3.5 text-gray-500" strokeWidth={1.5} />
+                              <Trash2 className="w-3.5 h-3.5" strokeWidth={1.5} />
                             </button>
                           </TooltipFlowbite>
                         </TooltipProvider>

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { SidebarLearner } from "@/components/platform/sidebar-learner"
 import { Header } from "@/components/platform/header"
 import { PlatformFooter } from "@/components/platform/platform-footer"
-import { Plus, Mic, ArrowUp, Square, RotateCw, ArrowLeft, Bold, Italic, Link as LinkIcon, List, ListOrdered, Upload, Sparkles, FileImage, X, Check, Copy, Volume2, Reply, Building2, Pencil, Share2 } from "lucide-react"
+import { Plus, Mic, ArrowUp, Square, RotateCw, ArrowLeft, Bold, Italic, Link as LinkIcon, List, ListOrdered, Upload, Sparkles, FileImage, X, Check, Copy, Volume2, Reply, Building2, Pencil, Share2, Video, BookOpen } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { JumpstartTemplates } from "@/components/jumpstart-templates"
 import { Textarea } from "@/components/ui/textarea"
@@ -122,6 +122,7 @@ export default function HomePage() {
     isGeneratingImage: false,
     generatedImageUrl: null as string | null,
     uploadedImageUrl: null as string | null,
+    courseType: "traditional" as "live" | "traditional",
   })
   const router = useRouter()
 
@@ -1264,6 +1265,80 @@ export default function HomePage() {
                         </div>
                       </TabsContent>
                     </Tabs>
+                  </div>
+                </div>
+
+                {/* Course Type */}
+                <div className="mt-8 space-y-3">
+                  <Label className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
+                    Course type
+                  </Label>
+                  <p className="text-xs text-gray-500">Choose how your course is delivered.</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setCourseDetailsForm((prev) => ({ ...prev, courseType: "live" }))}
+                      className={cn(
+                        "flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-lg border-2 text-left transition-all duration-200 min-h-[88px] sm:min-h-[72px]",
+                        courseDetailsForm.courseType === "live"
+                          ? "border-[#2563EB] bg-blue-50/50 shadow-sm"
+                          : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50/50"
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center",
+                          courseDetailsForm.courseType === "live" ? "bg-blue-100 text-[#2563EB]" : "bg-gray-100 text-gray-600"
+                        )}
+                      >
+                        <Video className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <span className="text-sm font-semibold text-[var(--sidebar-foreground)] block">Live</span>
+                        <span className="text-xs text-gray-500 mt-0.5 block">
+                          Live sessions with an introductory video, course description, and scheduled meetings (community/cohort style).
+                        </span>
+                      </div>
+                      <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center sm:ml-auto">
+                        {courseDetailsForm.courseType === "live" ? (
+                          <Check className="w-5 h-5 text-[#2563EB]" />
+                        ) : (
+                          <span className="w-5 h-5" aria-hidden />
+                        )}
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCourseDetailsForm((prev) => ({ ...prev, courseType: "traditional" }))}
+                      className={cn(
+                        "flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-lg border-2 text-left transition-all duration-200 min-h-[88px] sm:min-h-[72px]",
+                        courseDetailsForm.courseType === "traditional"
+                          ? "border-[#2563EB] bg-blue-50/50 shadow-sm"
+                          : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50/50"
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center",
+                          courseDetailsForm.courseType === "traditional" ? "bg-blue-100 text-[#2563EB]" : "bg-gray-100 text-gray-600"
+                        )}
+                      >
+                        <BookOpen className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <span className="text-sm font-semibold text-[var(--sidebar-foreground)] block">Traditional</span>
+                        <span className="text-xs text-gray-500 mt-0.5 block">
+                          Self-paced course with sections, units, and content blocks (current format).
+                        </span>
+                      </div>
+                      <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center sm:ml-auto">
+                        {courseDetailsForm.courseType === "traditional" ? (
+                          <Check className="w-5 h-5 text-[#2563EB]" />
+                        ) : (
+                          <span className="w-5 h-5" aria-hidden />
+                        )}
+                      </div>
+                    </button>
                   </div>
                 </div>
 

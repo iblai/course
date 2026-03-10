@@ -39,6 +39,14 @@ const DATE_INPUT_CLASS =
 const DATE_FIELD_WRAPPER_CLASS = "space-y-1.5 min-w-0 w-full max-w-full overflow-hidden"
 const DATE_INPUT_INNER_CLASS = "min-w-0 w-full max-w-full overflow-hidden"
 
+/* Consistent action buttons: Generate + Edit (outline, icon, modern) */
+const ACTION_BTN_BASE =
+  "inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 shadow-sm transition-all duration-200 ease-out hover:bg-blue-50/80 hover:border-blue-200 hover:text-[#2563EB] hover:shadow-md hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none disabled:hover:translate-y-0 disabled:hover:shadow-sm"
+const ACTION_BTN_SECTION = "h-9 w-9 shrink-0"
+const ACTION_BTN_SUBSECTION = "h-8 w-8 shrink-0"
+const ACTION_BTN_UNIT = "h-7 w-7 shrink-0"
+const ACTION_BTN_BLOCK = "h-7 w-7 shrink-0"
+
 type ContentBlock = {
   id: string
   title: string
@@ -355,7 +363,12 @@ export default function CourseEditPage() {
     setSections((prev) =>
       prev.map((s) =>
         s.id === editingSectionId
-          ? { ...s, displayName: editSectionDisplayName.trim() || s.displayName }
+          ? {
+              ...s,
+              displayName: editSectionDisplayName.trim() || s.displayName,
+              startDate: editSectionStartDate,
+              dueDate: editSectionDueDate,
+            }
           : s
       )
     )
@@ -697,14 +710,14 @@ export default function CourseEditPage() {
           <main className="flex-1 flex flex-col min-h-0 min-w-0 transition-all duration-300 pb-[200px] md:pb-[200px] overflow-x-hidden">
             <div className="flex flex-1 min-h-0 min-w-0">
               <div className="flex-1 min-h-0 min-w-0 w-full pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:pl-8 sm:pr-8 md:pr-20 pt-2 sm:pt-4 pb-4 sm:pb-8 overflow-x-hidden">
-                {/* Page header: title, Add Section */}
+                {/* Page header: title, actions */}
                 <div className="pt-4 pb-4 mb-4 sm:mb-6 border-b border-gray-100">
                   <div className="flex flex-row items-center justify-between gap-3 mb-1">
                     <div className="min-w-0 flex-1">
                       <h1 className="text-xl sm:text-2xl font-semibold mb-0.5 text-[var(--sidebar-foreground)] break-words">
                         {courseTitle}
                       </h1>
-                      <p className="text-sm text-gray-500 mt-[5px] mb-[5px]">Edit Course</p>
+                      <p className="text-sm text-gray-500 mt-1 mb-0">Edit Course</p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <Button
@@ -714,25 +727,26 @@ export default function CourseEditPage() {
                           const url = typeof window !== "undefined" ? `${window.location.origin}/course/${id}` : ""
                           navigator.clipboard.writeText(url).then(() => toast.success("Link copied to clipboard", successToastStyle), () => toast.error("Failed to copy link"))
                         }}
-                        className="border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium px-3 py-2"
+                        className="rounded-lg border border-gray-200 bg-white text-gray-600 shadow-sm text-sm font-medium px-3 py-2 h-9 transition-all duration-200 ease-out hover:bg-gray-50 hover:border-gray-300 hover:shadow-md hover:-translate-y-0.5"
                       >
                         <Link2 className="w-4 h-4 sm:mr-1.5" />
                         <span className="hidden sm:inline">Copy link</span>
                       </Button>
                     </div>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2 mt-2.5">
+                  <div className="flex flex-wrap items-center gap-2 mt-3">
                     <Button
                       onClick={() => setIsAddSectionOpen(true)}
                       variant="outline"
-                      className="border-gray-300 bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm font-medium px-4 py-2"
+                      className="rounded-lg border border-gray-200 bg-white text-gray-700 shadow-sm text-sm font-medium px-4 py-2 h-9 transition-all duration-200 ease-out hover:bg-gray-50 hover:border-gray-300 hover:shadow-md hover:-translate-y-0.5"
                     >
+                      <Plus className="w-4 h-4 mr-2" />
                       Add Section
                     </Button>
                     <Button
                       variant="outline"
                       onClick={() => setIsOutlineOpen(true)}
-                      className="border-[#2563EB] text-[#2563EB] hover:bg-blue-50 text-sm font-medium px-4 py-2"
+                      className="rounded-lg border border-[#2563EB] bg-white text-[#2563EB] shadow-sm text-sm font-medium px-4 py-2 h-9 transition-all duration-200 ease-out hover:bg-blue-50 hover:border-[#2563EB] hover:shadow-md hover:shadow-blue-500/10 hover:-translate-y-0.5"
                     >
                       <FileText className="w-4 h-4 mr-2" />
                       Course Outline
@@ -741,7 +755,7 @@ export default function CourseEditPage() {
                       <Button
                         variant="outline"
                         onClick={() => setViewAcademyDialogOpen(true)}
-                        className="border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium px-4 py-2"
+                        className="rounded-lg border border-gray-200 bg-white text-gray-600 shadow-sm text-sm font-medium px-4 py-2 h-9 transition-all duration-200 ease-out hover:bg-gray-50 hover:border-gray-300 hover:shadow-md hover:-translate-y-0.5"
                       >
                         View Academy
                       </Button>
@@ -749,15 +763,14 @@ export default function CourseEditPage() {
                       <Button
                         variant="outline"
                         onClick={() => {
-                        setIsEditAcademyMode(false)
-                        setIsCreateAcademyDialogOpen(true)
-                      }}
+                          setIsEditAcademyMode(false)
+                          setIsCreateAcademyDialogOpen(true)
+                        }}
                         className={
                           hasPublished
-                            ? "border-[#2563EB] text-[#2563EB] hover:bg-blue-50 text-sm font-medium px-4 py-2"
-                            : "text-white border-0 text-sm font-medium px-4 py-2 hover:opacity-90 hover:text-white"
+                            ? "rounded-lg border border-[#2563EB] bg-white text-[#2563EB] shadow-sm text-sm font-medium px-4 py-2 h-9 transition-all duration-200 ease-out hover:bg-blue-50 hover:shadow-md hover:shadow-blue-500/10 hover:-translate-y-0.5"
+                            : "rounded-lg border-0 bg-gradient-to-r from-[#00A3EC] to-[#6988FF] text-white shadow-sm text-sm font-medium px-4 py-2 h-9 transition-all duration-200 ease-out hover:opacity-95 hover:shadow-lg hover:shadow-blue-500/25 hover:-translate-y-0.5"
                         }
-                        style={!hasPublished ? { background: "linear-gradient(135deg, #00A3EC 0%, #6988FF 100%)" } : undefined}
                       >
                         <Plus className="w-4 h-4 mr-2" />
                         Create Academy
@@ -766,7 +779,7 @@ export default function CourseEditPage() {
                     {hasPublished && (
                       <Button
                         asChild
-                        className="bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white text-sm font-medium px-4 py-2"
+                        className="rounded-lg bg-gradient-to-r from-[#00A3EC] to-[#6988FF] text-white shadow-sm text-sm font-medium px-4 py-2 h-9 transition-all duration-200 ease-out hover:opacity-95 hover:shadow-lg hover:shadow-blue-500/25 hover:-translate-y-0.5"
                       >
                         <Link href={`/course/${id}`}>View course</Link>
                       </Button>
@@ -809,105 +822,103 @@ export default function CourseEditPage() {
                       if (!section) return null
                       return (
                         <div className="space-y-5">
-                          {/* Section heading with refresh + edit */}
+                          {/* Section heading with Generate + Edit */}
                           <div className="flex items-center gap-2 pb-3 border-b border-gray-200">
-                            <h2 className="text-lg font-bold text-[var(--sidebar-foreground)]">
+                            <h2 className="text-lg font-bold text-[var(--sidebar-foreground)] min-w-0 flex-1">
                               {section.displayName || section.name}
                             </h2>
-                            <TooltipProvider>
-                              <TooltipFlowbite content="Generate content" position="top">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 text-gray-500 hover:text-[#2563EB] hover:bg-blue-50"
-                                  onClick={() => handleGenerateSectionContent(section.id)}
-                                  disabled={generatingSectionId === section.id}
-                                  aria-label="Refresh content"
-                                >
-                                  <RotateCw className={cn("w-4 h-4", generatingSectionId === section.id && "animate-spin")} />
-                                </Button>
-                              </TooltipFlowbite>
-                              <TooltipFlowbite content="Edit section" position="top">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 text-gray-500 hover:text-[#2563EB] hover:bg-blue-50"
-                                  onClick={() => openEditSection(section)}
-                                  aria-label="Edit section"
-                                >
-                                  <Pencil className="w-4 h-4" />
-                                </Button>
-                              </TooltipFlowbite>
-                            </TooltipProvider>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <TooltipProvider>
+                                <TooltipFlowbite content="Generate content" position="top">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleGenerateSectionContent(section.id)}
+                                    disabled={generatingSectionId === section.id}
+                                    aria-label="Generate content"
+                                    className={cn(ACTION_BTN_BASE, ACTION_BTN_SECTION)}
+                                  >
+                                    <RotateCw className={cn("w-4 h-4", generatingSectionId === section.id && "animate-spin")} />
+                                  </button>
+                                </TooltipFlowbite>
+                                <TooltipFlowbite content="Edit section" position="top">
+                                  <button
+                                    type="button"
+                                    onClick={() => openEditSection(section)}
+                                    aria-label="Edit section"
+                                    className={cn(ACTION_BTN_BASE, ACTION_BTN_SECTION)}
+                                  >
+                                    <Pencil className="w-4 h-4" />
+                                  </button>
+                                </TooltipFlowbite>
+                              </TooltipProvider>
+                            </div>
                           </div>
 
                           {/* Subsections → Units → Content blocks */}
                           {(section.subsections || []).map((sub) => (
                             <div key={sub.id} className="pt-[5px] first:pt-2 border-b border-gray-100 last:border-b-0 pb-5 last:pb-0">
                               <div className="flex items-center gap-2 mb-4">
-                                <h3 className="text-base font-semibold text-[var(--sidebar-foreground)]">
+                                <h3 className="text-base font-semibold text-[var(--sidebar-foreground)] min-w-0 flex-1">
                                   {sub.name}
                                 </h3>
-                                <TooltipProvider>
-                                  <TooltipFlowbite content="Generate content" position="top">
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-7 w-7 text-gray-500 hover:text-[#2563EB] hover:bg-blue-50"
-                                      onClick={() => handleGenerateSubsectionContent(sub.id)}
-                                      disabled={generatingSubsectionId === sub.id}
-                                      aria-label="Generate content"
-                                    >
-                                      <RotateCw className={cn("w-4 h-4", generatingSubsectionId === sub.id && "animate-spin")} />
-                                    </Button>
-                                  </TooltipFlowbite>
-                                  <TooltipFlowbite content="Edit subsection" position="top">
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-7 w-7 text-gray-500 hover:text-[#2563EB] hover:bg-blue-50"
-                                      onClick={() => openEditSubsection(section.id, sub)}
-                                      aria-label="Edit subsection"
-                                    >
-                                      <Pencil className="w-4 h-4" />
-                                    </Button>
-                                  </TooltipFlowbite>
-                                </TooltipProvider>
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  <TooltipProvider>
+                                    <TooltipFlowbite content="Generate content" position="top">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleGenerateSubsectionContent(sub.id)}
+                                        disabled={generatingSubsectionId === sub.id}
+                                        aria-label="Generate content"
+                                        className={cn(ACTION_BTN_BASE, ACTION_BTN_SUBSECTION)}
+                                      >
+                                        <RotateCw className={cn("w-4 h-4", generatingSubsectionId === sub.id && "animate-spin")} />
+                                      </button>
+                                    </TooltipFlowbite>
+                                    <TooltipFlowbite content="Edit subsection" position="top">
+                                      <button
+                                        type="button"
+                                        onClick={() => openEditSubsection(section.id, sub)}
+                                        aria-label="Edit subsection"
+                                        className={cn(ACTION_BTN_BASE, ACTION_BTN_SUBSECTION)}
+                                      >
+                                        <Pencil className="w-4 h-4" />
+                                      </button>
+                                    </TooltipFlowbite>
+                                  </TooltipProvider>
+                                </div>
                               </div>
                               {(sub.units || []).map((unit) => (
                                 <div key={unit.id} className="pl-3 sm:pl-5 ml-0 border-l-2 border-gray-200 mb-6 last:mb-0">
                                   <div className="flex items-center gap-2 mb-3 mt-4 first:mt-0">
-                                    <h4 className="text-sm font-semibold text-gray-700">{unit.name}</h4>
+                                    <h4 className="text-sm font-semibold text-gray-700 min-w-0 flex-1">{unit.name}</h4>
                                     <TooltipProvider>
                                       <TooltipFlowbite content="Generate content" position="top">
-                                        <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          className="h-6 w-6 text-gray-500 hover:text-[#2563EB] hover:bg-blue-50"
+                                        <button
+                                          type="button"
                                           onClick={() => handleGenerateUnitContent(unit.id)}
                                           disabled={generatingUnitId === unit.id}
                                           aria-label="Generate content"
+                                          className={cn(ACTION_BTN_BASE, ACTION_BTN_UNIT)}
                                         >
                                           <RotateCw className={cn("w-3.5 h-3.5", generatingUnitId === unit.id && "animate-spin")} />
-                                        </Button>
+                                        </button>
                                       </TooltipFlowbite>
                                     </TooltipProvider>
                                   </div>
                                   {(unit.blocks || []).map((block) => (
                                     <div key={block.id} className="mb-6 last:mb-0">
                                       <div className="flex items-center gap-2 mb-1.5">
-                                        <span className="font-medium text-gray-800">{block.title}</span>
+                                        <span className="font-medium text-gray-800 min-w-0 flex-1">{block.title}</span>
                                         <TooltipProvider>
                                           <TooltipFlowbite content="Edit block" position="top">
-                                            <Button
-                                              variant="ghost"
-                                              size="icon"
-                                              className="h-6 w-6 text-gray-500 hover:text-[#2563EB] hover:bg-blue-50"
+                                            <button
+                                              type="button"
                                               aria-label="Edit block"
                                               onClick={() => openEditBlock(section.id, sub.id, unit.id, block)}
+                                              className={cn(ACTION_BTN_BASE, ACTION_BTN_BLOCK)}
                                             >
                                               <Pencil className="w-3.5 h-3.5" />
-                                            </Button>
+                                            </button>
                                           </TooltipFlowbite>
                                         </TooltipProvider>
                                       </div>
@@ -1179,7 +1190,7 @@ export default function CourseEditPage() {
             <p className="text-sm text-gray-500 mt-0.5">Edit section details</p>
           </DialogHeader>
           <div className="pb-2 space-y-4 border-t border-gray-100 pt-2 min-w-0">
-            <div className="space-y-1.5 min-w-0">
+            <div className={DATE_FIELD_WRAPPER_CLASS}>
               <Label className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
                 Display Name
               </Label>
@@ -1189,29 +1200,29 @@ export default function CourseEditPage() {
                 className="border-gray-200 w-full min-w-0 bg-white"
               />
             </div>
-            <div className="space-y-3 border-t border-gray-100 pt-4">
-              <h3 className="text-sm font-semibold text-[var(--sidebar-foreground)]">Add Unit</h3>
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
-                  Unit Name
-                </Label>
-                <Input
-                  value={editSectionNewUnitName}
-                  onChange={(e) => setEditSectionNewUnitName(e.target.value)}
-                  placeholder="Enter unit name"
-                  className="border-gray-200 bg-white"
-                />
-              </div>
-              <Button
-                variant="outline"
-                type="button"
-                onClick={handleAddUnitFromEditSection}
-                disabled={!editSectionNewUnitName.trim()}
-                className="border-[#2563EB] text-[#2563EB] hover:bg-blue-50"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Unit
-              </Button>
+            <div className={DATE_FIELD_WRAPPER_CLASS}>
+              <Label className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
+                Start Date
+              </Label>
+              <Input
+                type="datetime-local"
+                value={editSectionStartDate ? editSectionStartDate.slice(0, 16) : ""}
+                onChange={(e) => setEditSectionStartDate(e.target.value || "")}
+                onClick={(e) => (e.target as HTMLInputElement).showPicker?.()}
+                className={DATE_INPUT_CLASS}
+              />
+            </div>
+            <div className={DATE_FIELD_WRAPPER_CLASS}>
+              <Label className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
+                Due Date
+              </Label>
+              <Input
+                type="datetime-local"
+                value={editSectionDueDate ? editSectionDueDate.slice(0, 16) : ""}
+                onChange={(e) => setEditSectionDueDate(e.target.value || "")}
+                onClick={(e) => (e.target as HTMLInputElement).showPicker?.()}
+                className={DATE_INPUT_CLASS}
+              />
             </div>
           </div>
           <DialogFooter className="flex flex-row flex-wrap gap-2 pt-2 px-0 border-t border-gray-100 min-w-0">
