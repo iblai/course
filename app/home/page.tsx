@@ -1158,8 +1158,8 @@ export default function HomePage() {
                           <Label className="text-sm font-medium" style={{ color: "rgb(113,121,133)" }}>
                             Select Image File
                           </Label>
-                          <div className="flex flex-col sm:flex-row gap-2 items-start">
-                            <label className="cursor-pointer">
+                          <div className="flex flex-row flex-wrap items-center gap-2">
+                            <label className="cursor-pointer shrink-0">
                               <Button variant="outline" type="button" className="px-4 py-2 text-sm font-medium border-gray-300 text-gray-700 hover:bg-gray-50">
                                 Choose File
                               </Button>
@@ -1170,7 +1170,7 @@ export default function HomePage() {
                                 onChange={handleImageUpload}
                               />
                             </label>
-                            <span className="text-sm text-gray-500 self-center">
+                            <span className="text-sm text-gray-500">
                               {courseDetailsForm.uploadedImageUrl ? "File selected" : "No file chosen"}
                             </span>
                           </div>
@@ -1272,10 +1272,12 @@ export default function HomePage() {
                 <div className="mt-6 sm:mt-8 pt-6 sm:pt-6 border-t border-gray-200">
                   <div className="rounded-xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm">
                     <div className="space-y-3 sm:space-y-4">
-                      <Label className="text-sm font-medium block" style={{ color: "rgb(113,121,133)" }}>
-                        Course type
-                      </Label>
-                      <p className="text-xs text-gray-500">Choose how your course is delivered.</p>
+                      <div className="space-y-1">
+                        <Label className="text-sm font-medium block" style={{ color: "rgb(113,121,133)" }}>
+                          Course type
+                        </Label>
+                        <p className="text-xs text-gray-500">Choose how your course is delivered.</p>
+                      </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-0.5">
                     <button
                       type="button"
