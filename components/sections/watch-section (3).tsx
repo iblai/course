@@ -13,11 +13,13 @@ export function WatchSection() {
           <div className="space-y-7">
             {/* Main Heading */}
             <div className="space-y-4">
-              <h1 className="text-3xl font-bold text-[var(--sidebar-foreground)] leading-tight lg:text-5xl">
-                <span className="block">Create engaging</span>
-                <span className="block">courses</span>
+              <h1 className="text-2xl font-bold text-[var(--sidebar-foreground)] leading-tight sm:text-3xl lg:text-4xl">
                 <span className="block">
-                  in <span className="bg-gradient-to-r from-[#00A3EC] to-[#6988FF] bg-clip-text text-transparent font-bold">minutes</span>
+                  Watch Wink build a course
+                  <br />
+                  <span className="inline-block bg-gradient-to-r from-[#00A3EC] to-[#6988FF] bg-clip-text text-transparent font-bold">
+                    in 2 minutes
+                  </span>
                 </span>
               </h1>
             </div>
@@ -46,8 +48,12 @@ export function WatchSection() {
 
             {/* Get Started Button */}
             <div className="pt-4">
-              <Button className="bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white border-0 px-8 py-3 rounded-lg font-medium flex items-center gap-2 shadow-sm">
-                Get Started
+              <Button
+                type="button"
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                className="bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white border-0 px-8 py-3 rounded-lg font-medium flex items-center gap-2 shadow-sm"
+              >
+                Start free
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
@@ -80,13 +86,13 @@ export function WatchSection() {
               <div className="flex flex-col items-center justify-center px-8 sm:px-12 md:px-16 gap-3">
                 <Image
                   src="/images/skillsAI-logo.webp"
-                  alt="Ibl.ai Wink"
+                  alt="wink.school"
                   width={80}
                   height={32}
                   className="w-16 sm:w-20 md:w-24 lg:w-28 h-auto object-contain"
                 />
                 <span className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-[#00A3EC] to-[#6988FF] bg-clip-text text-transparent">
-                  Ibl.ai Wink
+                  wink.school
                 </span>
               </div>
 

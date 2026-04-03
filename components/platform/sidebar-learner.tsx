@@ -274,14 +274,14 @@ export function SidebarLearner({
         <Link href="/home" className="flex items-center gap-3">
           <Image
             src="/images/skillsAI-logo.webp"
-            alt="ibl.ai Wink"
+            alt="wink.school"
             width={32}
             height={32}
             className="object-contain flex-shrink-0"
           />
           {(!isCollapsed || isMobile) && (
               <span className="text-lg font-semibold bg-gradient-to-r from-[#00A3EC] to-[#6988FF] bg-clip-text text-transparent">
-                ibl.ai Wink
+                wink.school
               </span>
           )}
         </Link>

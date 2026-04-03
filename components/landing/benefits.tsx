@@ -39,7 +39,7 @@ export function Benefits() {
     <section id="benefits" className="py-20 lg:py-28 bg-[var(--accent-color)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-text-primary text-balance">Why Choose ibl.ai Wink?</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-text-primary text-balance">Why Choose wink.school?</h2>
           <p className="mt-4 text-lg text-text-secondary max-w-2xl mx-auto">
             Experience a new way of learning with our cutting-edge platform
           </p>

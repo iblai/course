@@ -321,7 +321,7 @@ function CoursesPageContent() {
                     style={{ background: "linear-gradient(135deg, #00A3EC 0%, #6988FF 100%)" }}
                   >
                     <Plus className="w-4 h-4" strokeWidth={2} />
-                    Create Academy
+                    Create School
                   </Button>
                 )}
               </div>

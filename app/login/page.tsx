@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useLayoutEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button"
 import { FAQSection } from "@/components/sections/faq-section"
 import { PricingSection } from "@/components/sections/pricing-section"
 import { WatchSection } from "@/components/sections/watch-section (3)"
-import { ScrollToTopButton } from "@/components/sections/scroll-to-top-button"
+import { AudienceSection } from "@/components/sections/audience-section"
+import { BuiltWithWinkSection } from "@/components/sections/built-with-wink-section"
 import { GoogleIcon, AppleIcon } from "@/components/auth-icons/auth-icons"
 import { DollarSign, Globe, Users } from "lucide-react"
 
@@ -222,9 +223,12 @@ const InsightsIcon = () => (
 export default function AuthPage() {
   const [countdown, setCountdown] = useState(5)
   const router = useRouter()
-  const [viewportHeight, setViewportHeight] = useState(0)
-  const [viewportWidth, setViewportWidth] = useState(0)
-  const [showScrollTop, setShowScrollTop] = useState(false)
+  /** Match reference auth: avoid first-paint squeeze before layout measurement. */
+  const [viewportHeight, setViewportHeight] = useState(720)
+  const focusEmail = () => {
+    const el = document.getElementById("auth-email") as HTMLInputElement | null
+    el?.focus()
+  }
 
   const {
     email,
@@ -245,64 +249,45 @@ export default function AuthPage() {
 
   const { currentSlide, fadeIn, slides, changeSlide } = useSlides()
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const updateViewport = () => {
-      const w = window.innerWidth
-      const isMobile = w <= 768
-      setViewportWidth(w)
-      let newViewportHeight
-      if (isMobile) {
-        newViewportHeight = Math.min(window.screen.height * 0.85, 650)
-      } else {
-        newViewportHeight = window.innerHeight
-      }
+      const isMobile = window.innerWidth <= 768
+      const newViewportHeight = isMobile
+        ? Math.min(window.screen.height * 0.85, 650)
+        : window.innerHeight
       setViewportHeight(newViewportHeight)
     }
 
     updateViewport()
-    window.addEventListener("resize", updateViewport)
-    return () => window.removeEventListener("resize", updateViewport)
-  }, [])
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 300)
+    const handleResize = () => {
+      if (window.innerWidth > 768) {
+        updateViewport()
+      }
     }
 
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
   }, [])
 
   const getResponsiveSizes = () => {
     const maxHeight = Math.min(viewportHeight, 730)
-    // Use same size tier as single-column (mobile/tablet) for desktop left column
-    const effectiveSize = maxHeight
-    const isSmallScreen = effectiveSize < 560
-    const isMediumScreen = effectiveSize >= 560 && effectiveSize < 700
+    const isSmallScreen = maxHeight < 600
+    const isMediumScreen = maxHeight >= 600 && maxHeight < 700
 
     return {
       containerHeight: maxHeight,
       logoHeight: isSmallScreen ? "h-6" : isMediumScreen ? "h-8" : "h-10",
-      logoMarginBottom: "mb-0",
-      logoMarginTop: "mt-0",
-      titleSize: isSmallScreen ? "text-lg" : isMediumScreen ? "text-xl" : "text-2xl",
-      subtitleSize: isSmallScreen ? "text-xs" : isMediumScreen ? "text-sm" : "text-base",
+      titleSize: isSmallScreen ? "text-2xl" : isMediumScreen ? "text-2xl" : "text-2xl",
+      subtitleSize: isSmallScreen ? "text-base" : isMediumScreen ? "text-base" : "text-base",
+      controlTextSize: isSmallScreen ? "text-sm" : isMediumScreen ? "text-base" : "text-base",
       buttonHeight: isSmallScreen ? "h-9" : isMediumScreen ? "h-10" : "h-12",
       inputHeight: isSmallScreen ? "h-9" : isMediumScreen ? "h-10" : "h-12",
-      spacing: "space-y-2.5 sm:space-y-2.5 md:space-y-2.5 lg:space-y-3",
+      spacing: isSmallScreen ? "space-y-3" : isMediumScreen ? "space-y-4" : "space-y-5",
       padding: isSmallScreen ? "p-3" : isMediumScreen ? "p-4" : "p-6",
-      margin: isSmallScreen ? "mb-3" : isMediumScreen ? "mb-4" : "mb-6",
       iconSize: isSmallScreen ? "w-4 h-4" : isMediumScreen ? "w-5 h-5" : "w-6 h-6",
-      fontSize: isSmallScreen ? "text-xs" : isMediumScreen ? "text-sm" : "text-base",
-      inputFontSize: "text-base",
-      titleBlockSpacing: "space-y-0 pt-[40px] pb-[45px] sm:pt-[4vh] sm:pb-[4vh] md:pt-[4vh] md:pb-[4vh] lg:pt-[5vh] lg:pb-[5vh]",
-      titleBlockPadding: "py-0",
-      titleHeadingSize: isSmallScreen ? "text-lg md:text-xl" : "text-[22px] md:text-xl lg:text-2xl xl:text-3xl",
-      subtitleMargin: isSmallScreen ? "mt-[4px]" : "mt-[6px]",
-      footerPaddingTop: "pt-[5vh]",
-      footerPaddingBottom: "pb-[5vh]",
-      maxFormWidth: isSmallScreen ? "max-w-[26rem]" : isMediumScreen ? "max-w-[28rem]" : "max-w-[31rem]",
-      formBlockMarginTop: "mt-0",
+      maxFormWidth: "max-w-[31rem]",
+      maxPasswordFormWidth: "max-w-[28rem]",
     }
   }
 
@@ -331,10 +316,6 @@ export default function AuthPage() {
     if (faqSection) {
       faqSection.scrollIntoView({ behavior: "smooth" })
     }
-  }
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
   useEffect(() => {
@@ -368,14 +349,14 @@ export default function AuthPage() {
         >
           <div
             className={cn(
-              "flex flex-col min-h-0 px-4 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-0 sm:px-6 md:px-4 lg:px-6 xl:overflow-hidden overflow-y-auto scrollbar-hide xl:min-h-0",
+              "flex flex-col min-h-0 px-4 pt-[calc(1.75rem+env(safe-area-inset-top,0px))] pb-0 sm:px-6 sm:pt-[calc(2rem+env(safe-area-inset-top,0px))] md:px-4 lg:px-6 xl:overflow-hidden overflow-y-auto scrollbar-hide xl:min-h-0 xl:pt-[calc(2.25rem+env(safe-area-inset-top,0px))]",
               showConfirmation ? "xl:flex-1 xl:min-h-0" : "xl:flex-1",
               showConfirmation && "max-xl:flex-1"
             )}
           >
-            {/* Logo Section */}
-            <div className={`flex justify-center flex-shrink-0 h-[5vh] ${sizes.logoMarginBottom}`}>
-              <div className={`flex items-center gap-2 ${sizes.logoMarginTop}`}>
+            {/* Logo Section — reference auth column spacing */}
+            <div className="flex justify-center flex-shrink-0 mt-6 md:mt-3 xl:mt-0 xl:mb-7">
+              <div className="flex items-center gap-3">
                 <Image
                   src="/images/skillsAI-logo.webp"
                   alt="ibl.ai Wink"
@@ -384,39 +365,45 @@ export default function AuthPage() {
                   className={`${sizes.logoHeight} w-auto`}
                 />
                 <span
-                  className={`${sizes.titleSize} font-bold bg-gradient-to-r from-[#00A3EC] to-[#6988FF] bg-clip-text text-transparent`}
+                  className={`${sizes.titleSize} font-bold bg-gradient-to-r from-[#38A1E5] to-[#0078FF] bg-clip-text text-transparent`}
                 >
                   ibl.ai Wink
                 </span>
               </div>
             </div>
 
-            {/* Auth Container Section - no xl:flex-1 so form-to-Read-more gap matches mobile/tablet */}
             <div
               className={cn(
-                "flex flex-col items-center pt-0 xl:pt-0",
+                "flex flex-col items-center mt-[2px] min-h-0 pt-0 xl:pt-0",
                 showConfirmation && "xl:flex-1 xl:min-h-0 xl:justify-center",
                 showConfirmation && "max-xl:flex-1 max-xl:justify-center"
               )}
             >
-              {/* Title and Subtitle Section */}
               {!showConfirmation && !showPasswordForm && (
-                <div className="flex justify-center items-center w-full">
-                  <div className={`text-center w-full ${sizes.titleBlockPadding}`}>
-                    <div className={sizes.titleBlockSpacing}>
-                      <h1
-                        className={`${sizes.titleHeadingSize} text-[#4E5460] leading-none font-normal`}
-                      >
-                        Instantly create and sell
+                <div className="text-center -mt-1 w-full">
+                  <div className="space-y-2 mt-[50px] mb-[50px] xl:mt-[10px]">
+                    <h1 className="text-2xl sm:text-2xl md:text-xl lg:text-2xl xl:text-3xl text-[#4E5460] leading-tight font-normal max-w-lg mx-auto">
+                      Turn what you know
+                      <br />
+                      into a school that pays you
+                    </h1>
+                    <p
+                      className={cn(
+                        "mx-auto mt-1 max-w-lg px-1 leading-snug text-gray-600",
+                        "text-sm xl:text-base",
+                      )}
+                    >
+                      <span className="xl:hidden">
+                        <span className="block">Wink builds your courses,</span>
+                        <span className="block">your brand, and your platform —</span>
+                        <span className="block">powered by AI that actually understands teaching.</span>
+                      </span>
+                      <span className="hidden xl:block">
+                        Wink builds your courses, your brand, and your platform —{" "}
                         <br />
-                        engaging courses
-                      </h1>
-                      <p className={`text-[#4E5460] mt-[10px] xl:mt-1 ${sizes.subtitleSize} leading-tight`}>
-                        Launch a subscription-based learning
-                        <br />
-                        community on a top platform
-                      </p>
-                    </div>
+                        powered by AI that actually understands teaching.
+                      </span>
+                    </p>
                   </div>
                 </div>
               )}
@@ -424,11 +411,12 @@ export default function AuthPage() {
                 <>
                   {!showPasswordForm ? (
                     <div
-                      className={`rounded-[0.70rem] border-[0.25px] border-[rgba(0,163,236,0.25)] bg-[#F5F8FF] ${sizes.padding} shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(0,163,236,0.2)] w-full ${sizes.maxFormWidth} ${sizes.formBlockMarginTop}`}
+                      className={`rounded-[0.70rem] border-[0.25px] border-[rgba(115,185,255,0.3)] bg-[#F5F8FF] ${sizes.padding} shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(115,185,255,0.23)] w-full ${sizes.maxFormWidth}`}
                     >
                       <div className={`flex flex-col justify-between ${sizes.spacing}`}>
                         <div className="w-full">
                           <Input
+                            id="auth-email"
                             type="email"
                             placeholder="Enter your email"
                             value={email}
@@ -436,25 +424,25 @@ export default function AuthPage() {
                               setEmail(e.target.value)
                               if (emailError) setEmailError("")
                             }}
-                            className={`${sizes.inputHeight} rounded-md ${sizes.inputFontSize} ${emailError ? "border-2 border-[#00A3EC]" : "border-gray-200"}`}
+                            className={`${sizes.inputHeight} rounded-md ${sizes.controlTextSize} ${emailError ? "border-2 border-blue-500" : "border-gray-200"}`}
                           />
                           {emailError && (
-                            <p style={{ color: "#00A3EC", fontSize: "0.7rem", marginTop: "0.25rem" }}>{emailError}</p>
+                            <p style={{ color: "#0078FF", fontSize: "0.7rem", marginTop: "0.25rem" }}>{emailError}</p>
                           )}
                         </div>
 
                         <Button
-                          className={`w-full ${sizes.buttonHeight} bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white rounded-md ${sizes.fontSize}`}
+                          className={`w-full ${sizes.buttonHeight} bg-gradient-to-r from-[#BACEFF] to-[#0078FF] hover:from-[#A9BDFF] hover:to-[#0069E0] text-white rounded-md ${sizes.controlTextSize}`}
                           onClick={handleContinue}
                         >
                           Continue
                         </Button>
 
-                        <div className={`text-center text-[#4E5460] ${sizes.fontSize} py-0.5`}>OR</div>
+                        <div className={`text-center text-gray-500 ${sizes.controlTextSize} py-1`}>OR</div>
 
                         <Button
                           variant="outline"
-                          className={`w-full ${sizes.buttonHeight} flex items-center justify-center gap-1 border border-gray-200 rounded-md ${sizes.fontSize}`}
+                          className={`w-full ${sizes.buttonHeight} flex items-center justify-center gap-1 border border-gray-200 rounded-md ${sizes.controlTextSize}`}
                         >
                           <GoogleIcon />
                           Continue with Google
@@ -462,7 +450,7 @@ export default function AuthPage() {
 
                         <Button
                           variant="outline"
-                          className={`w-full ${sizes.buttonHeight} flex items-center justify-center gap-1 border border-gray-200 rounded-md ${sizes.fontSize}`}
+                          className={`w-full ${sizes.buttonHeight} flex items-center justify-center gap-1 border border-gray-200 rounded-md ${sizes.controlTextSize}`}
                         >
                           <AppleIcon />
                           Continue with Apple
@@ -470,7 +458,7 @@ export default function AuthPage() {
 
                         <Button
                           variant="outline"
-                          className={`w-full ${sizes.buttonHeight} flex items-center justify-center gap-1 border border-gray-200 rounded-md ${sizes.fontSize}`}
+                          className={`w-full ${sizes.buttonHeight} flex items-center justify-center gap-1 border border-gray-200 rounded-md ${sizes.controlTextSize}`}
                           onClick={handlePasswordLogin}
                         >
                           <svg width="1.25rem" height="1.25rem" viewBox="0 -960 960 960" fill="#383838">
@@ -480,7 +468,7 @@ export default function AuthPage() {
                         </Button>
 
                         <div className="w-full text-center">
-                          <div className="text-xs text-[#4E5460] pt-2.5 pb-2.5">
+                          <div className="text-xs text-gray-500">
                             <Link href="/terms" className="hover:underline">
                               Terms of Use
                             </Link>
@@ -494,7 +482,7 @@ export default function AuthPage() {
                     </div>
                   ) : (
                     <div
-                      className={`rounded-[0.70rem] border-[0.25px] border-[rgba(0,163,236,0.25)] bg-[#F5F8FF] ${sizes.padding} shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(0,163,236,0.2)] w-full ${sizes.maxFormWidth} ${sizes.formBlockMarginTop}`}
+                      className={`rounded-[0.70rem] border-[0.25px] border-[rgba(115,185,255,0.3)] bg-[#F5F8FF] ${sizes.padding} shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(115,185,255,0.23)] w-full ${sizes.maxPasswordFormWidth}`}
                     >
                       <div className={`flex flex-col justify-between ${sizes.spacing}`}>
                         <div className="w-full">
@@ -506,7 +494,7 @@ export default function AuthPage() {
                               setEmail(e.target.value)
                               if (emailError) setEmailError("")
                             }}
-                            className={`${sizes.inputHeight} rounded-md ${sizes.inputFontSize} ${emailError ? "border-2 border-[#00A3EC]" : "border-gray-200"}`}
+                            className={`${sizes.inputHeight} rounded-md text-base ${emailError ? "border-2 border-blue-500" : "border-gray-200"}`}
                           />
                         </div>
 
@@ -519,13 +507,13 @@ export default function AuthPage() {
                               setPassword(e.target.value)
                               if (emailError) setEmailError("")
                             }}
-                            className={`${sizes.inputHeight} rounded-md ${sizes.inputFontSize} ${emailError ? "border-2 border-[#00A3EC]" : "border-gray-200"}`}
+                            className={`${sizes.inputHeight} rounded-md ${sizes.controlTextSize} ${emailError ? "border-2 border-blue-500" : "border-gray-200"}`}
                           />
                           {password.length > 0 && (
                             <button
                               type="button"
                               onClick={togglePasswordVisibility}
-                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#4E5460] hover:opacity-80"
+                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                               aria-label={showPassword ? "Hide password" : "Show password"}
                             >
                               {showPassword ? <EyeOffIcon /> : <EyeIcon />}
@@ -533,11 +521,11 @@ export default function AuthPage() {
                           )}
                         </div>
                         {emailError && (
-                          <p style={{ color: "#00A3EC", fontSize: "0.7rem", marginTop: "0.25rem" }}>{emailError}</p>
+                          <p style={{ color: "#0078FF", fontSize: "0.7rem", marginTop: "0.25rem" }}>{emailError}</p>
                         )}
 
                         <Button
-                          className={`w-full ${sizes.buttonHeight} bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 text-white rounded-md ${sizes.fontSize}`}
+                          className={`w-full ${sizes.buttonHeight} bg-gradient-to-r from-[#BACEFF] to-[#0078FF] hover:from-[#A9BDFF] hover:to-[#0069E0] text-white rounded-md ${sizes.controlTextSize}`}
                           onClick={handlePasswordContinue}
                         >
                           Continue
@@ -546,7 +534,7 @@ export default function AuthPage() {
                         <div className="flex justify-center w-full">
                           <button
                             onClick={handleBackToMain}
-                            className="flex items-center text-[#00A3EC] hover:text-[#6988FF]"
+                            className="flex items-center text-blue-400 hover:text-blue-500"
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -557,12 +545,12 @@ export default function AuthPage() {
                             >
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                             </svg>
-                            <span className={`text-[#00A3EC] ${sizes.fontSize}`}>Back</span>
+                            <span className={`text-blue-400 ${sizes.controlTextSize}`}>Back</span>
                           </button>
                         </div>
 
                         <div className="w-full text-center">
-                          <div className="text-xs text-[#4E5460] pt-2.5 pb-2.5">
+                          <div className="text-xs text-gray-500">
                             <Link href="/terms" className="hover:underline">
                               Terms of Use
                             </Link>
@@ -577,25 +565,25 @@ export default function AuthPage() {
                   )}
                 </>
               ) : (
-                <div className={`flex flex-col items-center justify-center w-full max-w-md mx-auto text-center min-h-0 px-4 sm:px-6`}>
-                  <div className="mb-3 sm:mb-4">
+                <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto text-center shrink-0 min-h-0 py-4 px-4 sm:px-6">
+                  <div className="mb-4">
                     <Image
                       src="/images/email-verify-icon.png"
                       alt="Email Sent"
-                      width={viewportHeight < 600 ? 56 : 72}
-                      height={viewportHeight < 600 ? 56 : 72}
+                      width={viewportHeight < 600 ? 60 : 80}
+                      height={viewportHeight < 600 ? 60 : 80}
                       className="mx-auto block"
                     />
                   </div>
-                  <h2 className={`${sizes.titleSize} font-medium text-[#4E5460] mb-2 leading-snug`}>
+                  <h2 className={`${sizes.titleSize} font-medium text-gray-800 mb-3`}>
                     We sent you a magic link to log in!
                   </h2>
-                  <p className={`text-[#4E5460] mb-1.5 ${sizes.fontSize} leading-relaxed max-w-sm mx-auto`}>
-                    We sent an email to you at <span className="font-medium text-[#00A3EC] break-all">{email}</span>.
+                  <p className="text-gray-600 mb-1 text-base">
+                    We sent an email to you at <span className="font-medium text-[#0078FF] break-all">{email}</span>.
                   </p>
-                  <p className={`text-[#4E5460] ${sizes.fontSize} leading-relaxed max-w-sm mx-auto`}>Click the link in the email to log in to your account.</p>
-                  <p className={`text-[#4E5460] mt-3 sm:mt-4 ${sizes.fontSize} opacity-90`}>
-                    Redirecting to onboarding in <span className="font-medium text-[#00A3EC]">{countdown}</span>{" "}
+                  <p className="text-gray-600 text-base">Click the link in the email to log in to your account.</p>
+                  <p className="text-gray-500 mt-3 mb-[40px] text-base">
+                    Redirecting to onboarding in <span className="font-medium text-[#0078FF]">{countdown}</span>{" "}
                     seconds...
                   </p>
                 </div>
@@ -603,25 +591,33 @@ export default function AuthPage() {
             </div>
 
             {!showConfirmation && (
-              <div className={cn("flex items-end gap-0 justify-start", sizes.footerPaddingBottom, sizes.footerPaddingTop)}>
-                <div className="w-full px-2 flex justify-center items-center">
-                  <button
+              <div className="w-full pt-[5vh] pb-[5vh]">
+                <div className="mx-auto flex w-full max-w-md min-w-0 flex-row items-stretch justify-center gap-2.5">
+                  <Button
                     type="button"
+                    variant="outline"
                     onClick={() => document.getElementById("watch-section")?.scrollIntoView({ behavior: "smooth" })}
-                    className={`${sizes.fontSize} text-sm md:text-base font-medium text-[#00A3EC] hover:text-[#6988FF] hover:border-[#6988FF] hover:bg-[#00A3EC]/10 transition-colors border border-[#00A3EC] rounded-md px-3 pt-1.5 pb-1.5`}
+                    className={`min-w-0 flex-1 border-[#0078FF] text-[#0078FF] hover:bg-[#0078FF]/10 sm:flex-none sm:w-auto ${sizes.controlTextSize}`}
                   >
-                    Read more
-                  </button>
+                    See it in action
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={focusEmail}
+                    className={`min-w-0 flex-1 bg-gradient-to-r from-[#BACEFF] to-[#0078FF] hover:from-[#A9BDFF] hover:to-[#0069E0] text-white sm:flex-none sm:w-auto ${sizes.controlTextSize}`}
+                  >
+                    Start free
+                  </Button>
                 </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* Right Column - Logo and Slides - Desktop Only */}
-        <div className="hidden xl:flex xl:w-1/2 xl:min-h-0 flex-col rounded-lg xl:m-0 xl:h-full" style={{ background: "linear-gradient(135deg, #E8F7FE 0%, #EEF0FF 100%)" }}>
-          <div className="flex flex-col h-full p-6">
-            <div className="flex justify-center w-full flex-shrink-0 mb-7">
+        {/* Right Column — structure/styles from reference AuthPage; copy & 3 slides unchanged */}
+        <div className="m-4 hidden w-full flex-col rounded-lg bg-blue-50 xl:flex xl:h-[calc(100vh-2rem)] xl:min-h-0 xl:w-1/2">
+          <div className="flex h-full flex-col p-6">
+            <div className="mb-7 flex w-full flex-shrink-0 justify-center">
               <div className="flex flex-col items-center gap-2">
                 <Image
                   src="/images/skillsAI-logo.webp"
@@ -633,17 +629,17 @@ export default function AuthPage() {
               </div>
             </div>
 
-            <div className="flex justify-center w-full flex-shrink-0 mt-4">
-              <div className="flex items-center gap-3 rounded-[0.70rem] border-[0.25px] border-[rgba(0,163,236,0.25)] bg-[#F5F8FF] shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(0,163,236,0.2)] rounded-lg p-4 w-[30rem]">
+            <div className="mt-4 flex w-full flex-shrink-0 justify-center">
+              <div className="flex w-[30rem] items-center gap-3 rounded-[0.70rem] rounded-lg border-[0.25px] border-[rgba(115,185,255,0.3)] bg-[#F5F8FF] p-4 shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(115,185,255,0.23)]">
                 <div className="flex-shrink-0">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(0,163,236,0.15)", color: "#00A3EC" }}>
-                    {currentSlide === 0 && <DollarSign className="w-5 h-5" strokeWidth={2} />}
-                    {currentSlide === 1 && <Globe className="w-5 h-5" strokeWidth={2} />}
-                    {currentSlide === 2 && <Users className="w-5 h-5" strokeWidth={2} />}
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                    {currentSlide === 0 && <DollarSign className="h-5 w-5" strokeWidth={2} />}
+                    {currentSlide === 1 && <Globe className="h-5 w-5" strokeWidth={2} />}
+                    {currentSlide === 2 && <Users className="h-5 w-5" strokeWidth={2} />}
                   </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-[#4E5460] leading-relaxed text-base">
+                <div className="min-w-0 flex-1">
+                  <p className="text-base font-medium leading-relaxed text-gray-600">
                     {currentSlide === 0 && "Monetize your expertise, deliver an impactful experience"}
                     {currentSlide === 1 && "Successfully ran and scale an educational business"}
                     {currentSlide === 2 && "Create, sell, and manage memberships"}
@@ -652,35 +648,27 @@ export default function AuthPage() {
               </div>
             </div>
 
-            <div className="w-full mt-4 flex-1 flex flex-col min-h-0 overflow-hidden">
-              <div className="flex-1 flex items-start justify-center min-h-0 overflow-hidden">
+            <div className="mt-5 flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden">
               <div
-                className={`w-full max-w-4xl h-full flex items-start justify-center transition-opacity duration-200 ease-in-out ${
+                className={`flex h-full w-full max-w-4xl items-center justify-center px-3 transition-opacity duration-200 ease-in-out ${
                   fadeIn ? "opacity-100" : "opacity-0"
                 }`}
               >
-                <div className="w-full h-full flex items-start justify-center p-2 pt-14">
+                <div className="flex h-full w-full items-center justify-center p-4">
                   <div
-                    className="relative w-fit h-fit max-w-full max-h-full cursor-pointer"
+                    className="flex h-full max-h-full w-full max-w-full cursor-pointer items-center justify-center px-1"
                     role="button"
                     tabIndex={0}
                     onClick={() => changeSlide((currentSlide + 1) % slides.length)}
                     onKeyDown={(e) => e.key === "Enter" && changeSlide((currentSlide + 1) % slides.length)}
                   >
-                    <div className="absolute left-0 top-0 z-10 rounded-xl border border-[#00A3EC]/30 bg-white px-4 py-2.5 shadow-sm w-fit -translate-y-[calc(100%+0.5rem)]">
-                      <span className="text-sm font-medium text-[#4E5460]">
-                        {currentSlide === 0 && "Design, Build, and Refine Courses"}
-                        {currentSlide === 1 && "Create Projects & Organize Folders"}
-                        {currentSlide === 2 && "Explore All Courses & Configure"}
-                      </span>
-                    </div>
                     {currentSlide === 0 ? (
                       <Image
                         src="/images/slide-1.png"
                         alt="Monetize your expertise, deliver an impactful experience"
                         width={680}
                         height={400}
-                        className="rounded-lg object-contain max-w-full max-h-full block"
+                        className="h-full max-h-full w-full rounded-lg object-contain"
                         priority
                         unoptimized
                       />
@@ -690,7 +678,7 @@ export default function AuthPage() {
                         alt="Successfully ran and scale an educational business"
                         width={680}
                         height={400}
-                        className="rounded-lg object-contain max-w-full max-h-full block"
+                        className="h-full max-h-full w-full rounded-lg object-contain"
                         unoptimized
                       />
                     ) : (
@@ -699,7 +687,7 @@ export default function AuthPage() {
                         alt="Create, sell, and manage memberships"
                         width={680}
                         height={400}
-                        className="rounded-lg object-contain max-w-full max-h-full block"
+                        className="h-full max-h-full w-full rounded-lg object-contain"
                         unoptimized
                       />
                     )}
@@ -707,13 +695,14 @@ export default function AuthPage() {
                 </div>
               </div>
             </div>
-            </div>
 
-            <div className="flex justify-center gap-1 mt-3 flex-shrink-0 pb-2">
+            <div className="mt-3 flex flex-shrink-0 justify-center gap-1 pb-2">
               {slides.map((_, index) => (
                 <button
                   key={index}
-                  className={`w-2 h-2 rounded-full ${index === currentSlide ? "bg-[#00A3EC]" : "bg-gray-300"}`}
+                  type="button"
+                  aria-label={`Go to slide ${index + 1}`}
+                  className={`h-2 w-2 rounded-full ${index === currentSlide ? "bg-blue-500" : "bg-gray-300"}`}
                   onClick={() => changeSlide(index)}
                 />
               ))}
@@ -725,14 +714,10 @@ export default function AuthPage() {
 
       {/* Mobile/Tablet Slides Section */}
       {!showConfirmation && (
-      <div
-        id="mobile-slides-section"
-        className="xl:hidden w-full py-16 px-4"
-        style={{ background: "linear-gradient(135deg, #E8F7FE 0%, #EEF0FF 100%)" }}
-      >
-        <div className="max-w-7xl mx-auto w-full">
-          <div className="max-w-2xl mx-auto">
-          <div className="flex justify-center w-full mb-6">
+      <div id="mobile-slides-section" className="w-full bg-blue-50 px-4 py-12 xl:hidden">
+        <div className="mx-auto w-full max-w-7xl">
+          <div className="mx-auto max-w-2xl">
+          <div className="mb-6 flex w-full justify-center">
             <Image
               src="/images/skillsAI-logo.webp"
               alt="ibl.ai Wink"
@@ -742,17 +727,17 @@ export default function AuthPage() {
             />
           </div>
 
-          <div className="flex justify-center w-full mb-6">
-            <div className="flex items-center gap-3 rounded-[0.70rem] border-[0.25px] border-[rgba(0,163,236,0.25)] bg-[#F5F8FF] shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(0,163,236,0.2)] rounded-lg p-4 w-full max-w-md">
+          <div className="mb-6 flex w-full justify-center">
+            <div className="flex w-full max-w-md items-center gap-3 rounded-[0.70rem] rounded-lg border-[0.25px] border-[rgba(115,185,255,0.3)] bg-[#F5F8FF] p-4 shadow-[0_0.125rem_1.25rem_0.3125rem_rgba(115,185,255,0.23)]">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(0,163,236,0.15)", color: "#00A3EC" }}>
-                  {currentSlide === 0 && <DollarSign className="w-5 h-5" strokeWidth={2} />}
-                  {currentSlide === 1 && <Globe className="w-5 h-5" strokeWidth={2} />}
-                  {currentSlide === 2 && <Users className="w-5 h-5" strokeWidth={2} />}
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                  {currentSlide === 0 && <DollarSign className="h-5 w-5" strokeWidth={2} />}
+                  {currentSlide === 1 && <Globe className="h-5 w-5" strokeWidth={2} />}
+                  {currentSlide === 2 && <Users className="h-5 w-5" strokeWidth={2} />}
                 </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-[#4E5460] leading-relaxed text-sm sm:text-base">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium leading-relaxed text-gray-600 sm:text-base">
                   {currentSlide === 0 && "Monetize your expertise, deliver an impactful experience"}
                   {currentSlide === 1 && "Successfully ran and scale an educational business"}
                   {currentSlide === 2 && "Create, sell, and manage memberships"}
@@ -773,13 +758,6 @@ export default function AuthPage() {
                   onClick={() => changeSlide((currentSlide + 1) % slides.length)}
                   onKeyDown={(e) => e.key === "Enter" && changeSlide((currentSlide + 1) % slides.length)}
                 >
-                  <div className="rounded-xl border border-[#00A3EC]/30 bg-white px-4 py-2.5 shadow-sm w-fit mb-2">
-                    <span className="text-sm font-medium text-[#4E5460]">
-                      {currentSlide === 0 && "Design, Build, and Refine Courses"}
-                      {currentSlide === 1 && "Create Projects & Organize Folders"}
-                      {currentSlide === 2 && "Explore All Courses & Configure"}
-                    </span>
-                  </div>
                   {currentSlide === 0 ? (
                     <Image
                       src="/images/slide-1.png"
@@ -818,7 +796,9 @@ export default function AuthPage() {
             {slides.map((_, index) => (
               <button
                 key={index}
-                className={`w-2.5 h-2.5 rounded-full transition-colors ${index === currentSlide ? "bg-[#00A3EC]" : "bg-gray-300"}`}
+                type="button"
+                aria-label={`Go to slide ${index + 1}`}
+                className={`h-2.5 w-2.5 rounded-full transition-colors ${index === currentSlide ? "bg-blue-500" : "bg-gray-300"}`}
                 onClick={() => changeSlide(index)}
               />
             ))}
@@ -831,12 +811,12 @@ export default function AuthPage() {
       {!showConfirmation && (
         <>
           <WatchSection />
+          <AudienceSection />
           <PricingSection />
+          <BuiltWithWinkSection />
           <FAQSection />
         </>
       )}
-
-      <ScrollToTopButton scrollToTop={scrollToTop} showScrollTop={showScrollTop} />
     </div>
   )
 }

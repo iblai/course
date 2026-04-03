@@ -144,13 +144,22 @@ export function AddSourcesDialog({
   const itemIconCls = "h-4 w-4 shrink-0 object-contain"
   const iconDir = "/icons/add-source-dialog"
 
+  const iconTintCls =
+    "text-[#38A1E5] [&>svg]:h-5 [&>svg]:w-5 [&>svg]:text-[#38A1E5] [&>img]:h-5 [&>img]:w-5 [&>img]:object-contain [&>img]:[filter:brightness(0)_saturate(100%)_invert(67%)_sepia(52%)_saturate(1023%)_hue-rotate(182deg)_brightness(95%)_contrast(91%)]"
+  const itemTintCls =
+    "text-[#38A1E5] [&>svg]:h-4 [&>svg]:w-4 [&>svg]:text-[#38A1E5] [&>img]:h-4 [&>img]:w-4 [&>img]:object-contain [&>img]:[filter:brightness(0)_saturate(100%)_invert(67%)_sepia(52%)_saturate(1023%)_hue-rotate(182deg)_brightness(95%)_contrast(91%)]"
+  const iconNoTintCls = "flex shrink-0 items-center justify-center [&>img]:h-5 [&>img]:w-5 [&>img]:object-contain"
+  const itemNoTintCls = "flex shrink-0 items-center justify-center [&>img]:h-4 [&>img]:w-4 [&>img]:object-contain"
+
   const sourceOptions = [
     {
       title: "Google Workspace",
+      keepBrandColor: true,
       icon: <Image src={`${iconDir}/google-workspace.svg`} alt="" width={20} height={20} className={iconCls} />,
       items: [
         {
           name: "Google Drive",
+          keepBrandColor: true,
           icon: <Image src={`${iconDir}/google-drive.svg`} alt="" width={16} height={16} className={itemIconCls} />,
           action: () => console.log("Google Drive clicked"),
         },
@@ -158,6 +167,7 @@ export function AddSourcesDialog({
     },
     {
       title: "Microsoft OneDrive",
+      keepBrandColor: true,
       icon: <Image src={`${iconDir}/onedrive.svg`} alt="" width={20} height={20} className={iconCls} />,
       items: [
         {
@@ -472,7 +482,7 @@ export function AddSourcesDialog({
             {sourceOptions.map((option) => (
               <div key={option.title} className="border border-border rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-3 min-h-[1.5rem]">
-                  <span className="flex shrink-0 items-center justify-center text-[#38A1E5] [&>svg]:h-5 [&>svg]:w-5 [&>svg]:text-[#38A1E5] [&>img]:h-5 [&>img]:w-5 [&>img]:object-contain [&>img]:[filter:brightness(0)_saturate(100%)_invert(67%)_sepia(52%)_saturate(1023%)_hue-rotate(182deg)_brightness(95%)_contrast(91%)]">
+                  <span className={option.keepBrandColor ? iconNoTintCls : `flex shrink-0 items-center justify-center ${iconTintCls}`}>
                     {option.icon}
                   </span>
                   <span className="font-medium text-slate-600">{option.title}</span>
@@ -484,7 +494,7 @@ export function AddSourcesDialog({
                       onClick={item.action}
                       className="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm bg-[#38A1E5]/10 text-[#38A1E5] hover:bg-[#38A1E5]/20 transition-colors"
                     >
-                      <span className="flex shrink-0 items-center justify-center text-[#38A1E5] [&>svg]:h-4 [&>svg]:w-4 [&>svg]:text-[#38A1E5] [&>img]:h-4 [&>img]:w-4 [&>img]:object-contain [&>img]:[filter:brightness(0)_saturate(100%)_invert(67%)_sepia(52%)_saturate(1023%)_hue-rotate(182deg)_brightness(95%)_contrast(91%)]">
+                      <span className={(item as { keepBrandColor?: boolean }).keepBrandColor ? itemNoTintCls : `flex shrink-0 items-center justify-center ${itemTintCls}`}>
                         {item.icon}
                       </span>
                       {item.name}

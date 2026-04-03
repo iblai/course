@@ -17,7 +17,7 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: "ibl.ai Wink - AI-Powered Learning Platform",
+  title: "wink.school - AI-Powered Learning Platform",
   description: "Master in-demand skills with personalized AI-powered learning paths. Start your journey today.",
   generator: "v0.app",
   icons: {

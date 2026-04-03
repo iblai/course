@@ -13,19 +13,19 @@ export function FAQSection() {
 
   const faqData = [
     {
-      question: "How does ibl.ai Wink help me create better courses?",
+      question: "How does wink.school help me create better courses?",
       answer:
-        "ibl.ai Wink uses advanced AI algorithms to analyze your teaching goals, subject matter, student level, and learning objectives to help you create engaging, personalized course content that aligns with your educational vision and student needs.",
+        "wink.school uses advanced AI algorithms to analyze your teaching goals, subject matter, student level, and learning objectives to help you create engaging, personalized course content that aligns with your educational vision and student needs.",
     },
     {
-      question: "Can I launch my own school, academy, or university?",
+      question: "Can I launch my own school or university?",
       answer:
         "That's the point. Our goal is to allow you to develop your own learning initiative by monetizing your expertise and maximizing impact. We built Wink to give you a powerful tool to thrive in this new AI economy.",
     },
     {
       question: "How do I customize my course content?",
       answer:
-        "Simply input your course objectives, target audience, and subject matter. ibl.ai Wink will generate tailored content that you can further customize, edit, and adapt to match your teaching style and student requirements.",
+        "Simply input your course objectives, target audience, and subject matter. wink.school will generate tailored content that you can further customize, edit, and adapt to match your teaching style and student requirements.",
     },
     {
       question: "How do I update my course preferences?",
@@ -43,7 +43,7 @@ export function FAQSection() {
         "You can work on multiple course projects simultaneously by creating different course outlines and generating content for various subjects based on your diverse teaching needs and educational goals.",
     },
     {
-      question: "Can I use ibl.ai Wink for free?",
+      question: "Can I use wink.school for free?",
       answer:
         "Yes! We offer a free Basic plan that includes 3 course templates, 4 AI-powered content generations, access to 10 educational resources, and 50 community interactions. Perfect for getting started with course creation.",
     },
@@ -53,7 +53,7 @@ export function FAQSection() {
         "You can upgrade your plan at any time from your account settings. Changes take effect immediately and you'll have access to additional course templates and premium AI features.",
     },
     {
-      question: "Can I cancel ibl.ai Wink at any time?",
+      question: "Can I cancel wink.school at any time?",
       answer:
         "Yes, you can cancel your subscription at any time. Your account will remain active until the end of your current billing period, and you'll retain access to your course creation history.",
     },
@@ -71,8 +71,8 @@ export function FAQSection() {
     >
       <div className="max-w-7xl mx-auto w-full">
         {/* Header */}
-        <div className="mb-10">
-          <h1 className="text-3xl font-bold text-[var(--sidebar-foreground)] mb-10 mr-5 lg:text-5xl lg:mr-0">
+          <div className="mb-10">
+          <h1 className="text-2xl font-bold text-[var(--sidebar-foreground)] mb-10 mr-5 lg:text-4xl lg:mr-0">
             Frequently asked questions
           </h1>
         </div>
@@ -154,7 +154,7 @@ export function FAQSection() {
 
               <div>
                 <label htmlFor="impact" className="block text-sm font-medium text-[var(--sidebar-foreground)] mb-1">
-                  How does this issue limit your use of ibl.ai Wink?
+                  How does this issue limit your use of wink.school?
                 </label>
                 <Select>
                   <SelectTrigger className="w-full h-10 border border-[#E5E7EB] rounded-md">

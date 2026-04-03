@@ -1280,64 +1280,76 @@ export default function HomePage() {
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-0.5">
                     <button
+                      id="course-type-live"
                       type="button"
                       onClick={() => setCourseDetailsForm((prev) => ({ ...prev, courseType: "live" }))}
                       className={cn(
                         "flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg border-2 text-left transition-all duration-200 sm:min-h-[72px]",
                         courseDetailsForm.courseType === "live"
-                          ? "border-[#2563EB] bg-blue-50/50 shadow-sm"
+                          ? "v0-course-type-card-selected border-[#00A3EC] bg-[rgba(0,163,236,0.08)] hover:bg-[rgba(0,163,236,0.12)] shadow-sm"
                           : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50/50"
                       )}
+                      style={
+                        courseDetailsForm.courseType === "live"
+                          ? { boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)" }
+                          : undefined
+                      }
                     >
                       <div
                         className={cn(
                           "flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center",
-                          courseDetailsForm.courseType === "live" ? "bg-blue-100 text-[#2563EB]" : "bg-gray-100 text-gray-600"
+                          courseDetailsForm.courseType === "live" ? "bg-[rgba(0,163,236,0.15)] text-[#00A3EC]" : "bg-gray-100 text-gray-600"
                         )}
                       >
                         <Video className="w-4 h-4 sm:w-5 sm:h-5" />
                       </div>
                       <div className="min-w-0 flex-1 py-0.5">
-                        <span className="text-sm font-semibold text-[var(--sidebar-foreground)] block">Live</span>
+                        <span className="text-sm font-semibold text-[#1F2937] block">Live</span>
                         <span className="text-xs text-gray-500 mt-1 block line-clamp-2">
                           Intro video, description, and live sessions.
                         </span>
                       </div>
                       <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center">
                         {courseDetailsForm.courseType === "live" ? (
-                          <Check className="w-4 h-4 sm:w-5 sm:h-5 text-[#2563EB]" />
+                          <Check className="w-4 h-4 sm:w-5 sm:h-5 text-[#00A3EC]" />
                         ) : (
                           <span className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden />
                         )}
                       </div>
                     </button>
                     <button
+                      id="course-type-traditional"
                       type="button"
                       onClick={() => setCourseDetailsForm((prev) => ({ ...prev, courseType: "traditional" }))}
                       className={cn(
                         "flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg border-2 text-left transition-all duration-200 sm:min-h-[72px]",
                         courseDetailsForm.courseType === "traditional"
-                          ? "border-[#2563EB] bg-blue-50/50 shadow-sm"
+                          ? "v0-course-type-card-selected border-[#00A3EC] bg-[rgba(0,163,236,0.08)] hover:bg-[rgba(0,163,236,0.12)] shadow-sm"
                           : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50/50"
                       )}
+                      style={
+                        courseDetailsForm.courseType === "traditional"
+                          ? { boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)" }
+                          : undefined
+                      }
                     >
                       <div
                         className={cn(
                           "flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center",
-                          courseDetailsForm.courseType === "traditional" ? "bg-blue-100 text-[#2563EB]" : "bg-gray-100 text-gray-600"
+                          courseDetailsForm.courseType === "traditional" ? "bg-[rgba(0,163,236,0.15)] text-[#00A3EC]" : "bg-gray-100 text-gray-600"
                         )}
                       >
                         <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
                       </div>
                       <div className="min-w-0 flex-1 py-0.5">
-                        <span className="text-sm font-semibold text-[var(--sidebar-foreground)] block">Traditional</span>
-                        <span className="text-xs text-gray-500 mt-1 block line-clamp-2">
+                        <span className="text-sm font-semibold text-[#1F2937] block">Traditional</span>
+                        <span className="text-xs text-[#6B7280] mt-1 block line-clamp-2">
                           Self-paced course with sections, units, and content blocks (current format).
                         </span>
                       </div>
                       <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center">
                         {courseDetailsForm.courseType === "traditional" ? (
-                          <Check className="w-4 h-4 sm:w-5 sm:h-5 text-[#2563EB]" />
+                          <Check className="w-4 h-4 sm:w-5 sm:h-5 text-[#00A3EC]" />
                         ) : (
                           <span className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden />
                         )}

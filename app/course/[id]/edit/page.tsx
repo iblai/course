@@ -234,6 +234,7 @@ export default function CourseEditPage() {
   const [isCreateAcademyDialogOpen, setIsCreateAcademyDialogOpen] = useState(false)
   const [isEditAcademyMode, setIsEditAcademyMode] = useState(false)
   const mainScrollRef = useRef<HTMLDivElement>(null)
+  const selectedSection = sections.find((s) => s.id === selectedSectionId)
 
   useEffect(() => {
     try {
@@ -812,176 +813,215 @@ export default function CourseEditPage() {
 
                 {/* Hierarchical outline with content blocks (screenshot style) */}
                 <section className="min-w-0">
-                  {!selectedSectionId || sections.length === 0 ? (
+                  {!selectedSection || sections.length === 0 ? (
                     <div className="px-4 py-8 text-center text-sm text-gray-500 bg-white rounded-lg border border-gray-200">
                       No sections yet. Click &quot;Add Section&quot; to create one.
                     </div>
                   ) : (
-                    (() => {
-                      const section = sections.find((s) => s.id === selectedSectionId)
-                      if (!section) return null
-                      return (
-                        <div className="space-y-5">
-                          {/* Section heading with Generate + Edit */}
-                          <div className="flex items-center gap-2 pb-3 border-b border-gray-200">
-                            <h2 className="text-lg font-bold text-[var(--sidebar-foreground)] min-w-0 flex-1">
-                              {section.displayName || section.name}
-                            </h2>
-                            <div className="flex items-center gap-1.5 shrink-0">
-                              <TooltipProvider>
-                                <TooltipFlowbite content="Generate content" position="top">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleGenerateSectionContent(section.id)}
-                                    disabled={generatingSectionId === section.id}
-                                    aria-label="Generate content"
-                                    className={cn(ACTION_BTN_BASE, ACTION_BTN_SECTION)}
-                                  >
-                                    <RotateCw className={cn("w-4 h-4", generatingSectionId === section.id && "animate-spin")} />
-                                  </button>
-                                </TooltipFlowbite>
-                                <TooltipFlowbite content="Edit section" position="top">
-                                  <button
-                                    type="button"
-                                    onClick={() => openEditSection(section)}
-                                    aria-label="Edit section"
-                                    className={cn(ACTION_BTN_BASE, ACTION_BTN_SECTION)}
-                                  >
-                                    <Pencil className="w-4 h-4" />
-                                  </button>
-                                </TooltipFlowbite>
-                              </TooltipProvider>
-                            </div>
+                    <div className="space-y-5">
+                      {/* Section heading with Generate + Edit */}
+                      <div className="flex flex-col gap-2 items-start pb-3 border-b border-gray-200 sm:flex-row sm:items-center sm:gap-2">
+                        <h2 className="text-lg font-bold text-[var(--sidebar-foreground)] min-w-0 flex-1 w-full sm:w-auto">
+                          {selectedSection?.displayName || selectedSection?.name}
+                        </h2>
+                        {selectedSection && (
+                          <div className="flex items-center gap-1.5 shrink-0 sm:ml-0">
+                            <TooltipProvider>
+                              <TooltipFlowbite content="Generate content" position="top">
+                                <button
+                                  type="button"
+                                  onClick={() => handleGenerateSectionContent(selectedSection.id)}
+                                  disabled={generatingSectionId === selectedSection.id}
+                                  aria-label="Generate content"
+                                  className={cn(ACTION_BTN_BASE, ACTION_BTN_SECTION)}
+                                >
+                                  <RotateCw
+                                    className={cn(
+                                      "w-4 h-4 text-[#2563EB]",
+                                      generatingSectionId === selectedSection.id && "animate-spin"
+                                    )}
+                                  />
+                                </button>
+                              </TooltipFlowbite>
+                              <TooltipFlowbite content="Edit section" position="top">
+                                <button
+                                  type="button"
+                                  onClick={() => openEditSection(selectedSection)}
+                                  aria-label="Edit section"
+                                  className={cn(ACTION_BTN_BASE, ACTION_BTN_SECTION)}
+                                >
+                                  <Pencil className="w-4 h-4" />
+                                </button>
+                              </TooltipFlowbite>
+                            </TooltipProvider>
                           </div>
+                        )}
+                      </div>
 
-                          {/* Subsections → Units → Content blocks */}
-                          {(section.subsections || []).map((sub) => (
-                            <div key={sub.id} className="pt-[5px] first:pt-2 border-b border-gray-100 last:border-b-0 pb-5 last:pb-0">
-                              <div className="flex items-center gap-2 mb-4">
-                                <h3 className="text-base font-semibold text-[var(--sidebar-foreground)] min-w-0 flex-1">
-                                  {sub.name}
-                                </h3>
-                                <div className="flex items-center gap-1.5 shrink-0">
-                                  <TooltipProvider>
-                                    <TooltipFlowbite content="Generate content" position="top">
-                                      <button
-                                        type="button"
-                                        onClick={() => handleGenerateSubsectionContent(sub.id)}
-                                        disabled={generatingSubsectionId === sub.id}
-                                        aria-label="Generate content"
-                                        className={cn(ACTION_BTN_BASE, ACTION_BTN_SUBSECTION)}
-                                      >
-                                        <RotateCw className={cn("w-4 h-4", generatingSubsectionId === sub.id && "animate-spin")} />
-                                      </button>
-                                    </TooltipFlowbite>
-                                    <TooltipFlowbite content="Edit subsection" position="top">
-                                      <button
-                                        type="button"
-                                        onClick={() => openEditSubsection(section.id, sub)}
-                                        aria-label="Edit subsection"
-                                        className={cn(ACTION_BTN_BASE, ACTION_BTN_SUBSECTION)}
-                                      >
-                                        <Pencil className="w-4 h-4" />
-                                      </button>
-                                    </TooltipFlowbite>
-                                  </TooltipProvider>
-                                </div>
-                              </div>
-                              {(sub.units || []).map((unit) => (
-                                <div key={unit.id} className="pl-3 sm:pl-5 ml-0 border-l-2 border-gray-200 mb-6 last:mb-0">
-                                  <div className="flex items-center gap-2 mb-3 mt-4 first:mt-0">
-                                    <h4 className="text-sm font-semibold text-gray-700 min-w-0 flex-1">{unit.name}</h4>
+                      {/* Subsections → Units → Content blocks */}
+                          {(selectedSection?.subsections ?? []).map((sub) => (
+                            <div key={sub.id} className="pt-[5px] first:pt-2 last:pb-0">
+                              <div className="rounded-xl bg-gray-50 dark:bg-slate-900/40 border border-gray-200 shadow-sm p-4 sm:p-5 space-y-4">
+                                <div className="flex flex-col gap-2 items-start w-full sm:flex-row sm:items-center sm:justify-between">
+                                  <h3 className="text-base font-semibold text-[var(--sidebar-foreground)] min-w-0 w-full sm:flex-1 sm:w-auto">
+                                    {sub.name}
+                                  </h3>
+                                  <div className="flex items-center justify-start gap-1.5 shrink-0">
                                     <TooltipProvider>
                                       <TooltipFlowbite content="Generate content" position="top">
                                         <button
                                           type="button"
-                                          onClick={() => handleGenerateUnitContent(unit.id)}
-                                          disabled={generatingUnitId === unit.id}
+                                          onClick={() => handleGenerateSubsectionContent(sub.id)}
+                                          disabled={generatingSubsectionId === sub.id}
                                           aria-label="Generate content"
-                                          className={cn(ACTION_BTN_BASE, ACTION_BTN_UNIT)}
+                                          className={cn(ACTION_BTN_BASE, ACTION_BTN_SUBSECTION)}
                                         >
-                                          <RotateCw className={cn("w-3.5 h-3.5", generatingUnitId === unit.id && "animate-spin")} />
+                                          <RotateCw
+                                            className={cn(
+                                              "w-4 h-4 text-[#2563EB]",
+                                              generatingSubsectionId === sub.id && "animate-spin"
+                                            )}
+                                          />
+                                        </button>
+                                      </TooltipFlowbite>
+                                      <TooltipFlowbite content="Edit subsection" position="top">
+                                        <button
+                                          type="button"
+                                          onClick={() => selectedSection && openEditSubsection(selectedSection.id, sub)}
+                                          aria-label="Edit subsection"
+                                          className={cn(ACTION_BTN_BASE, ACTION_BTN_SUBSECTION)}
+                                        >
+                                          <Pencil className="w-4 h-4" />
                                         </button>
                                       </TooltipFlowbite>
                                     </TooltipProvider>
                                   </div>
-                                  {(unit.blocks || []).map((block) => (
-                                    <div key={block.id} className="mb-6 last:mb-0">
-                                      <div className="flex items-center gap-2 mb-1.5">
-                                        <span className="font-medium text-gray-800 min-w-0 flex-1">{block.title}</span>
+                                </div>
+
+                                {sub.units && sub.units.length > 0 ? (
+                                  sub.units.map((unit) => (
+                                    <div
+                                      key={unit.id}
+                                      className="pl-3 sm:pl-5 ml-0 border-l-2 border-gray-200 mb-4 last:mb-0"
+                                    >
+                                      <div className="flex flex-wrap items-center gap-2 mb-3 mt-4 first:mt-1">
+                                        <h4 className="text-sm font-semibold text-gray-700 min-w-0 flex-1">
+                                          {unit.name}
+                                        </h4>
                                         <TooltipProvider>
-                                          <TooltipFlowbite content="Edit block" position="top">
+                                          <TooltipFlowbite content="Generate content" position="top">
                                             <button
                                               type="button"
-                                              aria-label="Edit block"
-                                              onClick={() => openEditBlock(section.id, sub.id, unit.id, block)}
-                                              className={cn(ACTION_BTN_BASE, ACTION_BTN_BLOCK)}
+                                              onClick={() => handleGenerateUnitContent(unit.id)}
+                                              disabled={generatingUnitId === unit.id}
+                                              aria-label="Generate content"
+                                              className={cn(ACTION_BTN_BASE, ACTION_BTN_UNIT)}
                                             >
-                                              <Pencil className="w-3.5 h-3.5" />
+                                              <RotateCw
+                                                className={cn(
+                                                  "w-3.5 h-3.5 text-[#2563EB]",
+                                                  generatingUnitId === unit.id && "animate-spin"
+                                                )}
+                                              />
                                             </button>
                                           </TooltipFlowbite>
                                         </TooltipProvider>
                                       </div>
-                                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm text-sm text-gray-800 leading-relaxed mt-1">
-                                        {block.type === "html" && block.html && (
-                                          <div
-                                            className="prose prose-sm max-w-none prose-p:leading-relaxed prose-p:my-2 first:prose-p:mt-0 last:prose-p:mb-0 prose-headings:font-semibold prose-headings:text-gray-900"
-                                            dangerouslySetInnerHTML={{ __html: block.html }}
-                                          />
-                                        )}
-                                        {block.type === "video" && block.videoId && (
-                                          <p className="font-medium text-gray-600">YouTube ID: {block.videoId}</p>
-                                        )}
-                                        {block.type === "quiz" && block.quiz && (
-                                          <div>
-                                            <p className="font-semibold text-gray-800 mb-1">Question:</p>
-                                            <p className="mb-2">{block.quiz.question}</p>
-                                            <p className="font-semibold text-gray-800 mb-1">Choices:</p>
-                                            <ul className="list-disc list-inside space-y-0.5">
-                                              {block.quiz.choices.map((choice, i) => (
-                                                <li key={i} className="flex items-center gap-2">
-                                                  {choice}
-                                                  {i === block.quiz!.correctIndex && (
-                                                    <span className="text-[#00A3EC]" aria-label="Correct">✓</span>
-                                                  )}
-                                                </li>
-                                              ))}
-                                            </ul>
+
+                                      {(unit.blocks ?? []).map((block) => (
+                                        <div key={block.id} className="mb-4 last:mb-0">
+                                          <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                                            <span className="font-medium text-gray-800 min-w-0 flex-1">
+                                              {block.title}
+                                            </span>
+                                            <TooltipProvider>
+                                              <TooltipFlowbite content="Edit block" position="top">
+                                                <button
+                                                  type="button"
+                                                  aria-label="Edit block"
+                                                  onClick={() =>
+                                                    selectedSection &&
+                                                    openEditBlock(selectedSection.id, sub.id, unit.id, block)
+                                                  }
+                                                  className={cn(ACTION_BTN_BASE, ACTION_BTN_BLOCK)}
+                                                >
+                                                  <Pencil className="w-3.5 h-3.5" />
+                                                </button>
+                                              </TooltipFlowbite>
+                                            </TooltipProvider>
                                           </div>
-                                        )}
-                                      </div>
+
+                                          <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm text-sm text-gray-800 leading-relaxed mt-1">
+                                            {block.type === "html" && block.html && (
+                                              <div
+                                                className="prose prose-sm max-w-none prose-p:leading-relaxed prose-p:my-2 first:prose-p:mt-0 last:prose-p:mb-0 prose-headings:font-semibold prose-headings:text-gray-900"
+                                                dangerouslySetInnerHTML={{ __html: block.html }}
+                                              />
+                                            )}
+                                            {block.type === "video" && block.videoId && (
+                                              <p className="font-medium text-gray-600">
+                                                YouTube ID: {block.videoId}
+                                              </p>
+                                            )}
+                                            {block.type === "quiz" && block.quiz && (
+                                              <div>
+                                                <p className="font-semibold text-gray-800 mb-1">Question:</p>
+                                                <p className="mb-2">{block.quiz.question}</p>
+                                                <p className="font-semibold text-gray-800 mb-1">Choices:</p>
+                                                <ul className="list-disc list-inside space-y-0.5">
+                                                  {block.quiz.choices.map((choice, i) => (
+                                                    <li key={i} className="flex items-center gap-2">
+                                                      {choice}
+                                                      {i === block.quiz!.correctIndex && (
+                                                        <span className="text-[#00A3EC]" aria-label="Correct">
+                                                          ✓
+                                                        </span>
+                                                      )}
+                                                    </li>
+                                                  ))}
+                                                </ul>
+                                              </div>
+                                            )}
+                                          </div>
+                                        </div>
+                                      ))}
                                     </div>
-                                  ))}
-                                </div>
-                              ))}
-                              {(!sub.units || sub.units.length === 0) && (
-                                <div className="flex items-center gap-2 pl-2">
-                                  <TooltipFlowbite content="Add subsection" position="top">
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-7 w-7 text-gray-500 hover:text-[#2563EB]"
-                                      onClick={() => {
-                                        setSubsectionParentId(section.id)
-                                        setIsAddSubsectionOpen(true)
-                                      }}
-                                    >
-                                      <Plus className="w-4 h-4" />
-                                    </Button>
-                                  </TooltipFlowbite>
-                                  <span className="text-sm text-gray-500">No units yet. Add subsection to create content.</span>
-                                </div>
-                              )}
+                                  ))
+                                ) : (
+                                  <div className="flex items-center gap-2 pl-2">
+                                    <TooltipFlowbite content="Add subsection" position="top">
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7 text-gray-500 hover:text-[#2563EB]"
+                                        onClick={() => {
+                                          if (!selectedSection) return
+                                          setSubsectionParentId(selectedSection.id)
+                                          setIsAddSubsectionOpen(true)
+                                        }}
+                                      >
+                                        <Plus className="w-4 h-4" />
+                                      </Button>
+                                    </TooltipFlowbite>
+                                    <span className="text-sm text-gray-500">
+                                      No units yet. Add subsection to create content.
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           ))}
-                          {section.subsections.length === 0 && (
+
+                          {(!selectedSection?.subsections ||
+                            selectedSection.subsections.length === 0) && (
                             <div className="flex items-center gap-2">
                               <Button
                                 variant="outline"
                                 size="sm"
                                 className="border-[#2563EB] text-[#2563EB] hover:bg-blue-50"
                                 onClick={() => {
-                                  setSubsectionParentId(section.id)
+                                  if (!selectedSection) return
+                                  setSubsectionParentId(selectedSection.id)
                                   setIsAddSubsectionOpen(true)
                                 }}
                               >
@@ -991,8 +1031,6 @@ export default function CourseEditPage() {
                             </div>
                           )}
                         </div>
-                      )
-                    })()
                   )}
                 </section>
 

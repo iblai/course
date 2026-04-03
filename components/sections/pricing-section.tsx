@@ -1,105 +1,128 @@
 "use client"
 
+import type { ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import { Check } from "lucide-react"
+import { cn } from "@/lib/utils"
+
+type PricingCardProps = {
+  title: string
+  /** Shown below the title in large type (e.g. “Free”, “$9.95/mo”). */
+  priceLine?: string
+  /** Optional intro line above the feature list. */
+  subtitle?: string
+  features: string[]
+  button: ReactNode
+  highlighted?: boolean
+}
+
+function PricingCard({ title, priceLine, subtitle, features, button, highlighted }: PricingCardProps) {
+  return (
+    <div className="flex h-auto flex-col md:h-[380px]">
+      <div
+        className={cn(
+          "flex flex-1 flex-col rounded-lg border-2 p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-xl",
+          highlighted ? "border-[#00A3EC]/30" : "border-gray-200 bg-white",
+        )}
+        style={
+          highlighted
+            ? {
+                background:
+                  "linear-gradient(to bottom, rgba(0,163,236,0.09) 0%, rgba(0,163,236,0.05) 30%, rgba(105,136,255,0.06) 100%)",
+              }
+            : undefined
+        }
+      >
+        <div className="mb-6">
+          {priceLine ? (
+            <div className="mb-2 flex w-full flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+              <h3 className="text-xl font-semibold text-[var(--sidebar-foreground)]">{title}</h3>
+              <span className="shrink-0 text-xl font-bold text-[var(--sidebar-foreground)]">{priceLine}</span>
+            </div>
+          ) : (
+            <h3 className="mb-2 text-xl font-semibold text-[var(--sidebar-foreground)]">{title}</h3>
+          )}
+          {subtitle ? (
+            <p className="text-sm text-[var(--muted-foreground)]">{subtitle}</p>
+          ) : null}
+        </div>
+        <div className="flex flex-1 flex-col">
+          <div className="space-y-3">
+            {features.map((text) => (
+              <div key={text} className="flex items-center gap-2 pb-5">
+                <Check className="h-4 w-4 flex-shrink-0" style={{ color: "#00A3EC" }} aria-hidden />
+                <span className="text-sm text-[var(--sidebar-foreground)]">{text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="mt-auto">{button}</div>
+      </div>
+    </div>
+  )
+}
 
 export function PricingSection() {
   return (
-    <section id="pricing-section" className="bg-white flex items-center justify-center py-[50px] px-4">
-      <div className="max-w-7xl mx-auto w-full">
-        {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Basic Plan for Hobby */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6 flex flex-col h-auto md:h-[380px]">
-            <div className="mb-6">
-              <h3 className="text-xl font-semibold text-[var(--sidebar-foreground)] mb-2">Basic Plan for Hobby</h3>
-              <div className="text-2xl font-bold text-[var(--sidebar-foreground)] mb-1">Free</div>
-              <p className="text-sm text-[var(--muted-foreground)]">No credit card required</p>
-            </div>
-            <div className="flex-1 flex flex-col">
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 pb-5">
-                  <Check className="w-4 h-4 flex-shrink-0" style={{ color: "#00A3EC" }} />
-                  <span className="text-sm text-[var(--sidebar-foreground)]">Create your courses</span>
-                </div>
-                <div className="flex items-center gap-2 pb-5">
-                  <Check className="w-4 h-4 flex-shrink-0" style={{ color: "#00A3EC" }} />
-                  <span className="text-sm text-[var(--sidebar-foreground)]">Launch your school</span>
-                </div>
-                <div className="flex items-center gap-2 pb-5">
-                  <Check className="w-4 h-4 flex-shrink-0" style={{ color: "#00A3EC" }} />
-                  <span className="text-sm text-[var(--sidebar-foreground)]">Get advice from our agent</span>
-                </div>
-              </div>
-            </div>
-            <Button className="w-full mt-auto bg-white border border-gray-300 text-[var(--sidebar-foreground)] hover:bg-gray-50">
-              Get started
-            </Button>
-          </div>
+    <section id="pricing-section" className="flex items-center justify-center bg-[#F8F9FA] px-4 py-[55px]">
+      <div className="mx-auto w-full max-w-7xl">
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold text-[var(--sidebar-foreground)] sm:text-3xl">Pricing</h2>
+        </div>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <PricingCard
+            title="Free"
+            features={["Build your first course.", "Launch your school", "See what's possible", "No credit card"]}
+            button={
+              <Button className="w-full border border-gray-300 bg-white text-[var(--sidebar-foreground)] hover:bg-gray-50">
+                Start free
+              </Button>
+            }
+          />
 
-          {/* Pro Plan */}
-          <div className="relative flex flex-col h-auto md:h-[380px]">
-            <div className="absolute -top-0 left-0 right-0 h-8 bg-gradient-to-r from-[#00A3EC] to-[#6988FF] rounded-t-lg flex items-center justify-center">
-              <span className="text-white text-xs font-medium">PRO</span>
-            </div>
-            <div
-              className="border-2 border-[#00A3EC]/30 rounded-lg p-6 flex flex-col h-full mt-4"
-              style={{
-                background: "linear-gradient(to bottom, rgba(0,163,236,0.09) 0%, rgba(0,163,236,0.05) 30%, rgba(105,136,255,0.06) 100%)",
-              }}
-            >
-              <div className="mb-6">
-                <h3 className="text-xl font-semibold text-[var(--sidebar-foreground)] mb-2">Pro Plan</h3>
-                <div className="text-2xl font-bold text-[var(--sidebar-foreground)] mb-1">$9.95 / month</div>
-                <p className="text-sm text-[var(--muted-foreground)]">All Basic features, plus:</p>
-              </div>
-              <div className="flex-1 flex flex-col">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 pb-5">
-                    <Check className="w-4 h-4 flex-shrink-0" style={{ color: "#00A3EC" }} />
-                    <span className="text-sm text-[var(--sidebar-foreground)]">$9.95 of included usage credit</span>
-                  </div>
-                  <div className="flex items-center gap-2 pb-5">
-                    <Check className="w-4 h-4 flex-shrink-0" style={{ color: "#00A3EC" }} />
-                    <span className="text-sm text-[var(--sidebar-foreground)]">Fully branded school</span>
-                  </div>
-                  <div className="flex items-center gap-2 pb-5">
-                    <Check className="w-4 h-4 flex-shrink-0" style={{ color: "#00A3EC" }} />
-                    <span className="text-sm text-[var(--sidebar-foreground)] mb-0">Chat / email support</span>
-                  </div>
-                </div>
-              </div>
-              <Button className="w-full mt-auto bg-white border border-gray-300 text-[var(--sidebar-foreground)] hover:bg-gray-50">
+          <PricingCard
+            title="Pro"
+            priceLine="$9.95/mo"
+            features={[
+              "Unlimited AI course generation.",
+              "Your own brand.",
+              "Chat & email support.",
+              "Everything you need to run a real business.",
+            ]}
+            highlighted
+            button={
+              <Button className="w-full border border-gray-300 bg-white text-[var(--sidebar-foreground)] hover:bg-gray-50">
                 Get started
               </Button>
-            </div>
-          </div>
+            }
+          />
 
-          {/* Enterprise */}
-          <div className="rounded-lg p-6 flex flex-col min-h-[380px] bg-gradient-to-r from-[#00A3EC] to-[#6988FF] text-white transition-all duration-200 ease-out hover:shadow-xl hover:-translate-y-0.5">
+          {/* Enterprise — full gradient card (original layout) */}
+          <div className="flex h-auto min-h-[380px] flex-col rounded-lg bg-gradient-to-r from-[#00A3EC] to-[#6988FF] p-6 text-white transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-xl md:h-[380px]">
             <div className="mb-6">
-              <h3 className="text-xl font-semibold text-white mb-2">Enterprise</h3>
-              <p className="text-sm text-white/90">All Pro features, plus:</p>
+              <h3 className="mb-2 text-xl font-semibold text-white">Enterprise</h3>
             </div>
-            <div className="flex-1 flex flex-col">
-              <div className="space-y-3 mb-6">
+            <div className="flex flex-1 flex-col">
+              <div className="mb-6 space-y-3">
                 <div className="flex items-center gap-2 pb-5">
-                  <Check className="w-4 h-4 flex-shrink-0 text-white" />
-                  <span className="text-sm text-white">Critical security, platform SLAs</span>
+                  <Check className="h-4 w-4 flex-shrink-0 text-white" aria-hidden />
+                  <span className="text-sm text-white">For organizations.</span>
                 </div>
                 <div className="flex items-center gap-2 pb-5">
-                  <Check className="w-4 h-4 flex-shrink-0 text-white" />
-                  <span className="text-sm text-white">Custom project</span>
+                  <Check className="h-4 w-4 flex-shrink-0 text-white" aria-hidden />
+                  <span className="text-sm text-white">Custom security</span>
                 </div>
                 <div className="flex items-center gap-2 pb-5">
-                  <Check className="w-4 h-4 flex-shrink-0 text-white" />
-                  <span className="text-sm text-white">Code ownership</span>
+                  <Check className="h-4 w-4 flex-shrink-0 text-white" aria-hidden />
+                  <span className="text-sm text-white">SLAs</span>
+                </div>
+                <div className="flex items-center gap-2 pb-5">
+                  <Check className="h-4 w-4 flex-shrink-0 text-white" aria-hidden />
+                  <span className="text-sm text-white">API access + dedicated support</span>
                 </div>
               </div>
             </div>
-            <Button className="w-full mt-auto bg-white text-[#00A3EC] hover:bg-gray-50">
-              Contact us
-            </Button>
+            <Button className="mt-auto w-full bg-white text-[#00A3EC] hover:bg-gray-50">Contact us</Button>
           </div>
         </div>
       </div>

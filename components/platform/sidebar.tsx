@@ -63,7 +63,7 @@ export function Sidebar() {
             <div className="w-8 h-8 rounded-full bg-brand-gradient flex items-center justify-center flex-shrink-0">
               <span className="text-white font-bold text-sm">ibl</span>
             </div>
-            {!isCollapsed && <span className="font-semibold text-brand-primary text-lg">ibl.ai Wink</span>}
+            {!isCollapsed && <span className="font-semibold text-brand-primary text-lg">wink.school</span>}
           </div>
 
           {/* Collapse Toggle */}
