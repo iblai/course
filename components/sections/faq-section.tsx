@@ -67,7 +67,7 @@ export function FAQSection() {
   return (
     <section
       id="faq-section"
-      className="bg-[#F8F9FA] flex items-center justify-center py-10 px-4"
+      className="bg-[#F8F9FA] py-10 px-4"
     >
       <div className="max-w-7xl mx-auto w-full">
         {/* Header */}
@@ -193,8 +193,8 @@ export function FAQSection() {
         </div>
 
         {/* Footer */}
-        <div className="mt-20 -mx-4">
-          <div className="border-t border-gray-200 pt-2.5 px-4">
+        <div className="mt-24 -mx-4 sm:mt-28">
+          <div className="border-t border-gray-200 px-4 pt-8 sm:pt-10">
             <div className="flex items-center justify-center text-sm text-[#3E6BAD]">
               <span className="flex items-center gap-2">
                 <Image

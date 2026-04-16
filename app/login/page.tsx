@@ -379,7 +379,7 @@ export default function AuthPage() {
                 showConfirmation && "max-xl:flex-1 max-xl:justify-center"
               )}
             >
-              {!showConfirmation && !showPasswordForm && (
+              {!showConfirmation && (
                 <div className="text-center -mt-1 w-full">
                   <div className="space-y-2 mt-[50px] mb-[50px] xl:mt-[10px]">
                     <h1 className="text-2xl sm:text-2xl md:text-xl lg:text-2xl xl:text-3xl text-[#4E5460] leading-tight font-normal max-w-lg mx-auto">
