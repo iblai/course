@@ -10,7 +10,7 @@ export function AudienceSection() {
   const [tab, setTab] = useState<AudienceTab>("instructors")
 
   return (
-    <section className="flex justify-center bg-white px-4 py-[55px]">
+    <section className="flex justify-center bg-white px-4 py-10">
       <div className="max-w-7xl mx-auto w-full">
         <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-2 lg:items-stretch">
           <div className="min-w-0 space-y-6 lg:h-full">

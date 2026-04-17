@@ -67,7 +67,7 @@ export function FAQSection() {
   return (
     <section
       id="faq-section"
-      className="bg-[#F8F9FA] py-10 px-4"
+      className="bg-[#F8F9FA] px-4 py-8"
     >
       <div className="max-w-7xl mx-auto w-full">
         {/* Header */}

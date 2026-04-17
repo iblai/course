@@ -66,7 +66,7 @@ if (process.env.NODE_ENV === "development") {
 
 export function BuiltWithWinkSection() {
   return (
-    <section className="flex justify-center bg-white py-[55px] px-4">
+    <section className="flex justify-center bg-white pt-[35px] pb-[45px] px-4">
       <div className="max-w-7xl mx-auto w-full">
         <div className="mb-6">
           <h2 className="text-2xl sm:text-3xl font-semibold text-[var(--sidebar-foreground)]">Built with Wink</h2>

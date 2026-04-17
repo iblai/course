@@ -64,7 +64,7 @@ function PricingCard({ title, priceLine, subtitle, features, button, highlighted
 
 export function PricingSection() {
   return (
-    <section id="pricing-section" className="flex items-center justify-center bg-[#F8F9FA] px-4 py-[55px]">
+    <section id="pricing-section" className="flex items-center justify-center bg-[#F8F9FA] px-4 pt-[30px] pb-[55px]">
       <div className="mx-auto w-full max-w-7xl">
         <div className="mb-8">
           <h2 className="text-2xl font-semibold text-[var(--sidebar-foreground)] sm:text-3xl">Pricing</h2>
