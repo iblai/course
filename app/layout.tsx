@@ -4,6 +4,7 @@ import { Inter, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { AccessibilityProvider } from "@/contexts/accessibility-context"
 import { ScrollToTop } from "@/components/scroll-to-top"
+import { AuthGate } from "@/components/iblai/auth-gate"
 import { Toaster } from "sonner"
 import "./globals.css"
 
@@ -48,7 +49,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`font-sans antialiased`}>
         <ScrollToTop />
-        <AccessibilityProvider>{children}</AccessibilityProvider>
+        <AuthGate>
+          <AccessibilityProvider>{children}</AccessibilityProvider>
+        </AuthGate>
         <Toaster
           position="top-center"
           richColors

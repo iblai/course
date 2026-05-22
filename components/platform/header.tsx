@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { AccountDialog } from "@/components/account-dialog"
+import { TenantSwitchSubMenu } from "@/components/iblai/tenant-switch"
 
 interface HeaderProps {
   onMenuClick?: () => void
@@ -153,6 +154,7 @@ export function Header({
                     <User className="mr-2 h-4 w-4" />
                     Profile
                   </DropdownMenuItem>
+                  <TenantSwitchSubMenu />
                   <DropdownMenuItem
                     onClick={handleLogout}
                     className="text-[#00A3EC] focus:text-[#00A3EC] cursor-pointer"

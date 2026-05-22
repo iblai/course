@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect, Suspense } from "react"
-import { Search, Share2, Link2, Plus } from "lucide-react"
+import { useState, useEffect, useRef, Suspense } from "react"
+import { Search, Share2, Link2, Plus, Loader2 } from "lucide-react"
 import Image from "next/image"
 import { toast } from "sonner"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -13,8 +13,28 @@ import { VoiceColumn } from "@/components/voice-column"
 import { Button } from "@/components/ui/button"
 import { ViewAcademyDialog } from "@/components/view-academy-dialog"
 import { CreateAcademyDialog } from "@/components/create-academy-dialog"
+import { useDiscover } from "@iblai/iblai-js/web-containers"
+import config from "@/lib/iblai/config"
 import { cn } from "@/lib/utils"
 import "@/styles/colors.css"
+
+/**
+ * v0 mock thumbnails -- rotated as fallback when the SDK row has no
+ * `edx_data.course_image_asset_path`. Keeps the v0 grid visually
+ * populated until real images attach.
+ */
+const CATALOG_IMG_FALLBACKS = [
+  "/images/course-1.png",
+  "/images/course-2.png",
+  "/images/course-3.png",
+  "/images/data-driven-decision.png",
+  "/images/team-performance.png",
+  "/images/leadership-is-language.png",
+  "/images/leadership-development.png",
+  "/images/strategic-leadership.png",
+  "/images/teamwork-growth.png",
+  "/images/coaching-culture.png",
+]
 
 function CourseCatalogContent() {
   const [searchValue, setSearchValue] = useState("")
@@ -84,80 +104,63 @@ function CourseCatalogContent() {
     }
   }
 
-  const courses = [
-    {
-      id: 1,
-      title: "AI in Academia: Driving Innovation and Efficiency",
-      image: "/images/course-1.png",
-      level: "Beginner",
-    },
-    {
-      id: 2,
-      title: "AI to Empower Students with Hyper-Personalized Learning",
-      image: "/images/course-2.png",
-      level: "Intermediate",
-    },
-    {
-      id: 3,
-      title: "AI in Autonomous Vehicles: Driving the Future",
-      image: "/images/course-3.png",
-      level: "Advanced",
-    },
-    {
-      id: 4,
-      title: "Managing Cybersecurity Incident Response",
-      image: "/images/data-driven-decision.png",
-      level: "Intermediate",
-    },
-    {
-      id: 5,
-      title: "Going Cloud Native with Linux",
-      image: "/images/team-performance.png",
-      level: "Advanced",
-    },
-    {
-      id: 6,
-      title: "Data-Driven Leadership",
-      image: "/images/leadership-is-language.png",
-      level: "Beginner",
-    },
-    {
-      id: 7,
-      title: "Advanced Leadership Techniques",
-      image: "/images/leadership-development.png",
-      level: "Advanced",
-    },
-    {
-      id: 8,
-      title: "Mastering Project Management",
-      image: "/images/strategic-leadership.png",
-      level: "Intermediate",
-    },
-    {
-      id: 9,
-      title: "Building High Performance Teams",
-      image: "/images/teamwork-growth.png",
-      level: "Beginner",
-    },
-    {
-      id: 10,
-      title: "Employee Coaching Techniques",
-      image: "/images/coaching-culture.png",
-      level: "Intermediate",
-    },
-    {
-      id: 11,
-      title: "Strategic Decision Making",
-      image: "/images/strategic-leadership.png",
-      level: "Advanced",
-    },
-    {
-      id: 12,
-      title: "Introduction to Machine Learning",
-      image: "/images/course-1.png",
-      level: "Beginner",
-    },
-  ]
+  // Course Catalog = public courses across ALL tenants. SDK does this
+  // via `tenantOverride: "main"` (the cross-tenant marketplace scope).
+  // Use the raw discover rows + the SDK's `handleFormatContents` so
+  // titles/images/ids land in the right shape, then remap to the v0
+  // catalog card shape `{ id, title, image, level }`.
+  const discover = useDiscover({
+    limit: 24,
+    lmsUrl: config.lmsUrl(),
+    tenantOverride: "main",
+  }) as any
+  const baseLmsUrl = config.lmsUrl().replace(/\/+$/, "")
+  const contentsLoading: boolean = !!discover?.contentsLoading
+  const rawContents: any[] = discover?.contents ?? []
+  // SDK's `contentsLoading` starts `false` and flips true only AFTER its
+  // debounced (500ms) fetch effect actually runs. The SDK also re-creates
+  // its fetch callback whenever tenant metadata resolves, which resets
+  // the debounce — so on a slow path `contentsLoading` may never have
+  // visibly toggled by the time we read it. Settle the loader on any of:
+  //  (a) we observed a true→false transition (normal fetch settle),
+  //  (b) contents arrived (positive signal), or
+  //  (c) hard timeout (8s) so the page never gets stuck.
+  const [hasSettled, setHasSettled] = useState(false)
+  const prevLoadingRef = useRef(false)
+  useEffect(() => {
+    if (prevLoadingRef.current && !contentsLoading) setHasSettled(true)
+    prevLoadingRef.current = contentsLoading
+  }, [contentsLoading])
+  useEffect(() => {
+    if (rawContents.length > 0) setHasSettled(true)
+  }, [rawContents.length])
+  useEffect(() => {
+    const t = setTimeout(() => setHasSettled(true), 8000)
+    return () => clearTimeout(t)
+  }, [])
+  const isLoadingCatalog = !hasSettled && (contentsLoading || rawContents.length === 0)
+  const formatContent: (row: any) => any =
+    discover?.handleFormatContents ?? ((row: any) => row)
+  const LEVELS = ["Beginner", "Intermediate", "Advanced"] as const
+  const courses = rawContents.map((row, i) => {
+    const f = formatContent(row)
+    // SDK builds `${lmsUrl}${edx_data.course_image_asset_path||""}`. With
+    // no asset path that string is just `lmsUrl` (not an image) so the
+    // browser hangs loading it. Detect + rotate a local fallback.
+    const img: string = f?.image ?? ""
+    const trimmedImg = img.replace(/\/+$/, "")
+    const image =
+      !trimmedImg || trimmedImg === baseLmsUrl
+        ? CATALOG_IMG_FALLBACKS[i % CATALOG_IMG_FALLBACKS.length]
+        : f.image
+    return {
+      id: String(f?.course_id ?? f?.id ?? i),
+      title: f?.title ?? f?.name ?? "Untitled course",
+      image,
+      // API doesn't expose a level → rotate for visual variety in chips.
+      level: LEVELS[i % LEVELS.length] as string,
+    }
+  })
 
   const filteredCourses = courses.filter((course) => course.title.toLowerCase().includes(searchValue.toLowerCase()))
 
@@ -180,9 +183,9 @@ function CourseCatalogContent() {
     className: "toast-success",
   } as const
 
-  const getCourseUrl = (courseId: number) => {
+  const getCourseUrl = (courseId: string) => {
     if (typeof window === "undefined") return ""
-    return `${window.location.origin}/course/${courseId}`
+    return `${window.location.origin}/course-content/${encodeURIComponent(courseId)}/course`
   }
 
   const handleCopyLink = (e: React.MouseEvent, course: (typeof courses)[0]) => {
@@ -224,7 +227,7 @@ function CourseCatalogContent() {
     if (!isLoggedIn) {
       router.push("/login")
     } else {
-      router.push(`/course/${course.id}`)
+      router.push(`/course-content/${encodeURIComponent(course.id)}/course`)
     }
   }
 
@@ -312,7 +315,17 @@ function CourseCatalogContent() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 pb-[200px]">
+                {isLoadingCatalog && (
+                  <div className="flex items-center justify-center gap-2 py-16 text-sm text-gray-500">
+                    <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
+                    Loading courses…
+                  </div>
+                )}
+
+                <div className={cn(
+                  "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 pb-[200px]",
+                  isLoadingCatalog && "hidden",
+                )}>
                   {filteredCourses.map((course) => (
                     <div
                       key={course.id}
@@ -364,7 +377,7 @@ function CourseCatalogContent() {
                 </div>
 
                 {/* No Results */}
-                {filteredCourses.length === 0 && (
+                {!isLoadingCatalog && filteredCourses.length === 0 && (
                   <div className="text-center py-12">
                     <p className="text-gray-500">No courses found matching your search.</p>
                   </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, type ComponentType } from "react"
 import { flushSync } from "react-dom"
 import { useRouter, usePathname } from "next/navigation"
 const SIDEBAR_ICONS = "/icons/sidebar"
@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import Image from "next/image"
+import { CreditCard, Coins, KeyRound, Settings, UserPlus, Mail } from "lucide-react"
+import { toast } from "sonner"
 
 import { TooltipFlowbite, TooltipProvider } from "@/components/ui/tooltip-flowbite"
 import {
@@ -21,6 +23,7 @@ import { InviteUserDialog } from "@/components/modals/invite-user-dialog"
 import { RenameItemDialog, type RenameDialogSection } from "@/components/modals/rename-item-dialog"
 import { DeleteItemDialog, type DeleteDialogSection } from "@/components/modals/delete-item-dialog"
 import { CreateProjectModal } from "@/components/modals/create-project-modal"
+import { AccountDialog } from "@/components/account-dialog"
 
 interface SidebarLearnerProps {
   isCollapsed?: boolean
@@ -77,6 +80,11 @@ export function SidebarLearner({
     label: string
   }>({ open: false, section: "pinned", itemId: "", label: "" })
   const [createProjectModalOpen, setCreateProjectModalOpen] = useState(false)
+  // Admin footer buttons (API / Settings) open the existing wink
+  // AccountDialog. Wink's dialog has tabs `basic / social / security /
+  // admin` -- pick `admin` for API + Settings; default to `basic`
+  // otherwise.
+  const [accountDialogOpen, setAccountDialogOpen] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
 
@@ -166,10 +174,22 @@ export function SidebarLearner({
     { id: "2", label: "Recent chat item..." },
   ])
 
+  // Top nav -- matches hq's order: workspace/agent surface first, then
+  // catalog. Users + Invite User moved to the admin footer below (hq
+  // groups Users/Invite in its own footer rail). Configure stays in
+  // the top nav as the workspace-config entry point.
   const sidebarItems = [
     {
-      id: "all-courses",
-      label: "All Courses",
+      id: "agents",
+      label: "Agents",
+      // mentorai's "My Mentors" icon, ported from
+      // mentorai/public/icons/my-mentors.svg
+      icon: `${SIDEBAR_ICONS}/my-mentors.svg`,
+      href: "/agents",
+    },
+    {
+      id: "my-courses",
+      label: "My Courses",
       icon: `${SIDEBAR_ICONS}/courses.svg`,
       href: "/courses",
     },
@@ -185,18 +205,21 @@ export function SidebarLearner({
       icon: `${SIDEBAR_ICONS}/configure.svg`,
       href: "/customize",
     },
-    {
-      id: "users",
-      label: "Users",
-      icon: `${SIDEBAR_ICONS}/users.svg`,
-      href: "/users",
-    },
-    {
-      id: "invite-user",
-      label: "Invite User",
-      icon: `${SIDEBAR_ICONS}/mail.svg`,
-      href: "#",
-    },
+  ]
+
+  // Admin footer -- mirrors hq's `SIDEBAR_FOOTER_ACTIONS` order:
+  // Invites, Users, API, Billing, Monetization, Settings. Mix of
+  // file-based SVGs (existing wink icons) and Lucide components (for
+  // the new buttons that don't have a matching svg in
+  // `public/icons/sidebar/`).
+  type FooterIcon = string | ComponentType<{ className?: string }>
+  const adminFooterItems: { id: string; label: string; icon: FooterIcon }[] = [
+    { id: "invite-user", label: "Invites", icon: Mail },
+    { id: "users", label: "Users", icon: UserPlus },
+    { id: "api", label: "API", icon: KeyRound },
+    { id: "billing", label: "Billing", icon: CreditCard },
+    { id: "monetization", label: "Monetization", icon: Coins },
+    { id: "settings", label: "Settings", icon: Settings },
   ]
 
   const projectsItem = {
@@ -270,21 +293,28 @@ export function SidebarLearner({
 
   const SidebarContent = ({ isMobile = false }: { isMobile?: boolean }) => (
     <div className={cn("flex flex-col h-full", isMobile && "pb-[env(safe-area-inset-bottom)]")}>
-      <div className="px-4 py-3.5 border-b" style={{ borderColor: "#D0E0FF" }}>
-        <Link href="/home" className="flex items-center gap-3">
-          <Image
-            src="/images/skillsAI-logo.webp"
-            alt="wink.school"
-            width={32}
-            height={32}
-            className="object-contain flex-shrink-0"
-          />
-          {(!isCollapsed || isMobile) && (
-              <span className="text-lg font-semibold bg-gradient-to-r from-[#00A3EC] to-[#6988FF] bg-clip-text text-transparent">
-                wink.school
-              </span>
-          )}
-        </Link>
+      <div className="px-4 py-4 border-b" style={{ borderColor: "#D0E0FF" }}>
+        {/* ibl.ai brand mark. Asset is 257x110 (wordmark-style), so use
+            an aspect-preserving height-based size like hq does. Hide the
+            mark entirely on the collapsed rail (rail is only 64px wide,
+            no room for the wordmark) -- the toggle chevron beside the
+            rail handles brand presence. */}
+        {(!isCollapsed || isMobile) && (
+          <Link
+            href="/home"
+            className="flex items-center justify-center transition-opacity hover:opacity-90"
+            aria-label="ibl.ai home"
+          >
+            <Image
+              src="/images/iblai-logo.png"
+              alt="ibl.ai"
+              width={257}
+              height={110}
+              priority
+              className="h-10 w-auto object-contain"
+            />
+          </Link>
+        )}
       </div>
 
       {isLoggedIn && (
@@ -1083,6 +1113,113 @@ export function SidebarLearner({
           )}
         </div>
       )}
+
+      {/* Admin footer (logged-in) -- matches hq's `SIDEBAR_FOOTER_ACTIONS`:
+          Invites, Users, API, Billing, Monetization, Settings. Items
+          without a wink-native surface (Billing, Monetization) raise a
+          toast; API + Settings open the existing AccountDialog. */}
+      {isLoggedIn && (
+        <div
+          className={cn(
+            "border-t space-y-1",
+            isCollapsed ? "flex flex-col items-center px-0 py-3" : "p-3",
+            isMobile && "pb-6",
+          )}
+          style={{ borderColor: "#D0E0FF" }}
+        >
+          {adminFooterItems.map((item) => {
+            const handleClick = () => {
+              if (item.id === "invite-user") {
+                onMobileClose?.()
+                setInviteDialogOpen(true)
+                return
+              }
+              if (item.id === "users") {
+                router.push("/users")
+                return
+              }
+              if (item.id === "api" || item.id === "settings") {
+                onMobileClose?.()
+                setAccountDialogOpen(true)
+                return
+              }
+              if (item.id === "billing") {
+                // No wink-native billing page yet. Hand off to /pricing
+                // as the closest thing, like hq's link to financial.
+                router.push("/pricing")
+                return
+              }
+              if (item.id === "monetization") {
+                toast("Monetization settings are coming soon to wink.")
+                return
+              }
+            }
+            const isActive =
+              item.id === "users"
+                ? isActiveRoute("/users")
+                : item.id === "billing"
+                  ? isActiveRoute("/pricing")
+                  : false
+            const isLucide = typeof item.icon !== "string"
+            const button = (
+              <Button
+                variant="ghost"
+                className={cn(
+                  "gap-2 hover:bg-blue-50 hover:text-[#020817] text-[rgb(113,121,133)]",
+                  isCollapsed
+                    ? "justify-center items-center w-10 h-10 p-0 rounded-lg mx-auto"
+                    : "w-full justify-start pl-[11px]",
+                  isActive && !isCollapsed && "bg-blue-50 text-blue-600",
+                  isActive && isCollapsed && "bg-gray-100",
+                )}
+                onClick={handleClick}
+              >
+                <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center">
+                  {isLucide ? (
+                    (() => {
+                      const Icon = item.icon as ComponentType<{ className?: string }>
+                      return (
+                        <Icon
+                          className={cn(
+                            "w-4 h-4 transition-colors",
+                            isActive && "text-blue-600",
+                          )}
+                        />
+                      )
+                    })()
+                  ) : (
+                    <img
+                      src={item.icon as string}
+                      alt={item.label}
+                      className="w-5 h-[19px] p-0 transition-colors"
+                      style={
+                        isActive
+                          ? {
+                              filter:
+                                "brightness(0) saturate(100%) invert(27%) sepia(96%) saturate(1352%) hue-rotate(202deg) brightness(98%) contrast(96%)",
+                            }
+                          : {}
+                      }
+                    />
+                  )}
+                </span>
+                {(!isCollapsed || isMobile) && (
+                  <span className="flex-1 text-left">{item.label}</span>
+                )}
+              </Button>
+            )
+            return isCollapsed ? (
+              <TooltipProvider key={item.id}>
+                <TooltipFlowbite content={item.label} position="right">
+                  <div className="flex justify-center items-center">{button}</div>
+                </TooltipFlowbite>
+              </TooltipProvider>
+            ) : (
+              <div key={item.id}>{button}</div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 
@@ -1125,6 +1262,15 @@ export function SidebarLearner({
       </aside>
 
       <InviteUserDialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen} />
+
+      {/* Local AccountDialog instance for the API + Settings admin
+          footer buttons. The header already mounts its own; keeping a
+          sidebar-local one avoids cross-component state plumbing. */}
+      <AccountDialog
+        open={accountDialogOpen}
+        onOpenChange={setAccountDialogOpen}
+        onSave={() => setAccountDialogOpen(false)}
+      />
 
       <RenameItemDialog
         open={renameDialog.open}
