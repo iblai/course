@@ -43,7 +43,16 @@ function dedup(packageName) {
 }
 
 const resolveAliases = {}
-for (const pkg of ['@iblai/data-layer', '@reduxjs/toolkit', 'react-redux']) {
+for (const pkg of [
+  '@iblai/data-layer',
+  '@iblai/web-utils',
+  '@iblai/web-containers',
+  '@iblai/iblai-js',
+  '@reduxjs/toolkit',
+  'react-redux',
+  'react',
+  'react-dom',
+]) {
   const dir = dedup(pkg)
   if (dir) resolveAliases[pkg] = dir
 }
@@ -74,6 +83,13 @@ const nextConfig = {
   // Keep Turbopack scoped to this app. The previous hardcoded macOS
   // path was outside the project, which made Next reject the derived
   // distDirRoot ("...should not navigate out of the projectPath").
+  //
+  // Do NOT pass absolute `resolveAlias` paths here -- Turbopack treats
+  // absolute paths as relative-to-project and ends up resolving things
+  // like `/home/lain/.../node_modules/@iblai/data-layer` into the
+  // project root (`Module not found: ./home/lain/...`). Native pnpm
+  // resolution gives Turbopack a single copy per package on its own;
+  // the webpack alias block below is only used for production builds.
   turbopack: {
     root: path.resolve(__dirname),
   },

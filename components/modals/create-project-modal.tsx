@@ -2,13 +2,30 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, Check, ChevronLeft, ChevronRight, X } from "lucide-react"
-import { mentorsByCategory, type Mentor } from "@/data/mentors"
-import { MentorCategories } from "@/components/mentor-categories"
+import { Search, Check, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
+
+import { useGetMentorsQuery } from "@iblai/iblai-js/data-layer"
+import { useUrlContext } from "@/lib/iblai/use-url-context"
+
+/**
+ * Selection row exposed to the parent. Mirrors the SDK mentor shape so
+ * the sidebar's `onCreateProject` callback can extract `unique_id`
+ * directly. The legacy `id / title / description / avatar` keys are
+ * filled from the SDK row so any existing v0 call-sites keep
+ * compiling.
+ */
+export interface Mentor {
+  unique_id: string
+  id: string | number
+  title: string
+  description: string
+  avatar: string
+  updatedDate: string
+}
 
 interface CreateProjectModalProps {
   isOpen: boolean
@@ -16,294 +33,264 @@ interface CreateProjectModalProps {
   onCreateProject?: (projectName: string, selectedMentors: Mentor[]) => void
 }
 
+type SdkMentor = {
+  id?: number | string
+  unique_id?: string | null
+  name?: string | null
+  description?: string | null
+  profile_image?: string | null
+  updated_at?: string | null
+}
+
+const MENTORS_PER_PAGE = 8
+
+/**
+ * Create-project modal -- name + agent picker. Replaces the v0 fake
+ * mentor catalog (`@/data/mentors`) with live `useGetMentorsQuery`
+ * results so the user sees real tenant agents. Mirrors mentorai's
+ * `CreateProjectModal` shape (agent grid + search + pagination); the
+ * actual project-create mutation lives in the parent's
+ * `onCreateProject` callback to keep one mutation site.
+ */
 export function CreateProjectModal({ isOpen, onClose, onCreateProject }: CreateProjectModalProps) {
+  const { tenantKey, username } = useUrlContext()
   const [projectName, setProjectName] = useState("")
-  const [filters, setFilters] = useState({
-    category: "",
-    subject: "",
-    audience: "",
-  })
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedMentors, setSelectedMentors] = useState<Mentor[]>([])
   const [currentPage, setCurrentPage] = useState(1)
-  const mentorsPerPage = 8 // Show 8 mentors per page (4x2 grid)
 
-  const getFilteredMentors = () => {
-    let allMentors: Mentor[] = []
+  const { data: mentorsQueryData, isFetching: isLoadingMentors } =
+    useGetMentorsQuery(
+      {
+        org: tenantKey,
+        username: username ?? "",
+        limit: 100,
+      } as never,
+      { skip: !tenantKey || !username || !isOpen },
+    )
+  const sdkMentors: SdkMentor[] =
+    (mentorsQueryData as { results?: SdkMentor[] } | undefined)?.results ?? []
 
-    // Get all mentors from all categories
-    Object.values(mentorsByCategory).forEach((categoryMentors) => {
-      allMentors = [...allMentors, ...categoryMentors]
-    })
+  const mentors: Mentor[] = useMemo(
+    () =>
+      sdkMentors
+        .filter((m) => typeof m.unique_id === "string" && m.unique_id.length > 0)
+        .map((m) => ({
+          unique_id: m.unique_id as string,
+          id: m.id ?? (m.unique_id as string),
+          title: m.name ?? "Untitled agent",
+          description: m.description ?? "",
+          avatar: m.profile_image ?? "",
+          updatedDate: m.updated_at ?? "",
+        })),
+    [sdkMentors],
+  )
 
-    // Remove duplicates
-    allMentors = allMentors.filter((mentor, index, self) => index === self.findIndex((m) => m.id === mentor.id))
+  const filteredMentors = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase()
+    if (!q) return mentors
+    return mentors.filter(
+      (m) =>
+        m.title.toLowerCase().includes(q) ||
+        m.description.toLowerCase().includes(q),
+    )
+  }, [mentors, searchQuery])
 
-    // Apply filters
-    if (filters.subject || filters.category || filters.audience) {
-      allMentors = allMentors.filter((mentor) => {
-        const mentorText = `${mentor.title} ${mentor.description}`.toLowerCase()
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredMentors.length / MENTORS_PER_PAGE),
+  )
+  const pageStart = (currentPage - 1) * MENTORS_PER_PAGE
+  const pageMentors = filteredMentors.slice(
+    pageStart,
+    pageStart + MENTORS_PER_PAGE,
+  )
 
-        let matches = true
+  const isSelected = (m: Mentor) =>
+    selectedMentors.some((s) => s.unique_id === m.unique_id)
 
-        if (filters.subject) {
-          const subjectMatches =
-            mentorText.includes(filters.subject.toLowerCase()) ||
-            (filters.subject === "Business" && mentorText.includes("business")) ||
-            (filters.subject === "Computer Science" &&
-              (mentorText.includes("computer") ||
-                mentorText.includes("programming") ||
-                mentorText.includes("coding"))) ||
-            (filters.subject === "Economics" && mentorText.includes("economic")) ||
-            (filters.subject === "Math" && (mentorText.includes("math") || mentorText.includes("statistics"))) ||
-            (filters.subject === "Science" && mentorText.includes("science")) ||
-            (filters.subject === "Humanities" && (mentorText.includes("writing") || mentorText.includes("literature")))
-          matches = matches && subjectMatches
-        }
-
-        if (filters.category) {
-          const categoryMatches =
-            mentorText.includes(filters.category.toLowerCase()) ||
-            (filters.category === "Learning" && (mentorText.includes("learn") || mentorText.includes("teach"))) ||
-            (filters.category === "Grading" && mentorText.includes("grade")) ||
-            (filters.category === "Advising" && (mentorText.includes("advise") || mentorText.includes("mentor")))
-          matches = matches && categoryMatches
-        }
-
-        if (filters.audience) {
-          const audienceMatches =
-            mentorText.includes(filters.audience.toLowerCase()) ||
-            (filters.audience === "Learner" && (mentorText.includes("student") || mentorText.includes("learn"))) ||
-            (filters.audience === "Instructor" && (mentorText.includes("teacher") || mentorText.includes("instructor")))
-          matches = matches && audienceMatches
-        }
-
-        return matches
-      })
-    }
-
-    if (searchQuery.trim()) {
-      allMentors = allMentors.filter(
-        (mentor) =>
-          mentor.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          mentor.description.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
-    }
-
-    return allMentors
+  const toggleMentor = (m: Mentor) => {
+    setSelectedMentors((prev) =>
+      prev.some((s) => s.unique_id === m.unique_id)
+        ? prev.filter((s) => s.unique_id !== m.unique_id)
+        : [...prev, m],
+    )
   }
 
-  const handleFiltersChange = (newFilters: { category: string; subject: string; audience: string }) => {
-    setFilters(newFilters)
-    setCurrentPage(1)
-  }
-
-  const toggleMentorSelection = (mentor: Mentor) => {
-    setSelectedMentors((prev) => {
-      const isSelected = prev.some((m) => m.id === mentor.id)
-      if (isSelected) {
-        return prev.filter((m) => m.id !== mentor.id)
-      } else {
-        return [...prev, mentor]
-      }
-    })
-  }
-
-  const handleCreate = () => {
-    if (projectName.trim() && selectedMentors.length > 0) {
-      onCreateProject?.(projectName.trim(), selectedMentors)
-      setProjectName("")
-      setSelectedMentors([])
-      setSearchQuery("")
-      setFilters({ category: "", subject: "", audience: "" })
-      setCurrentPage(1)
-      onClose()
-    }
-  }
-
-  const handleCancel = () => {
+  const reset = () => {
     setProjectName("")
     setSelectedMentors([])
     setSearchQuery("")
-    setFilters({ category: "", subject: "", audience: "" })
     setCurrentPage(1)
+  }
+
+  const handleCancel = () => {
+    reset()
     onClose()
   }
 
-  const filteredMentors = getFilteredMentors()
-  const totalPages = Math.ceil(filteredMentors.length / mentorsPerPage)
-  const startIndex = (currentPage - 1) * mentorsPerPage
-  const endIndex = startIndex + mentorsPerPage
-  const currentMentors = filteredMentors.slice(startIndex, endIndex)
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value)
-    setCurrentPage(1)
+  const handleSubmit = () => {
+    if (!projectName.trim() || selectedMentors.length === 0) return
+    onCreateProject?.(projectName.trim(), selectedMentors)
+    reset()
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        className="max-w-4xl w-[95vw] p-0 sm:p-0 gap-0 overflow-hidden flex flex-col"
+        className="w-[95vw] max-w-4xl gap-0 overflow-hidden p-0"
         style={{
-          height: "85vh",
-          maxHeight: "85vh",
+          height: "auto",
+          maxHeight: "90vh",
+          display: "flex",
+          flexDirection: "column",
         }}
-        hideCloseButton
-        noPadding
       >
-        {/* Header - fixed, does not scroll */}
-        <div className="flex items-start justify-between p-4 sm:p-6 border-b border-border bg-background flex-shrink-0">
-          <div className="flex flex-col gap-2">
-            <DialogTitle className="sr-only">New Project</DialogTitle>
-            <h2 className="text-lg sm:text-xl font-semibold text-[var(--sidebar-foreground)]">New Project</h2>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="Close"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
+        <div className="flex-shrink-0 border-b border-gray-200 bg-white px-6 py-4">
+          <DialogTitle className="text-xl font-semibold text-gray-900">
+            New Project
+          </DialogTitle>
         </div>
 
-        {/* Scrollable body only - header and footer stay fixed on mobile */}
-        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
-          <div className="p-4 sm:p-6 space-y-4 pb-0">
-            {/* Project Name Input */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Project Name</label>
+        <div
+          className="flex-1 space-y-6 px-6 py-6"
+          style={{ overflowY: "auto", overflowX: "hidden" }}
+        >
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">
+              Project Name
+            </label>
+            <Input
+              placeholder="Project Name"
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
+              className="h-12 rounded-lg border-2 border-gray-200 px-4 text-base"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSubmit()
+              }}
+            />
+          </div>
+
+          <div>
+            <label className="mb-3 block text-sm font-medium text-gray-700">
+              Select Agents <span className="text-red-500">*</span>
+              {selectedMentors.length > 0 && (
+                <span className="ml-2 font-normal text-blue-600">
+                  ({selectedMentors.length} selected)
+                </span>
+              )}
+            </label>
+
+            <div className="mb-3 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="E.g. Project Planning"
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-                className="text-base h-12 px-4 border-2 border-gray-200 rounded-lg focus:border-gray-200 focus:ring-0 focus:outline-none"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleCreate()
-                  }
+                placeholder="Search agents…"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value)
+                  setCurrentPage(1)
                 }}
+                className="h-10 pl-9"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Select Agents <span className="text-red-500">*</span>
-                {selectedMentors.length > 0 && (
-                  <span className="text-blue-600 font-normal ml-2">({selectedMentors.length} selected)</span>
-                )}
-              </label>
 
-              {/* Search Input */}
-              <div className="relative mb-4">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search agents..."
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  className="pl-10 h-10 border-gray-200 focus:border-blue-500 focus:ring-0"
-                />
+            {isLoadingMentors ? (
+              <div className="flex h-[360px] items-center justify-center text-sm text-gray-500">
+                <Loader2 className="mr-2 size-4 animate-spin" aria-hidden />
+                Loading agents…
               </div>
-
-              <div className="mb-4">
-                <MentorCategories onFiltersChange={handleFiltersChange} />
+            ) : mentors.length === 0 ? (
+              <div className="flex h-[360px] items-center justify-center text-sm text-gray-500">
+                No agents available on this tenant yet.
               </div>
-            </div>
-
-            {/* Agents Grid */}
-            <div className="px-0 pb-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {currentMentors.map((mentor) => {
-                  const isSelected = selectedMentors.some((m) => m.id === mentor.id)
-                  return (
-                    <div
-                      key={mentor.id}
-                      onClick={() => toggleMentorSelection(mentor)}
-                      className={`flex items-center gap-3 p-2 rounded-lg border cursor-pointer transition-all ${
-                        isSelected
-                          ? "border-[#00A3EC] bg-blue-50"
-                          : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                      }`}
-                    >
-                      <img
-                        src={mentor.avatar || "/placeholder.svg"}
-                        alt={mentor.title}
-                        className="w-10 h-10 rounded-full object-cover flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-gray-900 text-sm truncate">{mentor.title}</h4>
-                        <p className="text-xs text-gray-600 line-clamp-2">{mentor.description}</p>
-                      </div>
-                      {isSelected && (
-                        <div className="flex-shrink-0">
-                          <div className="w-5 h-5 bg-[#00A3EC] rounded-full flex items-center justify-center">
-                            <Check className="w-3 h-3 text-white" />
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {pageMentors.map((m) => {
+                    const selected = isSelected(m)
+                    return (
+                      <button
+                        key={m.unique_id}
+                        type="button"
+                        onClick={() => toggleMentor(m)}
+                        className={`relative flex h-[160px] flex-col rounded-lg border-2 p-3 text-left transition-colors ${
+                          selected
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-gray-200 hover:border-gray-300"
+                        }`}
+                      >
+                        {selected && (
+                          <div className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-white">
+                            <Check className="h-3 w-3" />
                           </div>
+                        )}
+                        <div className="mb-2 flex items-center gap-2">
+                          {m.avatar ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={m.avatar}
+                              alt=""
+                              className="h-8 w-8 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-xs font-semibold text-white">
+                              {m.title.slice(0, 2).toUpperCase()}
+                            </div>
+                          )}
+                          <span className="line-clamp-2 text-sm font-medium text-gray-900">
+                            {m.title}
+                          </span>
                         </div>
-                      )}
-                    </div>
-                  )
-                })}
-                {currentMentors.length === 0 && (
-                  <div className="col-span-full flex items-center justify-center py-8 text-gray-500">
-                    No agents found matching your search.
+                        <span className="line-clamp-3 text-xs text-gray-500">
+                          {m.description}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {totalPages > 1 && (
+                  <div className="mt-4 flex items-center justify-between">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    >
+                      <ChevronLeft className="mr-1 h-4 w-4" /> Previous
+                    </Button>
+                    <span className="text-sm text-gray-500">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={currentPage === totalPages}
+                      onClick={() =>
+                        setCurrentPage((p) => Math.min(totalPages, p + 1))
+                      }
+                    >
+                      Next <ChevronRight className="ml-1 h-4 w-4" />
+                    </Button>
                   </div>
                 )}
-              </div>
-            </div>
-
-            {totalPages > 1 && (
-              <div className="px-0 py-3 border-t border-border bg-background flex items-center justify-between flex-shrink-0">
-                <div className="text-sm text-gray-700">
-                  Showing {startIndex + 1} to {Math.min(endIndex, filteredMentors.length)} of {filteredMentors.length}{" "}
-                  agents
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                    disabled={currentPage === 1}
-                    className="h-8 w-8 p-0"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <span className="text-sm text-gray-700 px-2">
-                    <span className="sm:hidden">{currentPage}/{totalPages}</span>
-                    <span className="hidden sm:inline">Page {currentPage} of {totalPages}</span>
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                    disabled={currentPage === totalPages}
-                    className="h-8 w-8 p-0"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
+              </>
             )}
           </div>
         </div>
 
-        {/* Footer - fixed, does not scroll */}
-        <div className="flex-shrink-0 px-4 sm:px-6 py-4 border-t border-border bg-muted/50 rounded-b-lg flex justify-end gap-3">
-          <Button variant="outline" onClick={handleCancel} className="px-6 bg-transparent">
+        <div className="flex flex-shrink-0 justify-end gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4">
+          <Button variant="outline" onClick={handleCancel} className="px-6">
             Cancel
           </Button>
           <Button
-            onClick={handleCreate}
+            onClick={handleSubmit}
             disabled={!projectName.trim() || selectedMentors.length === 0}
-            className={`px-6 text-white ${
-              projectName.trim() && selectedMentors.length > 0
-                ? "bg-gradient-to-r from-[#00A3EC] to-[#6988FF] hover:opacity-90 hover:text-white"
-                : "bg-gray-600 hover:bg-gray-700"
-            }`}
+            className="bg-gradient-to-r from-[#2563EB] to-[#93C5FD] px-6 text-white hover:opacity-90"
           >
-            Create Project
+            Save
           </Button>
         </div>
       </DialogContent>

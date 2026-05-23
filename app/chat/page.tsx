@@ -1,6 +1,6 @@
 "use client"
 
-import HomePage from "../home/page"
+import HomePage from "@/components/v0-home"
 
 export default function ChatPage() {
   return <HomePage />

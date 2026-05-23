@@ -1,2 +1,16 @@
 @import "tailwindcss";
 @import './iblai-styles.css';
+
+/*
+ * v0-generated pages reference `h-screen-dvh` / `min-h-screen-dvh` --
+ * not real Tailwind utilities. Without these defs the class is silently
+ * dropped, the sidebar `<aside>` has no height, and the admin-footer
+ * stops pinning to the bottom. Register both as standard Tailwind v4
+ * utilities so every existing call-site keeps working.
+ */
+@utility h-screen-dvh {
+  height: 100dvh;
+}
+@utility min-h-screen-dvh {
+  min-height: 100dvh;
+}

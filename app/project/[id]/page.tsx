@@ -66,7 +66,6 @@ export default function ProjectPage() {
   const [isAssistantTyping, setIsAssistantTyping] = useState(false)
   const [isAddSourcesDialogOpen, setIsAddSourcesDialogOpen] = useState(false)
   const [selectedAttachments, setSelectedAttachments] = useState<SelectedSource[]>([])
-  const [chatTitleByIndex, setChatTitleByIndex] = useState<Record<number, string>>({})
   const [replyingTo, setReplyingTo] = useState<{ id: string; content: string } | null>(null)
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null)
   const [fullscreenImageUrl, setFullscreenImageUrl] = useState<string | null>(null)
@@ -112,29 +111,6 @@ export default function ProjectPage() {
   }, [])
 
   // One sidebar item per chat (current conversation), not per message
-  const firstUserMessage = messages.find((m) => m.role === "user")
-  const currentChatPreview =
-    chatTitleByIndex[0] ??
-    (firstUserMessage
-      ? firstUserMessage.content.length > 50
-        ? firstUserMessage.content.slice(0, 50).trim() + "…"
-        : firstUserMessage.content
-      : "")
-  const recentChatPreviews = hasMessages ? [currentChatPreview] : []
-
-  const handleRenameChat = (index: number, newName: string) => {
-    if (index !== 0) return
-    setChatTitleByIndex((prev) => ({ ...prev, 0: newName }))
-  }
-  const handleDeleteChat = (index: number) => {
-    if (index !== 0) return
-    setMessages([])
-    setChatTitleByIndex({})
-  }
-  const handlePinChat = (_index: number) => {
-    // Optional: add to pinned list or show toast
-  }
-
   useEffect(() => {
     if (typeof window === "undefined" || !id) return
     try {
@@ -375,10 +351,6 @@ export default function ProjectPage() {
         onMobileClose={() => setMobileMenuOpen(false)}
         showAdminButtons={true}
         isLoggedIn={true}
-        recentChatPreviews={recentChatPreviews}
-        onRenameChat={handleRenameChat}
-        onDeleteChat={handleDeleteChat}
-        onPinChat={handlePinChat}
       />
 
       <div
