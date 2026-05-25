@@ -5,8 +5,9 @@ import { Textarea } from "@/components/ui/textarea"
 import { TooltipFlowbite, TooltipProvider } from "@/components/ui/tooltip-flowbite"
 import { cn } from "@/lib/utils"
 import { X, Square } from "lucide-react"
+import { asset } from "@/lib/iblai/asset-url"
 
-const PROMPT_ICONS = "/icons/home-prompt"
+const PROMPT_ICONS = asset("/icons/home-prompt")
 
 export interface ChatInputFormAttachment {
   id: string

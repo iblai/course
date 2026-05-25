@@ -32,11 +32,13 @@ import {
   deleteCourse,
   listCourseCreationCourses,
   getCourseCreationTask,
-  blockLocatorToCourseLocator,
+  recordToCourseLocator,
   type EdxCourseRecord,
   type CourseCreationTask,
 } from "@/lib/iblai/course-actions"
 import { useUrlContext } from "@/lib/iblai/use-url-context"
+import { useIsAdmin } from "@/hooks/use-is-admin"
+import { UpdateSubscriptionModal } from "@/components/iblai/update-subscription-modal"
 import "@/styles/colors.css"
 
 /**
@@ -110,6 +112,13 @@ function CoursesPageContent() {
 
   // Tenant + username for course-creation API calls (delete).
   const { tenantKey, username } = useUrlContext()
+  // Platform admins already own the platform — hide the "Create School"
+  // CTA for them. They still see "View Academy" when one exists.
+  // Non-admins seeing "Create School" get the upgrade prompt instead
+  // of the academy creation dialog (matches the rest of the
+  // admin-gated surfaces).
+  const isPlatformAdmin = useIsAdmin()
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false)
 
   useEffect(() => {
     // Set logged in state - can be determined by other means (auth context, localStorage, etc.)
@@ -246,7 +255,16 @@ function CoursesPageContent() {
 
   const isLoadingCourses = recordsLoading
   const courses = records.map((r, i) => {
-    const courseLocator = blockLocatorToCourseLocator(r.xblock_id)
+    const courseLocator = recordToCourseLocator(r)
+    if (!courseLocator && typeof window !== "undefined") {
+      // Surface in devtools so the missing field name is obvious.
+      // Without a locator, every action button (About / Schedule / Edit
+      // / Preview / Delete) builds a broken URL silently.
+      console.warn(
+        "[courses] no course locator on record — actions disabled",
+        r,
+      )
+    }
     return {
       // edX locator for routing (About/Schedule/Edit/Preview buttons).
       id: courseLocator,
@@ -281,6 +299,14 @@ function CoursesPageContent() {
   //  - delete: opens confirm dialog; the dialog's confirm button hits
   //    the Course Creation API.
   const handleActionClick = (action: string, courseId: string) => {
+    // Hard-bail on empty courseId so we don't open a broken LMS /
+    // Studio URL silently. The record mapping above logs to devtools
+    // when the locator is missing, so the user can see the offending
+    // record shape.
+    if (!courseId) {
+      toast.error("This course is missing its edX locator — actions disabled")
+      return
+    }
     if (action === "viewAbout") {
       // Real LMS about page (description, schedule, enroll). In-app
       // `/course-content/[id]/course` still ships v0 mock content.
@@ -409,12 +435,9 @@ function CoursesPageContent() {
                   >
                     View Academy
                   </Button>
-                ) : (
+                ) : isPlatformAdmin ? null : (
                   <Button
-                    onClick={() => {
-                    setIsEditAcademyMode(false)
-                    setIsCreateAcademyDialogOpen(true)
-                  }}
+                    onClick={() => setUpgradeModalOpen(true)}
                     className="shrink-0 gap-2 text-white border-0 shadow-sm hover:opacity-90"
                     style={{ background: "linear-gradient(135deg, #00A3EC 0%, #6988FF 100%)" }}
                   >
@@ -889,6 +912,10 @@ function CoursesPageContent() {
         }}
         onSuccess={() => setHasAcademy(true)}
         isEdit={isEditAcademyMode}
+      />
+      <UpdateSubscriptionModal
+        open={upgradeModalOpen}
+        onClose={() => setUpgradeModalOpen(false)}
       />
     </div>
   )

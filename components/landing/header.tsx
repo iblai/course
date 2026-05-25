@@ -17,7 +17,7 @@ export function Header() {
             <div className="w-8 h-8 rounded-lg bg-brand-gradient flex items-center justify-center">
               <GraduationCap className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-semibold text-brand-primary">wink.school</span>
+            <span className="text-xl font-semibold text-brand-primary">courseAI</span>
           </Link>
 
           {/* Desktop Navigation */}

@@ -8,31 +8,65 @@ dotenv.config({
 });
 
 const APP_HOST = process.env.APP_HOST || 'http://localhost:3000';
-const AUTH_HOST = process.env.AUTH_HOST || 'https://login.iblai.app';
 
+/**
+ * Auth setup — runs once per (role × browser) combination and saves
+ * the resulting storage state so journey tests can re-use it.
+ *
+ * Project name convention: `setup-<role>-<browser>` (e.g.
+ * `setup-admin-chromium`, `setup-learner-webkit`). The role piece
+ * determines which credentials we pull from
+ * `e2e/.env.development`:
+ *
+ *   PLAYWRIGHT_ADMIN_USERNAME / PLAYWRIGHT_ADMIN_PASSWORD
+ *   PLAYWRIGHT_LEARNER_USERNAME / PLAYWRIGHT_LEARNER_PASSWORD
+ *
+ * `PLAYWRIGHT_USERNAME` / `PLAYWRIGHT_PASSWORD` are accepted as a
+ * legacy fallback (the single-account setup we started with).
+ */
 setup('authenticate', async ({ page }) => {
   setup.setTimeout(120_000);
 
-  const username = process.env.PLAYWRIGHT_USERNAME || '';
-  const password = process.env.PLAYWRIGHT_PASSWORD || '';
+  const projectName = setup.info().project.name; // e.g. setup-admin-chromium
+  const role = projectName.includes('learner') ? 'learner' : 'admin';
+
+  const username =
+    process.env[`PLAYWRIGHT_${role.toUpperCase()}_USERNAME`] ||
+    process.env.PLAYWRIGHT_USERNAME ||
+    '';
+  const password =
+    process.env[`PLAYWRIGHT_${role.toUpperCase()}_PASSWORD`] ||
+    process.env.PLAYWRIGHT_PASSWORD ||
+    '';
 
   if (!username || !password) {
     throw new Error(
-      'PLAYWRIGHT_USERNAME and PLAYWRIGHT_PASSWORD must be set in e2e/.env.development',
+      `Missing credentials for role "${role}". Set ` +
+        `PLAYWRIGHT_${role.toUpperCase()}_USERNAME / PLAYWRIGHT_${role.toUpperCase()}_PASSWORD ` +
+        `in e2e/.env.development.`,
     );
   }
 
-  // Navigate to the app — AuthProvider will redirect to the auth SPA
-  await page.goto(APP_HOST, { waitUntil: 'domcontentloaded', timeout: 30_000 });
+  // Navigate to the app — AuthProvider redirects to the auth SPA
+  // almost immediately. Firefox aborts the initial response under
+  // `waitUntil: 'domcontentloaded'` with `NS_BINDING_ABORTED` when
+  // the redirect cancels the in-flight load. `commit` just confirms
+  // navigation started; the `waitForURL(/login)` below catches the
+  // redirect target.
+  await page
+    .goto(APP_HOST, { waitUntil: 'commit', timeout: 30_000 })
+    .catch(() => null);
 
-  // Wait for the auth SPA login page — just check for /login and app=agent
+  // Wait for the auth SPA login page
   await page.waitForURL(
-    (url) => url.href.includes('/login') && url.href.includes('app=agent'),
+    (url) => url.href.includes('/login'),
     { timeout: 60_000 },
   );
 
   // Click "Continue with Password" to reveal the password fields
-  const continueWithPassword = page.getByRole('button', { name: /continue with password/i });
+  const continueWithPassword = page.getByRole('button', {
+    name: /continue with password/i,
+  });
   await expect(continueWithPassword).toBeVisible({ timeout: 30_000 });
   await continueWithPassword.click();
 
@@ -44,16 +78,21 @@ setup('authenticate', async ({ page }) => {
   await page.getByRole('button', { name: /^continue$/i }).click();
 
   // Wait for redirect back to the app
-  await page.waitForURL((url) => url.href.startsWith(APP_HOST), { timeout: 60_000 });
-
-  // Wait for auth tokens to be stored in localStorage
-  await page.waitForFunction(() => !!window.localStorage.getItem('axd_token'), {
-    timeout: 30_000,
+  await page.waitForURL((url) => url.href.startsWith(APP_HOST), {
+    timeout: 120_000,
   });
 
-  // Save storage state keyed by project name (e.g., setup-chromium, setup-firefox, setup-webkit)
-  const projectName = setup.info().project.name;  // e.g. "setup-chromium"
+  // Wait for auth tokens to be stored in localStorage
+  await page.waitForFunction(
+    () => !!window.localStorage.getItem('dm_token'),
+    { timeout: 30_000 },
+  );
+
+  // Save storage state keyed by role + browser so each test project
+  // can pick up the one it needs.
   const authDir = 'playwright/.auth';
   if (!fs.existsSync(authDir)) fs.mkdirSync(authDir, { recursive: true });
-  await page.context().storageState({ path: `${authDir}/user-${projectName}.json` });
+  await page
+    .context()
+    .storageState({ path: `${authDir}/user-${projectName}.json` });
 });

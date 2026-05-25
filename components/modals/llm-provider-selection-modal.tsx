@@ -6,6 +6,7 @@ import { ChevronLeft, Loader2, Search, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { useGetLlmsQuery } from "@iblai/iblai-js/data-layer"
 import { useUrlContext } from "@/lib/iblai/use-url-context"
+import { asset } from "@/lib/iblai/asset-url"
 import { getLLMProviderDetails } from "@/lib/iblai/llm-provider-details"
 
 interface Provider {
@@ -47,7 +48,7 @@ interface LLMProviderSelectionModalProps {
   onLLMSelect?: (llm: LLM) => void
 }
 
-const PLACEHOLDER_LOGO = "/llm-logos/openai.svg"
+const PLACEHOLDER_LOGO = asset("/llm-logos/openai.svg")
 
 /**
  * `row.name` IS the provider key (e.g., `"openai"`, `"anthropic"`).

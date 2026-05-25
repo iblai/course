@@ -6,6 +6,7 @@ import { useState, useCallback, useEffect, useRef } from "react"
 import { createPortal } from "react-dom"
 import { Button } from "@/components/ui/button"
 import { Upload, X, ArrowLeft, Globe } from "lucide-react"
+import { asset } from "@/lib/iblai/asset-url"
 import Image from "next/image"
 import { Progress } from "@/components/ui/progress"
 
@@ -142,7 +143,7 @@ export function AddSourcesDialog({
 
   const iconCls = "h-5 w-5 shrink-0 object-contain"
   const itemIconCls = "h-4 w-4 shrink-0 object-contain"
-  const iconDir = "/icons/add-source-dialog"
+  const iconDir = asset("/icons/add-source-dialog")
 
   const iconTintCls =
     "text-[#38A1E5] [&>svg]:h-5 [&>svg]:w-5 [&>svg]:text-[#38A1E5] [&>img]:h-5 [&>img]:w-5 [&>img]:object-contain [&>img]:[filter:brightness(0)_saturate(100%)_invert(67%)_sepia(52%)_saturate(1023%)_hue-rotate(182deg)_brightness(95%)_contrast(91%)]"

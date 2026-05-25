@@ -59,9 +59,20 @@ function readTenants(): Tenant[] {
 export function HeaderAccountMenu({ className }: { className?: string }) {
   const { tenantKey: activeTenantKey } = useUrlContext()
   const isAdmin = useIsAdmin()
-  const [userData, setUserData] = React.useState<UserData | null>(null)
-  const [tenants, setTenants] = React.useState<Tenant[]>([])
+  // Read userData / tenants synchronously on the very first render so the
+  // SDK dropdown never mounts with an empty `username`. The SDK calls
+  // `useProfile(username)` internally with no `skip` guard, so a single
+  // render with `username=""` fires
+  // `GET /api/ibl/users/manage/metadata/?username=` → 400. The SSR pass
+  // returns null (no window), so we hydrate to the real values on the
+  // first client render and skip rendering until they're present.
+  const [userData, setUserData] = React.useState<UserData | null>(() =>
+    readUserData(),
+  )
+  const [tenants, setTenants] = React.useState<Tenant[]>(() => readTenants())
 
+  // Re-read after mount in case another tab wrote new values while this
+  // one was hydrating (rare, but cheap).
   React.useEffect(() => {
     setUserData(readUserData())
     setTenants(readTenants())
@@ -69,6 +80,11 @@ export function HeaderAccountMenu({ className }: { className?: string }) {
 
   const email = userData?.email || userData?.user_email || ''
   const username = userData?.username || userData?.user_nicename || ''
+
+  // Don't mount the SDK dropdown until we know the username. The SDK
+  // fires `getUserMetadata?username=<value>` unconditionally on mount,
+  // so passing an empty string produces a 400 on every page load.
+  if (!username) return null
 
   return (
     <div className={cn('flex items-center', className)}>

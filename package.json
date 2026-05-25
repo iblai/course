@@ -1,6 +1,6 @@
 {
-  "name": "ibl-ai-wink",
-  "version": "0.1.0",
+  "name": "courseai",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "prebuild": "next telemetry disable",
@@ -15,7 +15,8 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test --config e2e/playwright.config.ts",
     "test:e2e:ui": "playwright test --config e2e/playwright.config.ts --ui",
-    "test:e2e:headed": "cross-env HEADED=true playwright test --config e2e/playwright.config.ts"
+    "test:e2e:headed": "cross-env HEADED=true playwright test --config e2e/playwright.config.ts",
+    "release": "release-it"
   },
   "dependencies": {
     "@elevenlabs/react": "0.12.3",
@@ -92,9 +93,12 @@
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^4.1.7",
     "cross-env": "^10.1.0",
     "dotenv": "^17.4.2",
+    "jsdom": "^29.1.1",
     "postcss": "^8.5",
+    "release-it": "^20.0.1",
     "tailwind-scrollbar": "^4.0.2",
     "tailwindcss": "^4.1.9",
     "tw-animate-css": "1.3.3",

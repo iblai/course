@@ -61,22 +61,21 @@ export function PlatformFooter({
       <div className="px-4 sm:px-6 py-4">
         <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 text-sm text-text-secondary">
           <div className="hidden sm:flex items-center gap-4">
-            <Link href="#" className="hover:text-text-primary transition-colors">
+            <Link href="/privacy" className="hover:text-text-primary transition-colors">
               Privacy Policy
             </Link>
-            <Link href="#" className="hover:text-text-primary transition-colors">
+            <Link href="/terms" className="hover:text-text-primary transition-colors">
               Terms & Conditions
             </Link>
           </div>
           <div className="flex items-center gap-2">
             <Image
-              src="/images/os-logo.png"
-              alt="OS"
+              src="/images/iblai-logo.png"
+              alt="ibl.ai"
               width={80}
               height={22}
               className="h-5 w-auto"
             />
-            <span>ibl.ai OS</span>
           </div>
         </div>
       </div>

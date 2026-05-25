@@ -1,0 +1,346 @@
+{
+  "version": 2,
+  "lastUpdated": "2026-05-23",
+  "summary": {
+    "totalCheckpoints": 40,
+    "coveredCheckpoints": 40,
+    "deprecatedCheckpoints": 0,
+    "percent": 100,
+    "totalJourneys": 10,
+    "activeJourneys": 10
+  },
+  "journeys": [
+    {
+      "id": "authentication",
+      "name": "Authentication",
+      "spec": "auth.journey.spec.ts",
+      "role": "admin",
+      "sourceFiles": [
+        "app/sso-login-complete/page.tsx",
+        "providers/iblai-providers.tsx"
+      ],
+      "checkpoints": [
+        {
+          "id": "auth-01",
+          "description": "Authenticated user lands on the home page without bouncing back to the auth SPA",
+          "status": "covered"
+        },
+        {
+          "id": "auth-02",
+          "description": "Auth tokens (axd_token, userData.user_nicename) persist in localStorage after SSO",
+          "status": "covered"
+        }
+      ]
+    },
+    {
+      "id": "branding",
+      "name": "Branding",
+      "spec": "branding.journey.spec.ts",
+      "role": "admin",
+      "sourceFiles": [
+        "app/layout.tsx",
+        "app/favicon.ico",
+        "public/images/iblai-logo.png",
+        "components/landing/footer.tsx",
+        "components/platform/platform-footer.tsx",
+        "components/sections/faq-section.tsx",
+        "components/landing/header.tsx",
+        "components/landing/benefits.tsx",
+        "components/sections/watch-section (3).tsx",
+        "components/sidebar.tsx",
+        "components/platform/sidebar.tsx"
+      ],
+      "checkpoints": [
+        {
+          "id": "brand-01",
+          "description": "<title> includes \"courseAI\" (replaces wink.school)",
+          "status": "covered"
+        },
+        {
+          "id": "brand-02",
+          "description": "No surviving wink.school strings in the DOM on /",
+          "status": "covered"
+        },
+        {
+          "id": "brand-03",
+          "description": "/favicon.ico is served as an image (Next auto-detects app/favicon.ico)",
+          "status": "covered"
+        },
+        {
+          "id": "brand-04",
+          "description": "/images/iblai-logo.png loads as a 200 PNG (footer + sidebar share it)",
+          "status": "covered"
+        }
+      ]
+    },
+    {
+      "id": "legal-pages",
+      "name": "Legal Pages",
+      "spec": "legal-pages.journey.spec.ts",
+      "role": "admin",
+      "sourceFiles": [
+        "app/privacy/page.tsx",
+        "app/terms/page.tsx",
+        "components/landing/footer.tsx",
+        "components/platform/platform-footer.tsx"
+      ],
+      "checkpoints": [
+        {
+          "id": "legal-01",
+          "description": "/privacy redirects to ibl.ai/privacy-policy (HTTP 307)",
+          "status": "covered"
+        },
+        {
+          "id": "legal-02",
+          "description": "/terms redirects to ibl.ai/terms-of-use (HTTP 307)",
+          "status": "covered"
+        },
+        {
+          "id": "legal-03",
+          "description": "Platform footer Privacy / Terms links target /privacy and /terms (regression: previously \"#\")",
+          "status": "covered"
+        }
+      ]
+    },
+    {
+      "id": "course-catalog",
+      "name": "Course Catalog",
+      "spec": "course-catalog.journey.spec.ts",
+      "role": "admin",
+      "sourceFiles": [
+        "app/course-catalog/page.tsx",
+        "app/course-content/[id]/layout.tsx",
+        "lib/iblai/config.ts"
+      ],
+      "checkpoints": [
+        {
+          "id": "catalog-01",
+          "description": "Catalog renders with images served from the direct LMS host (no /lms/asset-v1: proxy URLs)",
+          "status": "covered"
+        },
+        {
+          "id": "catalog-02",
+          "description": "Clicking a course card navigates top-level to skillsai.iblai.app/courses/<id> (the About / preview page), NOT the in-course player",
+          "status": "covered"
+        },
+        {
+          "id": "catalog-03",
+          "description": "Direct visits to /course-content/<id>/<tab> redirect to the matching skillsAI URL",
+          "status": "covered"
+        },
+        {
+          "id": "catalog-04",
+          "description": "Redirect preserves the per-tab segment (progress / dates / discussion / bookmarks / instructor)",
+          "status": "covered"
+        },
+        {
+          "id": "catalog-05",
+          "description": "Redirect preserves query string and hash (e.g. ?unit_id=… deep links)",
+          "status": "covered"
+        }
+      ]
+    },
+    {
+      "id": "catalog-interactions",
+      "name": "Course Catalog Interactions",
+      "spec": "catalog-interactions.journey.spec.ts",
+      "role": "admin",
+      "sourceFiles": [
+        "app/course-catalog/page.tsx"
+      ],
+      "checkpoints": [
+        {
+          "id": "catint-01",
+          "description": "Search input accepts text and updates the URL with ?q=",
+          "status": "covered"
+        },
+        {
+          "id": "catint-02",
+          "description": "Filters button opens the SDK DiscoverFilterDrawer (heading \"Explore Content\")",
+          "status": "covered"
+        },
+        {
+          "id": "catint-03",
+          "description": "Clearing search via the X button resets the URL (drops ?q=)",
+          "status": "covered"
+        },
+        {
+          "id": "catint-04",
+          "description": "Empty state offers a \"Reset search and filters\" CTA when nothing matches",
+          "status": "covered"
+        },
+        {
+          "id": "catint-05",
+          "description": "Share + Copy-link buttons render on every catalog card",
+          "status": "covered"
+        }
+      ]
+    },
+    {
+      "id": "my-courses",
+      "name": "My Courses",
+      "spec": "my-courses.journey.spec.ts",
+      "role": "admin",
+      "sourceFiles": [
+        "app/courses/page.tsx",
+        "lib/iblai/course-actions.ts"
+      ],
+      "checkpoints": [
+        {
+          "id": "mycourses-01",
+          "description": "My Courses heading and platform footer render together (layout regression guard)",
+          "status": "covered"
+        },
+        {
+          "id": "mycourses-02",
+          "description": "Row action buttons either open a well-formed URL OR toast \"missing its edX locator\" — never open a malformed /courses//about-style URL",
+          "status": "covered"
+        }
+      ]
+    },
+    {
+      "id": "admin-gating-admin",
+      "name": "Admin Gating — Admin Path",
+      "spec": "admin-gating.journey.spec.ts",
+      "role": "admin",
+      "sourceFiles": [
+        "components/platform/sidebar-learner.tsx",
+        "components/iblai/update-subscription-modal.tsx",
+        "hooks/use-is-admin.ts"
+      ],
+      "checkpoints": [
+        {
+          "id": "gateadmin-01",
+          "description": "New Course in the sidebar routes admins into the mentor chat without the upgrade modal",
+          "status": "covered"
+        },
+        {
+          "id": "gateadmin-02",
+          "description": "Create School is hidden for admins on /courses (admins own the academy)",
+          "status": "covered"
+        },
+        {
+          "id": "gateadmin-03",
+          "description": "Admin-footer Settings opens without the upgrade modal intercepting",
+          "status": "covered"
+        }
+      ]
+    },
+    {
+      "id": "admin-gating-learner",
+      "name": "Admin Gating — Learner Path",
+      "spec": "learner/learner-gating.journey.spec.ts",
+      "role": "learner",
+      "sourceFiles": [
+        "components/platform/sidebar-learner.tsx",
+        "components/iblai/update-subscription-modal.tsx",
+        "app/courses/page.tsx",
+        "app/course-catalog/page.tsx"
+      ],
+      "checkpoints": [
+        {
+          "id": "gatelearner-01",
+          "description": "New Course click opens the SDK UpgradePackageModal (no navigation)",
+          "status": "covered"
+        },
+        {
+          "id": "gatelearner-02",
+          "description": "Create School on /courses opens the upgrade modal (CreateAcademyDialog does NOT open)",
+          "status": "covered"
+        },
+        {
+          "id": "gatelearner-03",
+          "description": "Create School on /course-catalog opens the upgrade modal",
+          "status": "covered"
+        },
+        {
+          "id": "gatelearner-04",
+          "description": "Admin-footer Settings opens the upgrade modal",
+          "status": "covered"
+        },
+        {
+          "id": "gatelearner-05",
+          "description": "/course-catalog stays accessible for learners — no auto-open upgrade modal on page load",
+          "status": "covered"
+        }
+      ]
+    },
+    {
+      "id": "upgrade-modal-lifecycle",
+      "name": "Upgrade Modal Lifecycle — Learner",
+      "spec": "learner/learner-modal-lifecycle.journey.spec.ts",
+      "role": "learner",
+      "sourceFiles": [
+        "components/iblai/update-subscription-modal.tsx"
+      ],
+      "checkpoints": [
+        {
+          "id": "modal-01",
+          "description": "Opening the modal does NOT navigate (the \"keeps redirecting\" Stripe-pricing-session regression cover)",
+          "status": "covered"
+        },
+        {
+          "id": "modal-02",
+          "description": "Modal does NOT auto-open on neutral page loads — it is contextual to a gated click",
+          "status": "covered"
+        },
+        {
+          "id": "modal-03",
+          "description": "Closing the modal via Escape leaves the user on the same page (no orphaned navigation)",
+          "status": "covered"
+        }
+      ]
+    },
+    {
+      "id": "learner-sidebar-gating",
+      "name": "Sidebar Gating — Learner: Remaining Items",
+      "spec": "learner/learner-sidebar-gating.journey.spec.ts",
+      "role": "learner",
+      "sourceFiles": [
+        "components/platform/sidebar-learner.tsx"
+      ],
+      "checkpoints": [
+        {
+          "id": "gatesidebar-01",
+          "description": "Configure (top nav) → upgrade modal opens, no navigation",
+          "status": "covered"
+        },
+        {
+          "id": "gatesidebar-02",
+          "description": "Chats section header → upgrade modal opens, no navigation",
+          "status": "covered"
+        },
+        {
+          "id": "gatesidebar-03",
+          "description": "New Project section header → upgrade modal opens, no navigation",
+          "status": "covered"
+        },
+        {
+          "id": "gatesidebar-04",
+          "description": "Invites (admin footer) → upgrade modal opens, no navigation",
+          "status": "covered"
+        },
+        {
+          "id": "gatesidebar-05",
+          "description": "Users (admin footer) → upgrade modal opens, no navigation",
+          "status": "covered"
+        },
+        {
+          "id": "gatesidebar-06",
+          "description": "API (admin footer) → upgrade modal opens, no navigation",
+          "status": "covered"
+        },
+        {
+          "id": "gatesidebar-07",
+          "description": "Billing (admin footer) → upgrade modal opens, no navigation",
+          "status": "covered"
+        },
+        {
+          "id": "gatesidebar-08",
+          "description": "Monetization (admin footer) → upgrade modal opens, no navigation",
+          "status": "covered"
+        }
+      ]
+    }
+  ]
+}

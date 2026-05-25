@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
 import {
   useLazyGetMentorsQuery,
 } from '@iblai/iblai-js/data-layer'
@@ -111,7 +110,9 @@ export function useMentorRedirect(options: UseMentorRedirectOptions = {}) {
           const stillExists = await agentExists(tenantKey, username, storedDefault)
           if (cancelled) return
           if (stillExists && go(storedDefault)) {
-            toast.success("Agent loaded")
+            // No toast — the resolve happens on every fresh chat
+            // landing and the success message was lingering on the
+            // chat UI for too long.
             setHasResolved(true)
             return
           }

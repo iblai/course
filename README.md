@@ -4,6 +4,8 @@
 
 # courseAI
 
+The video demo is available [here](https://drive.google.com/file/d/1IcfMBCSjZ5jqnCj_hQr6l1bxGjXY_xi9/view?usp=sharing).
+
 AI-assisted course authoring and delivery — design programs, browse the catalog, and chat with course agents on the ibl.ai platform.
 
 [![Next.js](https://img.shields.io/badge/Next.js-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org)

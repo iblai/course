@@ -57,10 +57,21 @@ if (typeof window !== "undefined") {
   try {
     // data-layer v1.2+ signature:
     // (dmUrl, lmsUrl, legacyLmsUrl, storageService, httpErrorHandler)
+    //
+    // LMS host = the API gateway proxy `api.<domain>/lms`, NOT the
+    // direct LMS host. The direct host (`learn.<domain>`) blocks CORS
+    // for several endpoints used by the SDK
+    // (e.g. `/api/ibl/users/manage/platform/`), so the data-layer
+    // routes all LMS-bound RTK Query calls through the gateway.
+    //
+    // Static asset URLs (catalog thumbnails, course-content iframe)
+    // still use the direct host — assets aren't subject to the CORS
+    // preflight and the LMS serves `/asset-v1:...` only on the direct
+    // host.
     initializeDataLayer(
       config.dmUrl(),
       config.lmsUrl(),
-      config.lmsUrl(), // legacyLmsUrl (same as lmsUrl for consolidated API)
+      config.lmsUrl(),
       storageService,
       {
         401: () => redirectToAuthSpa(undefined, undefined, true),

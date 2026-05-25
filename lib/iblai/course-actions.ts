@@ -77,7 +77,11 @@ export interface CourseApiContext {
  * Used to derive routable course ids for About/Schedule/Edit/Preview
  * buttons from the course-creation list response.
  */
-export function blockLocatorToCourseLocator(xblockId: string): string {
+export function blockLocatorToCourseLocator(xblockId: string | undefined | null): string {
+  if (!xblockId) return "";
+  // Already a course locator (some endpoints return `course-v1:...`
+  // directly instead of wrapping it in a block locator). Pass through.
+  if (xblockId.startsWith("course-v1:")) return xblockId;
   if (!xblockId.startsWith("block-v1:")) return xblockId;
   const stripped = xblockId
     .slice("block-v1:".length)
@@ -85,11 +89,37 @@ export function blockLocatorToCourseLocator(xblockId: string): string {
   return `course-v1:${stripped}`;
 }
 
+/**
+ * Best-effort course locator extraction from a course-creation record.
+ * Different versions of the AI-mentor API expose the locator under
+ * different field names; reading just `xblock_id` produced an empty
+ * string when the field was named e.g. `course_id` or `course_key`,
+ * which then made every action button (About / Schedule / Edit /
+ * Preview / Delete) open a URL with an empty course id.
+ */
+export function recordToCourseLocator(r: EdxCourseRecord): string {
+  const candidates = [
+    r.xblock_id,
+    (r as { course_id?: string }).course_id,
+    (r as { course_key?: string }).course_key,
+    (r as { course_locator?: string }).course_locator,
+  ];
+  for (const c of candidates) {
+    if (typeof c === "string" && c.length > 0) {
+      return blockLocatorToCourseLocator(c);
+    }
+  }
+  return "";
+}
+
 export interface EdxCourseRecord {
   /** Integer EdxCourse record id (path param for delete/detail). */
   id: number;
   name: string;
-  xblock_id: string;
+  xblock_id?: string;
+  course_id?: string;
+  course_key?: string;
+  course_locator?: string;
   run?: string;
   number?: string;
   description?: string;
@@ -174,17 +204,19 @@ export async function listCourseCreationCourses({
     lastRes = res;
     if (res.status !== 404) break;
   }
+  // `candidates.length > 0` is enforced above and every fetch result
+  // sets `lastRes`, so the loop is guaranteed to have populated it.
+  // The non-null assertion lets us collapse the previously-defensive
+  // `if (lastRes)` branch — it was unreachable.
+  const errRes = lastRes!;
   let detail = "";
-  if (lastRes) {
-    try {
-      const j = await lastRes.json();
-      detail = (j && (j.detail || j.error || j.message)) ?? "";
-    } catch {
-      /* ignore */
-    }
-    throw new Error(detail || `List failed (HTTP ${lastRes.status})`);
+  try {
+    const j = await errRes.json();
+    detail = (j && (j.detail || j.error || j.message)) ?? "";
+  } catch {
+    /* ignore */
   }
-  throw new Error("List failed: no response");
+  throw new Error(detail || `List failed (HTTP ${errRes.status})`);
 }
 
 /**
@@ -229,17 +261,16 @@ export async function getCourseCreationTask(
     lastRes = res;
     if (res.status !== 404) break;
   }
+  // See `listCourseCreationCourses` for the non-null-assertion rationale.
+  const errRes = lastRes!;
   let detail = "";
-  if (lastRes) {
-    try {
-      const j = await lastRes.json();
-      detail = (j && (j.detail || j.error || j.message)) ?? "";
-    } catch {
-      /* ignore */
-    }
-    throw new Error(detail || `Task fetch failed (HTTP ${lastRes.status})`);
+  try {
+    const j = await errRes.json();
+    detail = (j && (j.detail || j.error || j.message)) ?? "";
+  } catch {
+    /* ignore */
   }
-  throw new Error("Task fetch failed: no response");
+  throw new Error(detail || `Task fetch failed (HTTP ${errRes.status})`);
 }
 
 /**
@@ -283,15 +314,14 @@ export async function deleteCourse(
     lastRes = res;
     if (res.status !== 404) break;
   }
+  // See `listCourseCreationCourses` for the non-null-assertion rationale.
+  const errRes = lastRes!;
   let detail = "";
-  if (lastRes) {
-    try {
-      const j = await lastRes.json();
-      detail = (j && (j.detail || j.error || j.message)) ?? "";
-    } catch {
-      /* ignore */
-    }
-    throw new Error(detail || `Delete failed (HTTP ${lastRes.status})`);
+  try {
+    const j = await errRes.json();
+    detail = (j && (j.detail || j.error || j.message)) ?? "";
+  } catch {
+    /* ignore */
   }
-  throw new Error("Delete failed: no response");
+  throw new Error(detail || `Delete failed (HTTP ${errRes.status})`);
 }

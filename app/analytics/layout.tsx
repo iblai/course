@@ -15,9 +15,14 @@ import { cn } from "@/lib/utils"
 /**
  * `/iblai-analytics` shell — wraps each sub-route in `<AnalyticsLayout>` +
  * `<AnalyticsSettingsProvider>`. Sidebar + Header stay outside the SDK
- * shell so the rest of the app's nav remains visible. The SDK layout
- * uses `bg-[#f5f7fb]` internally; we wrap it in a white card so it pops
- * against the page background (per skill).
+ * shell so the rest of the app's nav remains visible.
+ *
+ * Background colour: the SDK layout uses `bg-[#f5f7fb]` internally and
+ * we want the surrounding page to match — otherwise the blue-ish
+ * content panel looks like an inset card on a white page. The outer
+ * `<div>` is set to `bg-[#f5f7fb]` so the whole route reads as a
+ * single surface, and the wrapper around `<AnalyticsLayout>` drops its
+ * card chrome (no bg-white, no border, no rounded) so it blends in.
  */
 export default function AnalyticsLayoutWrapper({
   children,
@@ -32,7 +37,12 @@ export default function AnalyticsLayoutWrapper({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <div className="h-dvh w-full bg-white">
+    // `min-h-dvh` (not `h-dvh`): the analytics content can be taller than
+    // the viewport. With `h-dvh`, the outer box was clipped to a single
+    // viewport — once the user scrolled past it the body background
+    // (theme `--background`, white) was what showed. `min-h-dvh` lets
+    // the blue-ish surface grow with the document.
+    <div className="min-h-dvh w-full bg-[#f5f7fb]">
       <SidebarLearner
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed((v) => !v)}
@@ -51,7 +61,7 @@ export default function AnalyticsLayoutWrapper({
           onMobileMenuToggle={() => setMobileMenuOpen(true)}
         />
         <div className="mx-auto w-full flex-1 overflow-auto px-4 py-8 md:w-[75vw] md:px-0">
-          <div className="overflow-hidden rounded-lg border border-[var(--border-color)] bg-white">
+          <div className="overflow-hidden">
             <AnalyticsSettingsProvider value={{}}>
               <AnalyticsLayout
                 currentPath={pathname ?? `${basePath}/financial`}

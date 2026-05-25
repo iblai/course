@@ -15,8 +15,11 @@ import { chatActions, isLoggedIn as sdkIsLoggedIn } from "@iblai/iblai-js/web-ut
 import { useDispatch } from "react-redux"
 import { useShowFreeTrialDialog } from "@/hooks/use-show-free-trial-dialog"
 import { AuthPopover } from "@/components/iblai/auth-popover"
+import { UpdateSubscriptionModal } from "@/components/iblai/update-subscription-modal"
+import { useIsAdmin } from "@/hooks/use-is-admin"
 import { enableCourseCreationToolIfMissing } from "@/lib/iblai/agent-tools"
-const SIDEBAR_ICONS = "/icons/sidebar"
+import { asset } from "@/lib/iblai/asset-url"
+const SIDEBAR_ICONS = asset("/icons/sidebar")
 const PROJECT_STORAGE_KEY = "project-data"
 const MAX_RECENT_CHATS = 8
 
@@ -104,20 +107,39 @@ export function SidebarLearner({
     section: RenameDialogSection
     itemId: string
     label: string
-  }>({ open: false, section: "pinned", itemId: "", label: "" })
+  }>({ open: false, section: "chat", itemId: "", label: "" })
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean
     section: DeleteDialogSection
     itemId: string
     label: string
-  }>({ open: false, section: "pinned", itemId: "", label: "" })
+  }>({ open: false, section: "chat", itemId: "", label: "" })
   const [createProjectModalOpen, setCreateProjectModalOpen] = useState(false)
+  // Non-admins clicking any admin surface (New Course, Configure,
+  // Chats, New Project, Invite, Users, API, Billing, Monetization,
+  // Settings) get the upgrade prompt instead. Admins proceed straight
+  // through. Modal is controlled here so we can cancel the original
+  // action atomically.
+  const isPlatformAdmin = useIsAdmin()
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false)
+  /**
+   * Run `action` if the viewer is a platform admin; otherwise open the
+   * upgrade-subscription modal and swallow the click. Used at every
+   * admin-gated sidebar surface so the gating logic is single-sourced.
+   */
+  const requireAdmin = (action: () => void) => {
+    if (!isPlatformAdmin) {
+      setUpgradeModalOpen(true)
+      return
+    }
+    action()
+  }
   // Resolve current mentor + tenant so the prominent "New Chat" button
   // can fire `?new=<ts>` on the active mentor URL (matches mentorai's
   // `startNewChat` behaviour). Falls back to `/` when no mentor is
   // resolved so `useMentorRedirect` picks one for us.
   const { tenantKey: ctxTenantKey, mentorId: ctxMentorId, username } = useUrlContext()
-  const startNewChat = () => {
+  const startNewChat = () => requireAdmin(() => {
     if (ctxTenantKey && ctxMentorId) {
       if (username) {
         // Fire-and-forget — never blocks navigation. The settings GET
@@ -136,7 +158,7 @@ export function SidebarLearner({
       // before redirecting.
       router.push("/")
     }
-  }
+  })
   // Org account dialog (SDK <Account>) — every admin-footer pane
   // (Users / API / Billing / Monetization / Settings) opens this with a
   // different `targetTab`. Mirrors hq's `handleFooterActionClick`.
@@ -237,7 +259,7 @@ export function SidebarLearner({
   const { data: chatHistoryData } = useGetChatHistoryQuery(
     {
       org: ctxTenantKey,
-      filterUserId: username ?? "",
+      filterUserId:  username ?? "",
       pageSize: MAX_RECENT_CHATS,
       page: 1,
     } as never,
@@ -319,11 +341,11 @@ export function SidebarLearner({
   }
 
 
-  // Pinned + Recent are not yet wired to SDK feeds -- start empty so
-  // the sidebar never shows placeholder "Design a course on..." rows.
-  // When `/iblai-agent-history` is integrated, replace these with the
-  // chat-history query results.
-  const [pinnedData, setPinnedData] = useState<{ id: string; label: string }[]>([])
+  // Recent is not yet wired to an SDK feed -- start empty so the
+  // sidebar never shows placeholder "Design a course on..." rows.
+  // When `/iblai-agent-history` is integrated, replace this with the
+  // chat-history query results. The Recent section is feature-flagged
+  // off below until the wiring lands.
   const [recentData, setRecentData] = useState<{ id: string; label: string }[]>([])
 
   // Top nav -- matches hq's order: workspace/agent surface first, then
@@ -381,16 +403,6 @@ export function SidebarLearner({
     })),
   }
 
-  const pinnedItem = {
-    id: "pinned",
-    label: "Pinned",
-    icon: `${SIDEBAR_ICONS}/pin.svg`,
-    children: pinnedData.map((pinned) => ({
-      id: `pinned-${pinned.id}`,
-      label: pinned.label,
-    })),
-  }
-
   const recentItem = {
     id: "recent",
     label: "Recent",
@@ -406,9 +418,7 @@ export function SidebarLearner({
 
   const handleRenameConfirm = async (newName: string) => {
     const dataId = getDataId(renameDialog.itemId, renameDialog.section)
-    if (renameDialog.section === "pinned") {
-      setPinnedData((prev) => prev.map((p) => (p.id === dataId ? { ...p, label: newName } : p)))
-    } else if (renameDialog.section === "project") {
+    if (renameDialog.section === "project") {
       // Persist via the SDK; the `useGetUserProjectsQuery` cache is
       // invalidated by the mutation, so the sidebar list re-renders
       // with the new name on its own.
@@ -435,9 +445,7 @@ export function SidebarLearner({
 
   const handleDeleteConfirm = async () => {
     const dataId = getDataId(deleteDialog.itemId, deleteDialog.section)
-    if (deleteDialog.section === "pinned") {
-      setPinnedData((prev) => prev.filter((p) => p.id !== dataId))
-    } else if (deleteDialog.section === "project") {
+    if (deleteDialog.section === "project") {
       if (!ctxTenantKey) {
         toast.error("No tenant resolved; cannot delete project.")
         return
@@ -548,6 +556,14 @@ export function SidebarLearner({
                     onMobileClose?.()
                     setInviteDialogOpen(true)
                   } else if (item.href) {
+                    // `configure` is an admin surface (workspace
+                    // settings); non-admins get the upgrade modal
+                    // instead of being routed into a page they can't
+                    // use. My Courses / Course Catalog stay public.
+                    if (item.id === "configure") {
+                      requireAdmin(() => router.push(item.href!))
+                      return
+                    }
                     if (!isLoggedIn && item.id === "instructors") {
                       router.push("/login")
                     } else {
@@ -610,7 +626,7 @@ export function SidebarLearner({
                   ? "bg-[#e0f2fe] text-blue-600 border-blue-200/60"
                   : "hover:bg-blue-50 hover:text-[#020817] text-[rgb(113,121,133)] border-transparent"
               )}
-              onClick={() => toggleExpanded("chats")}
+              onClick={() => requireAdmin(() => toggleExpanded("chats"))}
             >
               <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center">
                 <img
@@ -681,7 +697,7 @@ export function SidebarLearner({
                     "justify-center items-center w-10 h-10 p-0 rounded-lg mx-auto",
                     expandedItems.includes("chats") || pathname === "/chat" ? "bg-[#e0f2fe] text-blue-600" : "text-[rgb(113,121,133)] hover:bg-blue-50 hover:text-[#020817]"
                   )}
-                  onClick={() => toggleExpanded("chats")}
+                  onClick={() => requireAdmin(() => toggleExpanded("chats"))}
                 >
                   <img src={`${SIDEBAR_ICONS}/chat.svg`} alt="Chats" className="w-4 h-4 flex-shrink-0" aria-hidden />
                 </Button>
@@ -706,12 +722,20 @@ export function SidebarLearner({
                   isItemHighlighted(item) && !isCollapsed && "bg-blue-50 text-blue-600",
                 )}
                 onClick={() => {
+                  // Projects are admin-only — non-admins get the
+                  // upgrade modal regardless of whether they're
+                  // creating a new project or expanding the existing
+                  // list.
                   if (item.id === "projects") {
-                    executeWithTrialCheck(() =>
-                      setCreateProjectModalOpen(true),
+                    requireAdmin(() =>
+                      executeWithTrialCheck(() =>
+                        setCreateProjectModalOpen(true),
+                      ),
                     )
-                  } else if (item.children && item.children.length > 0) {
-                    toggleExpanded(item.id)
+                    return
+                  }
+                  if (item.children && item.children.length > 0) {
+                    requireAdmin(() => toggleExpanded(item.id))
                   }
                 }}
               >
@@ -937,147 +961,6 @@ export function SidebarLearner({
           )
         })()}
 
-        {/* Pinned Section */}
-        {(() => {
-          const item = pinnedItem
-          const sidebarButton = (
-            <div key={item.id} className={isCollapsed ? "flex justify-center items-center" : ""}>
-              <Button
-                variant="ghost"
-                className={cn(
-                  "gap-2 hover:bg-blue-50 hover:text-[#020817] text-[rgb(113,121,133)]",
-                  isCollapsed 
-                    ? "justify-center items-center w-10 h-10 p-0 rounded-lg mx-auto" 
-                    : "w-full justify-start pl-[11px]",
-                  isItemHighlighted(item) && isCollapsed && "bg-gray-100",
-                  isItemHighlighted(item) && !isCollapsed && "bg-blue-50 text-blue-600",
-                )}
-                onClick={() => {
-                  if (item.children && item.children.length > 0) {
-                    toggleExpanded(item.id)
-                  }
-                }}
-              >
-                {item.icon && (
-                    <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center">
-                      <img
-                        src={item.icon}
-                        alt={item.label}
-                        className={cn(
-                          "w-4 h-4 p-0 transition-colors",
-                          isItemHighlighted(item) && "opacity-100"
-                        )}
-                        style={
-                          isItemHighlighted(item)
-                            ? {
-                                filter:
-                                  "brightness(0) saturate(100%) invert(27%) sepia(96%) saturate(1352%) hue-rotate(202deg) brightness(98%) contrast(96%)",
-                              }
-                            : {}
-                        }
-                      />
-                    </span>
-                  )}
-                {(!isCollapsed || isMobile) && (
-                  <>
-                    <span className="flex-1 text-left">{item.label}</span>
-                    {item.children &&
-                      item.children.length > 0 &&
-                      (expandedItems.includes(item.id) ? (
-                        <img src={`${SIDEBAR_ICONS}/chevron-down.svg`} alt="" className="w-4 h-4 flex-shrink-0" aria-hidden />
-                      ) : (
-                        <img src={`${SIDEBAR_ICONS}/chevron-right.svg`} alt="" className="w-4 h-4 flex-shrink-0" aria-hidden />
-                      ))}
-                  </>
-                )}
-              </Button>
-            </div>
-          )
-
-          return isCollapsed ? (
-            <TooltipProvider key={item.id}>
-              <TooltipFlowbite content={item.label} position="right">
-                {sidebarButton}
-              </TooltipFlowbite>
-            </TooltipProvider>
-          ) : (
-            <div key={item.id}>
-              {sidebarButton}
-              {expandedItems.includes(item.id) && item.children && item.children.length > 0 && (
-                <div className="ml-6 mt-1 space-y-1 relative">
-                  <div className="absolute left-0 top-0 bottom-0 w-px bg-gray-200"></div>
-                  {item.children.map((child) => (
-                    <div
-                      key={child.id}
-                      className="group flex items-center gap-2 rounded-md pl-4 pr-1 py-0.5 hover:bg-gray-100 min-h-8"
-                    >
-                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted overflow-hidden">
-                        <img src={`${SIDEBAR_ICONS}/user.svg`} alt="" className="h-3 w-3 flex-shrink-0 opacity-70" aria-hidden />
-                      </div>
-                      <span className="flex-1 truncate text-sm text-[rgb(113,121,133)] group-hover:text-[#020817]">
-                        {child.label}
-                      </span>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className={cn(
-                              "h-7 w-7 shrink-0 rounded-md text-[rgb(113,121,133)] hover:bg-gray-200 hover:text-[#020817]",
-                              "opacity-100 pointer-events-auto md:opacity-0 md:pointer-events-none md:group-hover:opacity-100 md:group-hover:pointer-events-auto",
-                              "transition-opacity data-[state=open]:opacity-100 data-[state=open]:pointer-events-auto"
-                            )}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <img src={`${SIDEBAR_ICONS}/more-vertical.svg`} alt="" className="h-4 w-4 flex-shrink-0" aria-hidden />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
-                          <DropdownMenuItem
-                            onClick={() => {
-                              onMobileClose?.()
-                              setRenameDialog({
-                                open: true,
-                                section: "pinned",
-                                itemId: child.id,
-                                label: child.label,
-                              })
-                            }}
-                          >
-                            <img src={`${SIDEBAR_ICONS}/pencil.svg`} alt="" className="h-4 w-4 flex-shrink-0" aria-hidden />
-                            Rename Chat
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <img src={`${SIDEBAR_ICONS}/pin-off.svg`} alt="" className="h-4 w-4 flex-shrink-0" aria-hidden />
-                            Unpin
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <img src={`${SIDEBAR_ICONS}/download.svg`} alt="" className="h-4 w-4 flex-shrink-0" aria-hidden />
-                            Export
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              onMobileClose?.()
-                              setDeleteDialog({
-                                open: true,
-                                section: "pinned",
-                                itemId: child.id,
-                                label: child.label,
-                              })
-                            }}
-                          >
-                            <img src={`${SIDEBAR_ICONS}/trash-2.svg`} alt="" className="h-4 w-4 flex-shrink-0" aria-hidden />
-                            Delete Chat
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )
-        })()}
 
         {/* Recent Section - hidden for now */}
         {(() => {
@@ -1189,15 +1072,6 @@ export function SidebarLearner({
                             <img src={`${SIDEBAR_ICONS}/pencil.svg`} alt="" className="h-4 w-4 flex-shrink-0" aria-hidden />
                             Rename Chat
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setPinnedData((prev) => [...prev, { id: String(Date.now()), label: child.label }])
-                              setRecentData((prev) => prev.filter((r) => `recent-${r.id}` !== child.id))
-                            }}
-                          >
-                            <img src={`${SIDEBAR_ICONS}/pin.svg`} alt="" className="h-4 w-4 flex-shrink-0" aria-hidden />
-                            Pin
-                          </DropdownMenuItem>
                           <DropdownMenuItem>
                             <img src={`${SIDEBAR_ICONS}/download.svg`} alt="" className="h-4 w-4 flex-shrink-0" aria-hidden />
                             Export
@@ -1295,7 +1169,10 @@ export function SidebarLearner({
           style={{ borderColor: "#D0E0FF" }}
         >
           {adminFooterItems.map((item) => {
-            const handleClick = () => {
+            // Every footer pane (Invites / Users / API / Billing /
+            // Monetization / Settings) is admin-only — non-admins get
+            // the upgrade modal regardless of which one they click.
+            const handleClick = () => requireAdmin(() => {
               // Footer routing matches hq's `handleFooterActionClick`
               // pattern (`components/sidebar.tsx`): every admin-pane
               // button opens the SDK `<Account>` at the matching tab via
@@ -1335,7 +1212,7 @@ export function SidebarLearner({
                 setOrgAccountTab("monetization")
                 return
               }
-            }
+            })
             const isActive =
               item.id === "billing" ? isActiveRoute("/analytics/financial") : false
             const isLucide = typeof item.icon !== "string"
@@ -1517,6 +1394,16 @@ export function SidebarLearner({
             toast.error("Failed to create project")
           }
         }}
+      />
+      {/*
+        Upgrade prompt for non-admin users who clicked "New Course".
+        Controlled mount — the modal only opens when `startNewChat`
+        sets `upgradeModalOpen=true` (admins skip the modal entirely
+        and route into the course-creation chat as before).
+      */}
+      <UpdateSubscriptionModal
+        open={upgradeModalOpen}
+        onClose={() => setUpgradeModalOpen(false)}
       />
     </>
   )

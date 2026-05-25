@@ -14,3 +14,38 @@
 @utility min-h-screen-dvh {
   min-height: 100dvh;
 }
+
+/*
+ * Nested-dialog stacking.
+ *
+ * The shadcn `<Dialog>` primitive in `components/ui/dialog.tsx` puts both
+ * overlay and content at `z-[100]`. Sidebar-launched modals (SettingsModal,
+ * OrgAccountDialog, etc.) wrap SDK components (`<Account>`, `<Profile>`,
+ * `<InviteUserDialog>`) which then open their own Radix dialogs INSIDE the
+ * parent shadcn modal. Those SDK-side dialogs default to Radix's z-50 — so
+ * they render BELOW the parent (z-100), and the user sees them "covered by
+ * the older modal".
+ *
+ * Fix: lift every Radix dialog that's NOT one of ours (no `data-slot`
+ * attribute) above z-100. Our shadcn primitive tags overlay + content with
+ * `data-slot="dialog-overlay"` / `data-slot="dialog-content"` so this rule
+ * leaves the parent alone and only promotes the nested SDK / secondary
+ * dialog.
+ */
+[role='dialog']:not([data-slot='dialog-content']) {
+  z-index: 200 !important;
+}
+[data-state='open'][data-radix-dialog-overlay]:not([data-slot='dialog-overlay']),
+[data-state='open'].fixed.inset-0:not([data-slot='dialog-overlay']) {
+  z-index: 199 !important;
+}
+
+/*
+ * Hide the Next.js dev indicator (build activity dot / N-mark / error
+ * overlay launcher) in every environment. The `<nextjs-portal>` web
+ * component is the root host for all of them, so a single rule covers
+ * the dot, the route-announcer, and any future indicators Next adds.
+ */
+nextjs-portal {
+  display: none !important;
+}

@@ -24,25 +24,28 @@ test.describe('auth journey', () => {
 
     await page.goto(appHost);
 
-    // Wait for the app to finish loading (avoid networkidle — WebKit keeps connections open)
-    await page.waitForLoadState('domcontentloaded', { timeout: 15_000 });
-    // Give the app a moment to restore localStorage from storage state
-    await page.waitForFunction(() => !!window.localStorage.getItem('axd_token'), {
-      timeout: 10_000,
-    });
-
-    // ibl.ai auth tokens should be present after login
-    const axdToken = await page.evaluate(() =>
-      window.localStorage.getItem('axd_token'),
-    );
+    // The page can redirect through the mentor-redirect chain
+    // (/ → /platform/<t>/<m>) mid-test, which destroys execution
+    // contexts and makes one-shot `page.evaluate` calls throw
+    // "Execution context was destroyed". `waitForFunction` retries
+    // until the navigation settles, so we read tokens inside it.
+    const axdToken = await page
+      .waitForFunction(
+        () => window.localStorage.getItem('axd_token') || false,
+        { timeout: 30_000 },
+      )
+      .then((handle) => handle.jsonValue() as Promise<string>);
     expect(axdToken).toBeTruthy();
 
-    const userData = await page.evaluate(() =>
-      window.localStorage.getItem('userData'),
-    );
+    const userData = await page
+      .waitForFunction(
+        () => window.localStorage.getItem('userData') || false,
+        { timeout: 30_000 },
+      )
+      .then((handle) => handle.jsonValue() as Promise<string>);
     expect(userData).toBeTruthy();
 
-    const parsed = JSON.parse(userData!);
+    const parsed = JSON.parse(userData);
     expect(parsed).toHaveProperty('user_nicename');
   });
 });

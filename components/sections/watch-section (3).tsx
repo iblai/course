@@ -86,13 +86,13 @@ export function WatchSection() {
               <div className="flex flex-col items-center justify-center px-8 sm:px-12 md:px-16 gap-3">
                 <Image
                   src="/images/skillsAI-logo.webp"
-                  alt="wink.school"
+                  alt="courseAI"
                   width={80}
                   height={32}
                   className="w-16 sm:w-20 md:w-24 lg:w-28 h-auto object-contain"
                 />
                 <span className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-[#00A3EC] to-[#6988FF] bg-clip-text text-transparent">
-                  wink.school
+                  courseAI
                 </span>
               </div>
 

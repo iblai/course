@@ -58,7 +58,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileC
           {/* Logo */}
           <div className="flex items-center gap-2 px-4 py-4 border-b border-gray-200">
             <Image src="/images/toolsAI-logo.png" alt="ibl.ai" width={32} height={32} className="w-8 h-8" />
-            {!isCollapsed && <span className="font-semibold text-[#7284FF] text-lg">wink.school</span>}
+            {!isCollapsed && <span className="font-semibold text-[#7284FF] text-lg">courseAI</span>}
           </div>
 
           {/* Collapse Toggle */}

@@ -134,7 +134,10 @@ export async function enableCourseCreationToolIfMissing(
       (s) => s.toLowerCase() === COURSE_CREATION_SLUG,
     );
     if (alreadyEnabled) {
-      toast.success("Agent settings loaded");
+      // No-op: the SDK route was a load + sync, and the toast that
+      // used to confirm it lingered too long on the configure page.
+      // Successful writes still toast (see `Agent settings updated`
+      // below).
       return;
     }
 

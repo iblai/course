@@ -57,8 +57,46 @@ for (const pkg of [
   if (dir) resolveAliases[pkg] = dir
 }
 
+/**
+ * Optional sub-path mount. Reads `NEXT_PUBLIC_BASE_PATH`, normalises
+ * the leading slash, and feeds Next's `basePath` / `assetPrefix`
+ * config (same pattern hq uses).
+ *
+ * Defaults to `/courseai` — set `NEXT_PUBLIC_BASE_PATH=` (empty) for
+ * a root mount, or override to mount under a different path. basePath
+ * is *build-time* only; to change it, rebuild.
+ */
+function normaliseBasePath(raw) {
+  if (raw === undefined || raw === null) return '/courseai'
+  const trimmed = raw.replace(/\/+$/, '') // drop trailing slashes
+  if (trimmed === '' || trimmed === '/') return '' // explicit root mount
+  return trimmed.startsWith('/') ? trimmed : `/${trimmed}`
+}
+const basePath = normaliseBasePath(process.env.NEXT_PUBLIC_BASE_PATH)
+const assetPrefix = basePath ? `${basePath}/` : ''
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Emit the standalone build the Dockerfile copies to the runner
+  // stage. Without this, `.next/standalone` is empty and the image
+  // is missing `server.js`.
+  output: "standalone",
+  ...(basePath ? { basePath } : {}),
+  ...(assetPrefix ? { assetPrefix } : {}),
+  trailingSlash: !!basePath,
+  // The SDK ServiceWorkerProvider registers `${basePath}/sw.js` with
+  // `scope: basePath`. A worker's default max scope is its own
+  // directory; `Service-Worker-Allowed` lifts the cap so the requested
+  // scope is permitted. `source` is basePath-prefixed by Next, so
+  // `/sw.js` matches the served file.
+  async headers() {
+    return [
+      {
+        source: '/sw.js',
+        headers: [{ key: 'Service-Worker-Allowed', value: basePath || '/' }],
+      },
+    ]
+  },
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -70,8 +108,13 @@ const nextConfig = {
   // runs -> stuck "Processing...". SDK bug; disabling StrictMode is the
   // host workaround per iblai-agent-chat skill known-issues.
   reactStrictMode: false,
+  // `loader: 'custom'` + a basePath-aware loader prepends
+  // `NEXT_PUBLIC_BASE_PATH` to every `<Image>` src regardless of
+  // optimization. Replaces the previous `unoptimized: true`, which
+  // silently dropped basePath and produced 404s under a sub-path mount.
   images: {
-    unoptimized: true,
+    loader: 'custom',
+    loaderFile: './lib/iblai/image-loader.js',
     remotePatterns: [
       {
         protocol: 'https',

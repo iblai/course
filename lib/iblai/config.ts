@@ -23,6 +23,7 @@ const env = {
   NEXT_PUBLIC_MAIN_TENANT_KEY: process.env.NEXT_PUBLIC_MAIN_TENANT_KEY,
   NEXT_PUBLIC_TAURI_CUSTOM_SCHEME: process.env.NEXT_PUBLIC_TAURI_CUSTOM_SCHEME,
   NEXT_PUBLIC_MFE_URL: process.env.NEXT_PUBLIC_MFE_URL,
+  NEXT_PUBLIC_SKILLSAI_URL: process.env.NEXT_PUBLIC_SKILLSAI_URL,
 };
 
 declare global {
@@ -76,13 +77,30 @@ const config = {
   // User-facing only; matches `NEXT_PUBLIC_MFE_URL` in the skill.
   mfeUrl: () => getEnv("NEXT_PUBLIC_MFE_URL", `https://apps.learn.${domain()}`),
 
+  // skillsAI host -- the sibling SPA that owns the in-tenant course
+  // player. courseai redirects course-content clicks here because the
+  // LMS sets `Content-Security-Policy: frame-ancestors 'self'` on the
+  // edX iframe routes, which blocks any non-LMS origin (including
+  // courseai) from embedding the player. skillsAI is deployed under
+  // the same iblai infrastructure and is already allow-listed.
+  // `https://skills.<domain>` 301-redirects to the canonical
+  // `https://skillsai.<domain>`.
+  skillsaiUrl: () =>
+    getEnv("NEXT_PUBLIC_SKILLSAI_URL", `https://skillsai.${domain()}`),
+
   baseWsUrl: () =>
     getEnv("NEXT_PUBLIC_BASE_WS_URL", `wss://asgi.data.${domain()}`),
 
   wsUrl: () =>
     getEnv("NEXT_PUBLIC_BASE_WS_URL", `wss://asgi.data.${domain()}`),
 
-  mainTenantKey: () => getEnv("NEXT_PUBLIC_MAIN_TENANT_KEY", ""),
+  // `main` is the canonical iblai cross-tenant marketplace key. The
+  // SDK Stripe upgrade flow calls `/api/.../stripe/pricing-page-session/`
+  // scoped to this platform; if it resolves to an empty string the
+  // call fires `?platform_key=` and the server rejects it, surfacing
+  // as the "Failed to load upgrade options" toast in
+  // `UpgradePackageModal`. Mentorai uses the same default.
+  mainTenantKey: () => getEnv("NEXT_PUBLIC_MAIN_TENANT_KEY", "main"),
   tauriCustomScheme: () => getEnv("NEXT_PUBLIC_TAURI_CUSTOM_SCHEME", ""),
   platformBaseDomain: () => domain(),
 };
