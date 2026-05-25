@@ -1,5 +1,6 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
+import Script from "next/script"
 import { Inter, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { AccessibilityProvider } from "@/contexts/accessibility-context"
@@ -48,6 +49,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans antialiased`}>
+        <Script src="/env.js" strategy="beforeInteractive" />
         <ScrollToTop />
         <AuthGate>
           <AccessibilityProvider>{children}</AccessibilityProvider>
