@@ -6,8 +6,10 @@ ENV NODE_OPTIONS="--max-old-space-size=8192"
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
+ENV CI=true
+
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # Stage 1: Builder
 FROM base AS builder
