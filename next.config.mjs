@@ -58,18 +58,15 @@ for (const pkg of [
 }
 
 /**
- * Optional sub-path mount. Reads `NEXT_PUBLIC_BASE_PATH`, normalises
- * the leading slash, and feeds Next's `basePath` / `assetPrefix`
- * config (same pattern hq uses).
- *
- * Defaults to `/courseai` — set `NEXT_PUBLIC_BASE_PATH=` (empty) for
- * a root mount, or override to mount under a different path. basePath
- * is *build-time* only; to change it, rebuild.
+ * Sub-path mount. Reads `NEXT_PUBLIC_BASE_PATH`, normalises the
+ * leading slash, and feeds Next's `basePath` / `assetPrefix`. Defaults
+ * to `/courseai` — set `NEXT_PUBLIC_BASE_PATH=` (empty) for a root
+ * mount. basePath is *build-time* only; to change it, rebuild.
  */
 function normaliseBasePath(raw) {
   if (raw === undefined || raw === null) return '/courseai'
   const trimmed = raw.replace(/\/+$/, '') // drop trailing slashes
-  if (trimmed === '' || trimmed === '/') return '' // explicit root mount
+  if (trimmed === '' || trimmed === '/') return '' // explicit root
   return trimmed.startsWith('/') ? trimmed : `/${trimmed}`
 }
 const basePath = normaliseBasePath(process.env.NEXT_PUBLIC_BASE_PATH)
@@ -77,10 +74,7 @@ const assetPrefix = basePath ? `${basePath}/` : ''
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Emit the standalone build the Dockerfile copies to the runner
-  // stage. Without this, `.next/standalone` is empty and the image
-  // is missing `server.js`.
-  output: "standalone",
+  output: 'standalone',
   ...(basePath ? { basePath } : {}),
   ...(assetPrefix ? { assetPrefix } : {}),
   trailingSlash: !!basePath,
@@ -109,9 +103,10 @@ const nextConfig = {
   // host workaround per iblai-agent-chat skill known-issues.
   reactStrictMode: false,
   // `loader: 'custom'` + a basePath-aware loader prepends
-  // `NEXT_PUBLIC_BASE_PATH` to every `<Image>` src regardless of
-  // optimization. Replaces the previous `unoptimized: true`, which
-  // silently dropped basePath and produced 404s under a sub-path mount.
+  // `NEXT_PUBLIC_BASE_PATH` to every `<Image>` src when a sub-path
+  // mount is configured; no-op (returns src as-is) when it isn't.
+  // Replaces `unoptimized: true`, which silently dropped basePath
+  // under a sub-path mount.
   images: {
     loader: 'custom',
     loaderFile: './lib/iblai/image-loader.js',
