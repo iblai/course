@@ -3,7 +3,6 @@
 <a href="https://ibl.ai"><img src="https://ibl.ai/images/iblai-logo.png" alt="ibl.ai" width="300"></a>
 
 # courseAI
-
 The video demo is available [here](https://drive.google.com/file/d/1IcfMBCSjZ5jqnCj_hQr6l1bxGjXY_xi9/view?usp=sharing).
 
 AI-assisted course authoring and delivery — design programs, browse the catalog, and chat with course agents on the ibl.ai platform.
@@ -19,8 +18,15 @@ AI-assisted course authoring and delivery — design programs, browse the catalo
 ---
 
 ## What is courseAI
+courseAI is deployed at [course.ibl.ai](https://course.ibl.ai).
 
 courseAI is an end-to-end course-authoring workspace on the [ibl.ai](https://ibl.ai) platform. Plan a project, attach mentors, browse or create courses, and chat with an agent that helps draft outlines and unit content — all from one shell powered by the [@iblai/iblai-js](https://www.npmjs.com/package/@iblai/iblai-js) SDK and connected to [iblai.app](https://iblai.app).
+
+## Screenshots
+
+| Home | My Courses |
+|------|------------|
+| ![courseAI home](docs/screenshots/homepage.png) | ![My Courses](docs/screenshots/my_courses.png) |
 
 | Feature | Description |
 |---------|-------------|
