@@ -1,9 +1,11 @@
 {
   "pnpm": {
-      "ignoredBuiltDependencies": ["*"]
+    "ignoredBuiltDependencies": [
+      "*"
+    ]
   },
   "name": "courseai",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "private": true,
   "packageManager": "pnpm@11.3.0",
   "scripts": {
