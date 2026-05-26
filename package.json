@@ -1,4 +1,7 @@
 {
+  "pnpm": {
+      "ignoredBuiltDependencies": ["*"]
+  },
   "name": "courseai",
   "version": "1.0.5",
   "private": true,
