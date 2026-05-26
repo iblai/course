@@ -15,7 +15,14 @@
 
 import config from "./config";
 
-const REDIRECT_PATH_KEY = "redirect-to";
+// Naming convention across the codebase:
+//   - URL query param to the auth SPA: `redirect-to` (kebab-case)
+//   - localStorage key the SDK's `SsoLogin` reads on the way back:
+//     `redirectTo` (camelCase). Matches `redirectPathKey="redirectTo"`
+//     on app/sso-login-complete/page.tsx and the key written by
+//     `lib/iblai/auth-utils.ts:redirectToAuthSpa` when `saveRedirect=true`.
+const REDIRECT_PATH_LS_KEY = "redirectTo";
+const REDIRECT_PATH_QUERY = "redirect-to";
 
 function setCrossSpaCookie(name: string, value: string, days = 365) {
   if (typeof document === "undefined") return;
@@ -97,21 +104,37 @@ export async function handleTenantSwitch(
     localStorage.clear();
   }
 
-  // No basePath in this app (no NEXT_PUBLIC_BASE_PATH). Default the
-  // post-switch landing to `${origin}`. hq forwards `base-path` for
-  // its sub-path mount; we don't need that here.
-  const defaultReturnUrl = `${window.location.origin}`;
+  // The auth-SPA round trip lands on /sso-login-complete, where the
+  // SDK's `SsoLogin` does `${window.location.origin}${redirectPath}`.
+  // That breaks when `redirectPath` is a full URL (two origins get
+  // concatenated). Always pass `${origin}` as `redirect-to` and save
+  // the path+search to localStorage so SsoLogin reads it back cleanly.
+  let redirectPath: string | null = null;
+  if (redirectUrl) {
+    try {
+      const url = new URL(redirectUrl, window.location.origin);
+      redirectPath = `${url.pathname}${url.search}`;
+    } catch {
+      redirectPath = redirectUrl;
+    }
+  }
 
   const params: Record<string, string> = {
     tenant,
-    [REDIRECT_PATH_KEY]: redirectUrl ?? defaultReturnUrl,
+    [REDIRECT_PATH_QUERY]: `${window.location.origin}`,
   };
   if (jwtToken) params.token = jwtToken;
 
   // Restore the destination tenant + redirect path so they survive
-  // the round-trip through the auth SPA.
+  // the round-trip through the auth SPA. `saveRedirect` (legacy) wins
+  // over an explicit `redirectUrl` since it's a deliberate "send the
+  // user back where they were" signal from the caller.
   localStorage.setItem("tenant", tenant);
-  if (saveRedirect) localStorage.setItem(REDIRECT_PATH_KEY, currentPath);
+  if (saveRedirect) {
+    localStorage.setItem(REDIRECT_PATH_LS_KEY, currentPath);
+  } else if (redirectPath) {
+    localStorage.setItem(REDIRECT_PATH_LS_KEY, redirectPath);
+  }
 
   // Tiny delay lets the cookie writes flush before navigation.
   await new Promise((r) => setTimeout(r, 100));

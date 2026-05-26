@@ -144,12 +144,32 @@ describe("handleTenantSwitch", () => {
     expect(url.searchParams.get("redirect-to")).toBe("https://app.test")
   })
 
-  it("uses the provided redirectUrl when set", async () => {
+  it("always sends `${origin}` as the auth-SPA redirect-to query (never a full URL)", async () => {
     await handleTenantSwitch("new-tenant", {
-      redirectUrl: "https://app.test/courses",
+      redirectUrl: "https://app.test/courses?tab=catalog",
     })
     const url = new URL(location.href)
-    expect(url.searchParams.get("redirect-to")).toBe("https://app.test/courses")
+    // The SDK's `SsoLogin` does `${origin}${redirectPath}` on the way
+    // back, so sending a full URL would concatenate two origins and
+    // produce a malformed final navigation (user appears logged out).
+    expect(url.searchParams.get("redirect-to")).toBe("https://app.test")
+  })
+
+  it("saves the redirectUrl's path+search to localStorage.redirectTo", async () => {
+    await handleTenantSwitch("new-tenant", {
+      redirectUrl: "https://app.test/courses?tab=catalog",
+    })
+    expect(localStorage.getItem("redirectTo")).toBe("/courses?tab=catalog")
+  })
+
+  it("accepts a path-only redirectUrl and saves it as-is to localStorage.redirectTo", async () => {
+    await handleTenantSwitch("new-tenant", { redirectUrl: "/somewhere?x=1" })
+    expect(localStorage.getItem("redirectTo")).toBe("/somewhere?x=1")
+  })
+
+  it("does not touch `redirectTo` localStorage when no redirectUrl/saveRedirect is set", async () => {
+    await handleTenantSwitch("new-tenant")
+    expect(localStorage.getItem("redirectTo")).toBeNull()
   })
 
   it("forwards the edx_jwt_token as the `token` query when present", async () => {
@@ -202,9 +222,9 @@ describe("handleTenantSwitch", () => {
     expect(localStorage.getItem("tenant")).toBe("new-tenant")
   })
 
-  it("preserves the redirect-to localStorage key when saveRedirect=true", async () => {
+  it("preserves the path under localStorage.redirectTo when saveRedirect=true", async () => {
     setLocation("https://app.test/courses?tab=catalog")
     await handleTenantSwitch("new-tenant", { saveRedirect: true })
-    expect(localStorage.getItem("redirect-to")).toBe("/courses?tab=catalog")
+    expect(localStorage.getItem("redirectTo")).toBe("/courses?tab=catalog")
   })
 })
