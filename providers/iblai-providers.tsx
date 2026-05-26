@@ -29,6 +29,7 @@ import {
 import { iblaiStore } from "@/store/iblai-store";
 import { LocalStorageService } from "@/lib/iblai/storage-service";
 import { RadixPointerEventsGuard } from "@/components/iblai/radix-pointer-events-guard";
+import { StripeCallbackHandler } from "@/components/iblai/stripe-callback-handler";
 import config from "@/lib/iblai/config";
 import { resolveAppTenant, checkTenantMismatch } from "@/lib/iblai/tenant";
 import {
@@ -130,6 +131,7 @@ export function IblaiProviders({ children }: { children: ReactNode }) {
   return (
     <ReduxProvider store={iblaiStore}>
       <RadixPointerEventsGuard />
+      <StripeCallbackHandler />
       <ServiceWorkerProvider basePath="">
       <AuthProvider
         skip={skipAuth}

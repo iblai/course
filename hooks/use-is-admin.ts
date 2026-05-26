@@ -24,19 +24,45 @@ export function useIsAdmin(): boolean {
   const { tenantKey, ready } = useUrlContext()
   const [isAdmin, setIsAdmin] = React.useState(false)
 
+  // Poll localStorage briefly so we pick up the `tenants` list once the
+  // SDK's TenantProvider hydrates it. Same-tab writes don't fire a
+  // `storage` event, and `tenants` is reset to empty during a tenant
+  // switch (e.g. the Stripe-upgrade round-trip), so a one-shot read on
+  // mount can return stale `false` and let the upgrade modal flash.
   React.useEffect(() => {
     if (!ready) return
     if (typeof window === 'undefined') return
-    try {
-      const raw = localStorage.getItem('tenants')
-      if (!raw) return
-      const parsed = JSON.parse(raw) as TenantEntry[]
-      if (Array.isArray(parsed)) {
+
+    let cancelled = false
+    let attempts = 0
+
+    const check = (): boolean => {
+      try {
+        const raw = localStorage.getItem('tenants')
+        if (!raw) return false
+        const parsed = JSON.parse(raw) as TenantEntry[]
+        if (!Array.isArray(parsed) || parsed.length === 0) return false
+        if (cancelled) return true
         const match = parsed.find((t) => t.key === tenantKey)
         setIsAdmin(Boolean(match?.is_admin))
+        return true
+      } catch {
+        return false
       }
-    } catch {
-      /* ignore */
+    }
+
+    if (check()) return
+
+    const id = window.setInterval(() => {
+      attempts += 1
+      if (cancelled || check() || attempts >= 40) {
+        window.clearInterval(id)
+      }
+    }, 50)
+
+    return () => {
+      cancelled = true
+      window.clearInterval(id)
     }
   }, [ready, tenantKey])
 

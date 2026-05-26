@@ -5,6 +5,7 @@ import { UpgradePackageModal } from "@iblai/iblai-js/web-containers"
 
 import { useIsAdmin } from "@/hooks/use-is-admin"
 import { resolveAppTenant } from "@/lib/iblai/tenant"
+import { hasStripeCheckoutMarker } from "@/lib/iblai/stripe-callback"
 import config from "@/lib/iblai/config"
 
 /**
@@ -19,6 +20,36 @@ function currentUserEmail(): string {
   } catch {
     return ""
   }
+}
+
+/** Non-empty `tenants` localStorage means the SDK has hydrated the list. */
+function hasTenantsData(): boolean {
+  if (typeof window === "undefined") return false
+  try {
+    const raw = localStorage.getItem("tenants")
+    if (!raw) return false
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) && parsed.length > 0
+  } catch {
+    return false
+  }
+}
+
+/**
+ * True while a Stripe-checkout return / cross-SPA tenant switch is in
+ * flight. Suppresses the modal during the brief window where the user
+ * has landed on the new tenant but the SDK hasn't finished refreshing
+ * the tenants list yet (and `useIsAdmin` would briefly return false).
+ */
+function isCallbackInFlight(): boolean {
+  if (typeof window === "undefined") return false
+  if (
+    typeof document !== "undefined" &&
+    document.cookie.includes("ibl_tenant_switching")
+  ) {
+    return true
+  }
+  return hasStripeCheckoutMarker(window.location.search)
 }
 
 /**
@@ -49,17 +80,33 @@ export function UpdateSubscriptionModal({
   onClose,
 }: UpdateSubscriptionModalProps = {}) {
   const isAdmin = useIsAdmin()
-  const [resolved, setResolved] = useState(false)
+  const [tenantsReady, setTenantsReady] = useState(() => hasTenantsData())
   const [openState, setOpenState] = useState(true)
 
-  // One-tick delay so admin state from localStorage settles before the
-  // first render — otherwise admins briefly see the modal flash.
+  // Wait for `localStorage.tenants` to populate. After a Stripe upgrade
+  // the tenant switch wipes localStorage; until the SDK refetches the
+  // tenants list, `useIsAdmin` returns false and the modal would flash
+  // for users who are admins of the freshly-purchased tenant.
   useEffect(() => {
-    const id = window.setTimeout(() => setResolved(true), 0)
-    return () => window.clearTimeout(id)
-  }, [])
+    if (tenantsReady) return
+    let cancelled = false
+    let attempts = 0
+    const id = window.setInterval(() => {
+      attempts += 1
+      if (cancelled) return
+      if (hasTenantsData() || attempts >= 40) {
+        setTenantsReady(true)
+        window.clearInterval(id)
+      }
+    }, 50)
+    return () => {
+      cancelled = true
+      window.clearInterval(id)
+    }
+  }, [tenantsReady])
 
-  if (!resolved) return null
+  if (!tenantsReady) return null
+  if (isCallbackInFlight()) return null
 
   const tenant = resolveAppTenant()
   const email = currentUserEmail()
@@ -87,7 +134,7 @@ export function UpdateSubscriptionModal({
       open={open}
       onClose={handleClose}
       redirectUrl={
-        typeof window !== "undefined" ? window.location.origin : ""
+        typeof window !== "undefined" ? window.location.href : ""
       }
       mainPlatformKey={config.mainTenantKey()}
       sourcePlatformKey={tenant}
