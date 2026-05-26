@@ -16,9 +16,9 @@ FROM base AS builder
 WORKDIR /app
 
 # Build-time args. `NEXT_PUBLIC_BASE_PATH` is baked into the bundle —
-# changing the mount path requires a rebuild. Defaults to `/courseai`;
-# pass `--build-arg NEXT_PUBLIC_BASE_PATH=` for a root mount.
-ARG NEXT_PUBLIC_BASE_PATH=/courseai
+# changing the mount path requires a rebuild. Defaults to root (`/`);
+# pass `--build-arg NEXT_PUBLIC_BASE_PATH=/courseai` for a sub-path mount.
+ARG NEXT_PUBLIC_BASE_PATH=
 ENV NEXT_PUBLIC_BASE_PATH=$NEXT_PUBLIC_BASE_PATH
 
 ENV NODE_OPTIONS="--max-old-space-size=8192"

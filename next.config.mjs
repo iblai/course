@@ -60,11 +60,11 @@ for (const pkg of [
 /**
  * Sub-path mount. Reads `NEXT_PUBLIC_BASE_PATH`, normalises the
  * leading slash, and feeds Next's `basePath` / `assetPrefix`. Defaults
- * to `/courseai` — set `NEXT_PUBLIC_BASE_PATH=` (empty) for a root
+ * to root (`/`) — set `NEXT_PUBLIC_BASE_PATH=/courseai` for a sub-path
  * mount. basePath is *build-time* only; to change it, rebuild.
  */
 function normaliseBasePath(raw) {
-  if (raw === undefined || raw === null) return '/courseai'
+  if (raw === undefined || raw === null) return ''
   const trimmed = raw.replace(/\/+$/, '') // drop trailing slashes
   if (trimmed === '' || trimmed === '/') return '' // explicit root
   return trimmed.startsWith('/') ? trimmed : `/${trimmed}`
