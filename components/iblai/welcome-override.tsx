@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 // Exact v0 reference (`v0-ibl-ai-wink-bimsara/app/home/page.tsx:789`).
 // Plain ASCII apostrophe-less spelling on purpose — match v0 byte-for-byte.
-const WELCOME_TEXT = "Lets build together a great course!";
+const WELCOME_TEXT = "Let’s build a great course together.";
 
 // The SDK ships TWO welcome surfaces depending on version:
 //
