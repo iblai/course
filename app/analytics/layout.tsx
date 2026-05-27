@@ -37,12 +37,15 @@ export default function AnalyticsLayoutWrapper({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    // `min-h-dvh` (not `h-dvh`): the analytics content can be taller than
-    // the viewport. With `h-dvh`, the outer box was clipped to a single
-    // viewport — once the user scrolled past it the body background
-    // (theme `--background`, white) was what showed. `min-h-dvh` lets
-    // the blue-ish surface grow with the document.
-    <div className="min-h-dvh w-full bg-[#f5f7fb]">
+    // `h-dvh` (not `min-h-dvh`): the SDK `<AnalyticsLayout>` manages
+    // its OWN internal scroll (its root is `h-full overflow-hidden`)
+    // and needs a concrete fixed height to inherit. With `min-h-dvh`
+    // here, the SDK's `h-full` collapsed circularly and the billing
+    // page wouldn't scroll on touch or scroll wheel. The body
+    // background concern that drove the original `min-h-dvh` switch
+    // doesn't apply when the SDK keeps every panel inside the
+    // viewport — nothing ever scrolls *past* the box.
+    <div className="h-dvh w-full bg-[#f5f7fb]">
       <SidebarLearner
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed((v) => !v)}
@@ -52,7 +55,7 @@ export default function AnalyticsLayoutWrapper({
       />
       <div
         className={cn(
-          "flex min-h-dvh flex-col transition-all duration-300",
+          "flex h-dvh flex-col transition-all duration-300",
           sidebarCollapsed ? "md:ml-16" : "md:ml-64",
         )}
       >
@@ -60,25 +63,34 @@ export default function AnalyticsLayoutWrapper({
           sidebarCollapsed={sidebarCollapsed}
           onMobileMenuToggle={() => setMobileMenuOpen(true)}
         />
-        <div className="mx-auto w-full flex-1 overflow-auto px-4 py-8 md:w-[75vw] md:px-0">
-          <div className="overflow-hidden">
-            <AnalyticsSettingsProvider value={{}}>
-              <AnalyticsLayout
-                currentPath={pathname ?? `${basePath}/financial`}
-                basePath={basePath}
-                // Single-tab strip — courseai only surfaces the Financial
-                // pane (sidebar's Billing button). Other tabs (Overview,
-                // Courses, Programs, etc.) ship with the SDK but aren't
-                // wired to courseai routes yet.
-                tabs={[{ label: "Financial", value: "financial" }]}
-                onTabChange={(tab) =>
-                  router.push(tab ? `${basePath}/${tab}` : basePath)
-                }
-              >
-                {children}
-              </AnalyticsLayout>
-            </AnalyticsSettingsProvider>
-          </div>
+        {/*
+          The SDK's `<AnalyticsLayout>` root carries `h-full
+          overflow-hidden flex-1 min-h-0` and manages its OWN internal
+          scroll — it expects a parent with a concrete height. We give
+          it one with `flex-1 min-h-0` inside an `h-dvh` (header
+          shrinks; this fills the rest). No `overflow-auto` here and
+          no card wrapper around the SDK — the previous
+          `<div className="overflow-hidden">` had no height and
+          collapsed the SDK's `h-full` to 0, which made the billing
+          page un-scrollable on both touch and scroll wheel.
+        */}
+        <div className="mx-auto flex min-h-0 w-full flex-1 flex-col px-4 py-8 md:w-[75vw] md:px-0">
+          <AnalyticsSettingsProvider value={{}}>
+            <AnalyticsLayout
+              currentPath={pathname ?? `${basePath}/financial`}
+              basePath={basePath}
+              // Single-tab strip — courseai only surfaces the Financial
+              // pane (sidebar's Billing button). Other tabs (Overview,
+              // Courses, Programs, etc.) ship with the SDK but aren't
+              // wired to courseai routes yet.
+              tabs={[{ label: "Financial", value: "financial" }]}
+              onTabChange={(tab) =>
+                router.push(tab ? `${basePath}/${tab}` : basePath)
+              }
+            >
+              {children}
+            </AnalyticsLayout>
+          </AnalyticsSettingsProvider>
         </div>
       </div>
     </div>
