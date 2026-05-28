@@ -4,37 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  '@tiptap/extension-blockquote': 3.23.4
-  '@tiptap/extension-bold': 3.23.4
-  '@tiptap/extension-bubble-menu': 3.23.4
-  '@tiptap/extension-bullet-list': 3.23.4
-  '@tiptap/extension-code': 3.23.4
-  '@tiptap/extension-code-block': 3.23.4
-  '@tiptap/extension-document': 3.23.4
-  '@tiptap/extension-dropcursor': 3.23.4
-  '@tiptap/extension-floating-menu': 3.23.4
-  '@tiptap/extension-gapcursor': 3.23.4
-  '@tiptap/extension-hard-break': 3.23.4
-  '@tiptap/extension-horizontal-rule': 3.23.4
-  '@tiptap/extension-italic': 3.23.4
-  '@tiptap/extension-list': 3.23.4
-  '@tiptap/extension-list-item': 3.23.4
-  '@tiptap/extension-list-keymap': 3.23.4
-  '@tiptap/extension-ordered-list': 3.23.4
-  '@tiptap/extension-paragraph': 3.23.4
-  '@tiptap/extensions': 3.23.4
-  '@tiptap/extension-strike': 3.23.4
-  '@tiptap/extension-text': 3.23.4
-  vite: 8.0.13
-  '@babel/helper-string-parser': 7.27.1
-  '@babel/helper-validator-identifier': 7.28.5
-  '@babel/parser': 7.29.3
-  '@babel/types': 7.29.0
-  ast-v8-to-istanbul: 1.0.0
-  tldts-core: 7.0.30
-  tldts: 7.0.30
-
 importers:
 
   .:
@@ -2928,7 +2897,7 @@ packages:
   '@tiptap/extension-placeholder@3.20.4':
     resolution: {integrity: sha512-GB0KWtqm83YHG8cnqBLijvUBm+xvLfQHDfFRRH2fb3EzH3eIsM9jKRC31ADT27RSV1zVpHMFGcP3/pWpdrN1Lw==}
     peerDependencies:
-      '@tiptap/extensions': 3.23.4
+      '@tiptap/extensions': ^3.20.4
 
   '@tiptap/extension-strike@3.23.4':
     resolution: {integrity: sha512-Vnq5vW801zPbu1LtKeA5k4R241jY+hRjXeijYwIPxy15KzIiipY12518HiCf6/8kkRbMxgOfdYg9X4BRV3HV3g==}
@@ -3143,7 +3112,7 @@ packages:
     resolution: {integrity: sha512-vY7nuamKgfvpA1Koa3oYIw/k7D6kZnpGyNMZW8loow2bsBYla1TFdqTaXncWdRn4pgwNs+90RhnXhJScDwQeJA==}
     peerDependencies:
       msw: ^2.4.9
-      vite: 8.0.13
+      vite: ^6.0.0 || ^7.0.0 || ^8.0.0
     peerDependenciesMeta:
       msw:
         optional: true
@@ -5884,7 +5853,7 @@ packages:
       '@vitest/ui': 4.1.7
       happy-dom: '*'
       jsdom: '*'
-      vite: 8.0.13
+      vite: ^6.0.0 || ^7.0.0 || ^8.0.0
     peerDependenciesMeta:
       '@edge-runtime/vm':
         optional: true
