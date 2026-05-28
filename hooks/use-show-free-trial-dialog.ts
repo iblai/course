@@ -4,8 +4,8 @@ import { useCallback } from "react"
 import { useSelector } from "react-redux"
 import { toast } from "sonner"
 
-import { isLoggedIn } from "@iblai/iblai-js/web-utils"
-import { redirectToAuthSpa } from "@/lib/iblai/auth-utils"
+import { isLoggedIn, redirectToAuthSpa } from "@iblai/iblai-js/web-utils"
+import { authSpaOptions } from "@/lib/iblai/auth-utils"
 
 /**
  * Minimal mentorai-style free-trial gate. Wraps an action and:
@@ -36,7 +36,7 @@ export function useShowFreeTrialDialog() {
     (actionFn: () => unknown | Promise<unknown>, _enforceTrialCheck = true) => {
       void _enforceTrialCheck
       if (!isLoggedIn()) {
-        void redirectToAuthSpa("/")
+        void redirectToAuthSpa({ ...authSpaOptions(), redirectTo: "/" })
         return null
       }
       if (subscriptionStatus.creditExhausted) {

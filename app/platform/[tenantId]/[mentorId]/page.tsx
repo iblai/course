@@ -21,7 +21,8 @@ import { SidebarLearner } from "@/components/platform/sidebar-learner";
 import { ChatWelcomeOverride } from "@/components/iblai/welcome-override";
 import { cn } from "@/lib/utils";
 import config from "@/lib/iblai/config";
-import { redirectToAuthSpa } from "@/lib/iblai/auth-utils";
+import { redirectToAuthSpa } from "@iblai/iblai-js/web-utils";
+import { authSpaOptions } from "@/lib/iblai/auth-utils";
 import { enableCourseCreationToolIfMissing } from "@/lib/iblai/agent-tools";
 
 /**
@@ -175,7 +176,12 @@ function MentorChatPageInner() {
             tenantKey={tenantKey}
             config={chatConfig}
             redirectToAuthSpa={(redirectTo, platformKey, logout) =>
-              void redirectToAuthSpa(redirectTo, platformKey, logout)
+              void redirectToAuthSpa({
+                ...authSpaOptions(),
+                redirectTo,
+                platformKey,
+                logout,
+              })
             }
             username={username ?? null}
             userTenants={userTenants ?? []}

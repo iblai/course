@@ -77,9 +77,16 @@ export function checkTenantMismatch(): boolean {
   const sdkTenant = localStorage.getItem("tenant") ?? "";
 
   if (appTenant && sdkTenant && sdkTenant !== appTenant) {
-    // Use dynamic import to avoid hard dependency on auth-utils from tenant module.
-    import("./auth-utils").then(({ redirectToAuthSpa }) => {
-      redirectToAuthSpa(undefined, appTenant, false, false);
+    // Dynamic imports avoid a circular dep on auth-utils from this module.
+    Promise.all([
+      import("@iblai/iblai-js/web-utils"),
+      import("./auth-utils"),
+    ]).then(([{ redirectToAuthSpa }, { authSpaOptions }]) => {
+      redirectToAuthSpa({
+        ...authSpaOptions(),
+        platformKey: appTenant,
+        saveRedirect: false,
+      });
     });
     return true;
   }

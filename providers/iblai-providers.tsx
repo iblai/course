@@ -24,6 +24,7 @@ import {
   AuthProvider,
   TenantProvider,
   ServiceWorkerProvider,
+  redirectToAuthSpa,
 } from "@iblai/iblai-js/web-utils";
 
 import { iblaiStore } from "@/store/iblai-store";
@@ -33,7 +34,7 @@ import { StripeCallbackHandler } from "@/components/iblai/stripe-callback-handle
 import config from "@/lib/iblai/config";
 import { resolveAppTenant, checkTenantMismatch } from "@/lib/iblai/tenant";
 import {
-  redirectToAuthSpa,
+  authSpaOptions,
   hasNonExpiredAuthToken,
   handleLogout,
 } from "@/lib/iblai/auth-utils";
@@ -75,7 +76,7 @@ if (typeof window !== "undefined") {
       config.lmsUrl(),
       storageService,
       {
-        401: () => redirectToAuthSpa(undefined, undefined, true),
+        401: () => redirectToAuthSpa({ ...authSpaOptions(), logout: true }),
       },
     );
   } catch (e) {
@@ -139,7 +140,15 @@ export function IblaiProviders({ children }: { children: ReactNode }) {
       <ServiceWorkerProvider basePath="">
       <AuthProvider
         skip={skipAuth}
-        redirectToAuthSpa={redirectToAuthSpa}
+        redirectToAuthSpa={(redirectTo, platformKey, logout, saveRedirect) =>
+          redirectToAuthSpa({
+            ...authSpaOptions(),
+            redirectTo,
+            platformKey,
+            logout,
+            saveRedirect,
+          })
+        }
         hasNonExpiredAuthToken={hasNonExpiredAuthToken}
         username={username}
         pathname={pathname ?? "/"}
@@ -191,9 +200,21 @@ export function IblaiProviders({ children }: { children: ReactNode }) {
           }
           handleTenantSwitch={async () => {
             const tenant = resolveAppTenant();
-            redirectToAuthSpa(undefined, tenant, false, true);
+            redirectToAuthSpa({
+              ...authSpaOptions(),
+              platformKey: tenant,
+              saveRedirect: true,
+            });
           }}
-          redirectToAuthSpa={redirectToAuthSpa}
+          redirectToAuthSpa={(redirectTo, platformKey, logout, saveRedirect) =>
+            redirectToAuthSpa({
+              ...authSpaOptions(),
+              redirectTo,
+              platformKey,
+              logout,
+              saveRedirect,
+            })
+          }
           username={username}
           fallback={LOADING}
         >

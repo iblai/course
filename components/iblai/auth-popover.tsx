@@ -9,8 +9,8 @@ import {
 } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
 
-import { isLoggedIn } from "@iblai/iblai-js/web-utils"
-import { redirectToAuthSpa } from "@/lib/iblai/auth-utils"
+import { isLoggedIn, redirectToAuthSpa } from "@iblai/iblai-js/web-utils"
+import { authSpaOptions } from "@/lib/iblai/auth-utils"
 
 type AuthPopoverProps = {
   children: React.ReactNode
@@ -30,7 +30,11 @@ export function AuthPopover({ children, tenantKey }: AuthPopoverProps) {
   const loggedIn = isLoggedIn()
 
   const handleLogin = useCallback(() => {
-    void redirectToAuthSpa("/", tenantKey)
+    void redirectToAuthSpa({
+      ...authSpaOptions(),
+      redirectTo: "/",
+      platformKey: tenantKey,
+    })
   }, [tenantKey])
 
   const handleTriggerClick = useCallback(

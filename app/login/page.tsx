@@ -2,7 +2,8 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { redirectToAuthSpa, hasNonExpiredAuthToken } from "@/lib/iblai/auth-utils";
+import { redirectToAuthSpa } from "@iblai/iblai-js/web-utils";
+import { authSpaOptions, hasNonExpiredAuthToken } from "@/lib/iblai/auth-utils";
 import { resolveAppTenant } from "@/lib/iblai/tenant";
 import config from "@/lib/iblai/config";
 
@@ -23,7 +24,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!hasNonExpiredAuthToken()) {
-      redirectToAuthSpa();
+      void redirectToAuthSpa(authSpaOptions());
       return;
     }
 

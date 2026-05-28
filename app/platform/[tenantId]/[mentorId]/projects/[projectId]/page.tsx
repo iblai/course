@@ -21,7 +21,8 @@ import { SidebarLearner } from "@/components/platform/sidebar-learner";
 import { ProjectGridInterceptor } from "@/components/iblai/project-grid-interceptor";
 import { cn } from "@/lib/utils";
 import config from "@/lib/iblai/config";
-import { redirectToAuthSpa } from "@/lib/iblai/auth-utils";
+import { redirectToAuthSpa } from "@iblai/iblai-js/web-utils";
+import { authSpaOptions } from "@/lib/iblai/auth-utils";
 
 /**
  * Project landing — URL:
@@ -153,7 +154,12 @@ function MentorProjectPageInner() {
               projectId={projectId}
               config={chatConfig}
               redirectToAuthSpa={(redirectTo, platformKey, logout) =>
-                void redirectToAuthSpa(redirectTo, platformKey, logout)
+                void redirectToAuthSpa({
+                  ...authSpaOptions(),
+                  redirectTo,
+                  platformKey,
+                  logout,
+                })
               }
               username={username ?? null}
               userTenants={userTenants ?? []}

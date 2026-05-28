@@ -2,9 +2,18 @@
 /**
  * ibl.ai auth helper utilities.
  *
- * These are thin wrappers used by IblaiProviders. You can customise the
- * redirect behaviour here without touching the provider component.
+ * Redirects go through the SDK's `redirectToAuthSpa(options)` directly
+ * at every call site. This module only exports the static, app-specific
+ * options (`authSpaOptions`) and the token-expiry check the SDK depends
+ * on (`hasNonExpiredAuthToken`).
+ *
+ * NOTE: the SDK hardcodes the `redirect-to` query param to
+ * `window.location.origin`. Tauri-mobile custom-scheme redirects
+ * (`iblai-courseai://`) are no longer wired — re-introduce via an SDK
+ * PR exposing a `redirectToUrl` option.
  */
+
+import type { RedirectToAuthSpaOptions } from "@iblai/iblai-js/web-utils";
 
 import config from "./config";
 import { resolveAppTenant } from "./tenant";
@@ -15,51 +24,6 @@ export function isTauri(): boolean {
   return "__TAURI_INTERNALS__" in window || "__TAURI__" in window;
 }
 
-/** Check if running inside a Tauri mobile app (iOS/Android). */
-export function isTauriMobile(): boolean {
-  if (!isTauri()) return false;
-  return /android|iphone|ipad|ipod/i.test(navigator.userAgent);
-}
-
-/** Get the redirect origin for the Auth SPA.
- *  - Mobile Tauri: custom scheme (e.g. `iblai-skills://`)
- *  - Desktop Tauri / Web: window.location.origin
- */
-function getRedirectOrigin(): string {
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
-  if (isTauriMobile()) {
-    const scheme = config.tauriCustomScheme();
-    if (scheme) return `${scheme}://`;
-  }
-  return origin;
-}
-
-/** Redirect the browser to the ibl.ai Auth SPA for login. */
-export async function redirectToAuthSpa(
-  redirectTo?: string,
-  platformKey?: string,
-  logout?: boolean,
-  saveRedirect?: boolean,
-) {
-  const redirectOrigin = getRedirectOrigin();
-  const path = redirectTo ?? (typeof window !== "undefined" ? window.location.pathname : "/");
-
-  if (saveRedirect) {
-    localStorage.setItem("redirectTo", path);
-  }
-
-  const tenant = platformKey || resolveAppTenant();
-  let authUrl = `${config.authUrl()}/login?app=custom&redirect-to=${redirectOrigin}`;
-  if (tenant) authUrl += `&tenant=${encodeURIComponent(tenant)}`;
-  if (logout) authUrl += "&logout=1";
-
-  // All platforms (web, desktop Tauri, mobile Tauri): navigate the window
-  // to the Auth SPA.  On desktop Tauri the auth page loads in-app, and
-  // the Rust on_navigation filter opens OAuth providers (Google, Apple)
-  // in a popup window automatically.
-  window.location.href = authUrl;
-}
-
 /**
  * Parse an `axd_token_expires` value written by the Auth SPA into a
  * millisecond timestamp. The SPA can send any of:
@@ -67,18 +31,16 @@ export async function redirectToAuthSpa(
  *   - epoch in milliseconds ("1735689600000")
  *   - epoch in seconds  ("1735689600")
  *
- * The original generator only handled the ISO case; an epoch value
- * fed straight to `new Date(...)` returned `Invalid Date`, so every
- * post-login check reported the token as expired and AuthProvider
- * looped back to the Auth SPA.
+ * Epoch strings fed straight to `new Date(...)` return `Invalid Date`,
+ * so without this every post-login check reported the token as expired
+ * and the SDK looped back to the Auth SPA.
  */
 function parseExpiryMs(raw: string): number {
   const trimmed = raw.trim();
   if (/^-?\d+$/.test(trimmed)) {
     const n = Number(trimmed);
-    // Seconds vs milliseconds: anything below 10^12 is treated as
-    // seconds (year 2001 in ms is 10^12; any sane future expiry in
-    // seconds is well below that, in ms well above it).
+    // Anything below 10^12 is treated as seconds (year 2001 in ms
+    // is 10^12; any sane future expiry in seconds sits well below).
     return n < 1e12 ? n * 1000 : n;
   }
   const parsed = Date.parse(trimmed);
@@ -97,10 +59,35 @@ export function hasNonExpiredAuthToken(): boolean {
   return expiryMs > Date.now();
 }
 
+/**
+ * Per-app defaults to spread into every SDK `redirectToAuthSpa` call.
+ *
+ *   import { redirectToAuthSpa } from "@iblai/iblai-js/web-utils";
+ *   import { authSpaOptions } from "@/lib/iblai/auth-utils";
+ *   redirectToAuthSpa({ ...authSpaOptions(), logout: true });
+ *
+ * Returns a fresh object so per-call overrides (logout, redirectTo,
+ * platformKey, saveRedirect) compose via spread without leaking state.
+ */
+export function authSpaOptions(): RedirectToAuthSpaOptions {
+  return {
+    authUrl: config.authUrl(),
+    appName: "custom",
+    platformKey: resolveAppTenant(),
+    // SsoLogin reads `redirectTo` (camelCase) from localStorage on
+    // the way back; SDK default is `redirect_to`.
+    redirectPathStorageKey: "redirectTo",
+    // Enables the SDK's cross-SPA login/logout-timestamp guard.
+    hasNonExpiredAuthToken,
+    isNativeApp: isTauri,
+    preserveTokenKey: "edx_jwt_token",
+  };
+}
+
 /** Handle logout: clear state and redirect to the Auth SPA logout page. */
 export function handleLogout() {
   const tenant = resolveAppTenant();
-  const redirectOrigin = getRedirectOrigin();
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
   localStorage.clear();
-  window.location.href = `${config.authUrl()}/logout?redirect-to=${redirectOrigin}&tenant=${encodeURIComponent(tenant)}`;
+  window.location.href = `${config.authUrl()}/logout?redirect-to=${origin}&tenant=${encodeURIComponent(tenant)}`;
 }

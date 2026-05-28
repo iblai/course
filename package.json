@@ -30,7 +30,7 @@
     "@hookform/resolvers": "^3.10.0",
     "@iblai/agent-ai": "^2.6.0",
     "@iblai/data-layer": "^1.5.7",
-    "@iblai/iblai-js": "^1.11.5",
+    "@iblai/iblai-js": "^1.13.3",
     "@iblai/web-containers": "^1.7.5",
     "@iblai/web-utils": "^1.7.1",
     "@livekit/components-react": "^2.9.21",
