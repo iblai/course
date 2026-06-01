@@ -97,18 +97,31 @@ export async function agentExists(
  * contain `slug: "course-creation"`, PUT a JSON body with the full
  * (existing + course-creation) `tool_slugs` array and `can_use_tools=true`.
  *
- * Safe to fire-and-forget — never throws. Logs errors to the console so
- * the New Course click is never blocked by a network hiccup or a stale
- * token.
+ * Never throws — logs errors to the console so a fire-and-forget caller
+ * (the New Course click, `useMentorRedirect`'s pre-warm) is never blocked
+ * by a network hiccup or a stale token.
+ *
+ * Returns whether the agent can be expected to expose the tool:
+ *   - `true`  — the tool is now enabled, was already enabled, or there was
+ *               nothing to attempt yet (missing args / auth token still
+ *               hydrating). Safe to proceed into the chat.
+ *   - `false` — an enable attempt was actually made and failed (the
+ *               settings GET or PUT errored, or the request threw). The
+ *               course-creation chat can't work on this agent, so a
+ *               caller that depends on it should surface the error page.
  */
 export async function enableCourseCreationToolIfMissing(
   tenantKey: string,
   username: string,
   mentorUniqueId: string,
-): Promise<void> {
-  if (!tenantKey || !username || !mentorUniqueId) return;
+): Promise<boolean> {
+  // Nothing to attempt — not a failure (the platform page guards these
+  // before calling, so this only trips during the brief hydration window).
+  if (!tenantKey || !username || !mentorUniqueId) return true;
   const token = readDmToken();
-  if (!token) return;
+  // Token not in localStorage yet: let the SDK auth flow handle it rather
+  // than flashing the error page mid-hydration.
+  if (!token) return true;
 
   const url = settingsUrl(tenantKey, username, mentorUniqueId);
 
@@ -123,7 +136,7 @@ export async function enableCourseCreationToolIfMissing(
         getResp.status,
         mentorUniqueId,
       );
-      return;
+      return false;
     }
     const data = (await getResp.json()) as MentorSettingsResponse;
     const tools = data.mentor_tools ?? [];
@@ -138,7 +151,7 @@ export async function enableCourseCreationToolIfMissing(
       // used to confirm it lingered too long on the configure page.
       // Successful writes still toast (see `Agent settings updated`
       // below).
-      return;
+      return true;
     }
 
     const updatedSlugs = [...currentSlugs, COURSE_CREATION_SLUG];
@@ -162,10 +175,12 @@ export async function enableCourseCreationToolIfMissing(
         errText,
         mentorUniqueId,
       );
-      return;
+      return false;
     }
     toast.success("Agent settings updated");
+    return true;
   } catch (err) {
     console.error("[agent-tools] enableCourseCreationToolIfMissing", err);
+    return false;
   }
 }

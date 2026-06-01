@@ -24,6 +24,7 @@ const env = {
   NEXT_PUBLIC_TAURI_CUSTOM_SCHEME: process.env.NEXT_PUBLIC_TAURI_CUSTOM_SCHEME,
   NEXT_PUBLIC_MFE_URL: process.env.NEXT_PUBLIC_MFE_URL,
   NEXT_PUBLIC_SKILLSAI_URL: process.env.NEXT_PUBLIC_SKILLSAI_URL,
+  NEXT_PUBLIC_SUPPORT_EMAIL: process.env.NEXT_PUBLIC_SUPPORT_EMAIL,
 };
 
 declare global {
@@ -101,6 +102,11 @@ const config = {
   // as the "Failed to load upgrade options" toast in
   // `UpgradePackageModal`. Mentorai uses the same default.
   mainTenantKey: () => getEnv("NEXT_PUBLIC_MAIN_TENANT_KEY", "main"),
+
+  // Support contact surfaced on the error page. Falls back to the ibl.ai
+  // Zendesk support inbox when NEXT_PUBLIC_SUPPORT_EMAIL is unset.
+  supportEmail: () =>
+    getEnv("NEXT_PUBLIC_SUPPORT_EMAIL", "support@iblai.zendesk.com"),
   tauriCustomScheme: () => getEnv("NEXT_PUBLIC_TAURI_CUSTOM_SCHEME", ""),
   platformBaseDomain: () => domain(),
 };

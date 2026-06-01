@@ -12,6 +12,7 @@ import {
   getPlatformDefaultAgentId,
   setPlatformDefaultAgentId,
 } from './platform-metadata'
+import { customErrorMessages } from '@/lib/error'
 
 interface MentorListItem {
   unique_id?: string | null
@@ -137,8 +138,19 @@ export function useMentorRedirect(options: UseMentorRedirectOptions = {}) {
         // 2. Any mentor (defaults to featured/created order)
         const all = await callMentors({ limit: 10 })
         if (cancelled) return
+        if (all === null) {
+          // The mentor-list fetch itself failed (network / server) — as
+          // opposed to succeeding with an empty list. We can't load an
+          // agent to host the course-creation tool, so surface the error
+          // page rather than stranding the caller on its spinner.
+          router.replace(
+            `/error/500?errorType=${customErrorMessages.agentLoadFailed.key}`,
+          )
+          setHasResolved(true)
+          return
+        }
         const list: MentorListItem[] =
-          (all as { results?: MentorListItem[] } | null)?.results ?? []
+          (all as { results?: MentorListItem[] })?.results ?? []
         if (list.length > 0) {
           const pick = pickFirst(list)
           if (go(pick?.unique_id ?? '', { persist: true })) {
@@ -147,12 +159,19 @@ export function useMentorRedirect(options: UseMentorRedirectOptions = {}) {
           }
         }
 
-        // 3. Fall back to the explore page so the user can pick / create one
+        // 3. Fall back to the explore page so the user can pick / create one.
+        //    Reached only when the list loaded successfully but is empty —
+        //    the user simply has no agents yet, which is not an error.
         router.replace('/agents')
         setHasResolved(true)
       } catch (e) {
+        if (cancelled) return
         console.error('[mentor-redirect] failed to resolve mentor', e)
-        setResolving(false)
+        // Unexpected failure while resolving — show the error page instead
+        // of leaving the caller spinning forever.
+        router.replace(
+          `/error/500?errorType=${customErrorMessages.agentLoadFailed.key}`,
+        )
         setHasResolved(true)
       } finally {
         if (!cancelled) setResolving(false)

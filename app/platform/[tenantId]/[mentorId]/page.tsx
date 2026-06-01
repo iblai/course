@@ -24,6 +24,7 @@ import config from "@/lib/iblai/config";
 import { redirectToAuthSpa } from "@iblai/iblai-js/web-utils";
 import { authSpaOptions } from "@/lib/iblai/auth-utils";
 import { enableCourseCreationToolIfMissing } from "@/lib/iblai/agent-tools";
+import { customErrorMessages } from "@/lib/error";
 
 /**
  * Per-agent route. URL: `/platform/<tenantId>/<mentorId>` where
@@ -118,12 +119,32 @@ function MentorChatPageInner() {
   // courseai requirement: every agent landed on must expose the
   // `course-creation` tool. Direct navigation to /platform/<t>/<id>
   // (bookmarks, copy-pasted URLs) skips both `startNewChat` and
-  // `useMentorRedirect`, so the check has to run on mount here too.
-  // The helper GETs first and only PUTs when the tool is missing.
+  // `useMentorRedirect`, so the check has to run on mount here too. This
+  // is also the universal chokepoint — every course-creation entry point
+  // (New Chat, redirect, direct nav) lands here — so it's where a failed
+  // enable is surfaced: if the tool genuinely can't be enabled the chat
+  // can't create courses, so show the error page instead. The helper GETs
+  // first and only PUTs when the tool is missing, and returns `false` only
+  // when an enable attempt was actually made and failed.
   useEffect(() => {
     if (!tenantKey || !mentorId || !username) return;
-    void enableCourseCreationToolIfMissing(tenantKey, username, mentorId);
-  }, [tenantKey, mentorId, username]);
+    let cancelled = false;
+    void (async () => {
+      const enabled = await enableCourseCreationToolIfMissing(
+        tenantKey,
+        username,
+        mentorId,
+      );
+      if (!cancelled && !enabled) {
+        router.replace(
+          `/error/500?errorType=${customErrorMessages.courseCreationUnavailable.key}`,
+        );
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [tenantKey, mentorId, username, router]);
 
   const chatConfig: ChatConfig = {
     baseWsUrl: () => config.baseWsUrl(),
