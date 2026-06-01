@@ -49,3 +49,101 @@
 nextjs-portal {
   display: none !important;
 }
+
+/**
+ * The sidebar's Invites dialog is the SDK <InviteUserDialog>, which renders
+ * its own Radix dialog. The rules below reshape it to match the other
+ * sidebar dialogs (Users / API / Monetization / Settings — all the SDK
+ * <Account> mounted inside the host <Dialog> via OrgAccountDialog).
+ *
+ * SCOPING: keyed off `max-w-5xl`, the literal class the SDK hardcodes on
+ * this DialogContent (`sm:max-w-5xl …`). It's reliable because Radix always
+ * preserves `className` verbatim (unlike `aria-describedby`, which Radix
+ * Dialog rewrites to its own generated id). The only other SDK dialog using
+ * `max-w-5xl` is PaywallModal, which this app never renders, so the rules
+ * stay effectively invite-only.
+ */
+
+/**
+ * Size: override the SDK's `sm:max-w-5xl` (1024px) + content-fit height to
+ * the exact footprint of STANDARD_DIALOG_CLASSNAME (`lib/iblai/dialog-style.ts`:
+ * 1400px / min(96vw,1400px) / 92dvh, borderless). Keep in sync with that
+ * constant — they mirror it but can't import the TS value from CSS.
+ */
+[role='dialog'][class*='max-w-5xl'] {
+  width: min(96vw, 1400px) !important;
+  max-width: 1400px !important;
+  height: 92dvh !important;
+  max-height: 92dvh !important;
+  overflow: hidden !important;
+  border: none !important;
+  /* Drop the SDK content's extra slide (`slide-in-from-top-[48%]` /
+     `slide-in-from-left-1/2`) so the open/close animation matches the host
+     dialogs' fade + zoom. tailwindcss-animate drives the slide through these
+     custom properties consumed by the shared enter/exit keyframes. */
+  --tw-enter-translate-x: 0 !important;
+  --tw-enter-translate-y: 0 !important;
+  --tw-exit-translate-x: 0 !important;
+  --tw-exit-translate-y: 0 !important;
+}
+
+/**
+ * The SDK invite dialog caps its inner scroll region at `max-h-[60vh]`,
+ * shorter than the dialog's own 92dvh frame — leaving a dead gap above the
+ * pagination footer (the outer is `flex justify-between`). Lift the cap so
+ * the list fills the frame like the <Account> dialogs do.
+ */
+[role='dialog'][class*='max-w-5xl'] [class*='max-h-[60vh]'] {
+  max-height: none !important;
+}
+
+/**
+ * Title: the SDK <Account> tab heading (the other dialogs) renders as
+ * `text-lg font-medium text-gray-900 dark:text-gray-100`, but the SDK invite
+ * <DialogTitle> hardcodes `text-xl sm:text-2xl font-bold text-gray-800`
+ * (bigger, bolder, lighter, and no dark variant). The title is the only <h2>
+ * in this dialog (Radix Dialog.Title). Values reference the app's Tailwind
+ * theme tokens so they track the real palette/scale.
+ */
+[role='dialog'][class*='max-w-5xl'] h2 {
+  font-size: var(--text-lg) !important;
+  line-height: var(--text-lg--line-height) !important;
+  font-weight: var(--font-weight-medium) !important;
+  color: var(--color-gray-900) !important;
+}
+.dark [role='dialog'][class*='max-w-5xl'] h2 {
+  color: var(--color-gray-100) !important;
+}
+
+/**
+ * Close button: the other dialogs hide the host close button
+ * (`showCloseButton={false}`) and the embedded SDK <Account> renders none —
+ * they close on Esc / backdrop, leaving a clean top-right corner. The SDK
+ * invite dialog renders its own `absolute right-4 top-4` close button; hide
+ * it (matched by its position classes, any depth/tag) so the corner matches.
+ * Esc / backdrop still close the dialog, same as the others.
+ */
+[role='dialog'][class*='max-w-5xl'] .absolute.top-4.right-4 {
+  display: none !important;
+}
+
+/**
+ * On mobile, drop the invite dialog's title + subtitle to conform with the
+ * other dialogs (which don't show that header bar on small viewports). The
+ * SDK header (`p-4 pt-[30px] … border-b`, keyed here by `pt-[30px]`) holds
+ * only the <DialogTitle> ("Invite Users") and its <DialogDescription>
+ * subtitle, so hiding it drops both plus the now-empty bordered bar. 768px
+ * is the app's mobile breakpoint (hooks/use-mobile.ts).
+ */
+@media (max-width: 767px) {
+  [role='dialog'][class*='max-w-5xl'] [class*='pt-[30px]'] {
+    display: none !important;
+  }
+  /* With the header gone, the content sits flush against the top edge. Add a
+     little top padding so it breathes like the other dialogs (whose content
+     pane uses p-6 ≈ 1.5rem). Targets the scroll region (the `max-h-[60vh]`
+     element); overrides just its top (its p-2/sm:p-4 keeps the other sides). */
+  [role='dialog'][class*='max-w-5xl'] [class*='max-h-[60vh]'] {
+    padding-top: 1.5rem !important;
+  }
+}
