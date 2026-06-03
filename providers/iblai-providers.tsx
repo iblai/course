@@ -17,7 +17,7 @@
  */
 
 import { Suspense, useMemo, type ReactNode } from "react";
-import { Provider as ReduxProvider } from "react-redux";
+import { Provider as ReduxProvider, useSelector } from "react-redux";
 import { usePathname } from "next/navigation";
 import { initializeDataLayer } from "@iblai/iblai-js/data-layer";
 import {
@@ -28,15 +28,18 @@ import {
 } from "@iblai/iblai-js/web-utils";
 
 import { iblaiStore } from "@/store/iblai-store";
+import { selectRequestedTenant } from "@/features/tenant";
 import { LocalStorageService } from "@/lib/iblai/storage-service";
 import { RadixPointerEventsGuard } from "@/components/iblai/radix-pointer-events-guard";
 import { StripeCallbackHandler } from "@/components/iblai/stripe-callback-handler";
 import config from "@/lib/iblai/config";
-import { resolveAppTenant, checkTenantMismatch } from "@/lib/iblai/tenant";
+import { resolveAppTenant } from "@/lib/iblai/tenant";
+import { handleTenantSwitch as runTenantSwitch } from "@/lib/iblai/tenant-switch";
 import {
   authSpaOptions,
   handleLogout,
 } from "@/lib/iblai/auth-utils";
+import { useDefineUserTenants } from "@/hooks/iblai/use-define-user-tenants";
 
 const storageService = LocalStorageService.getInstance();
 
@@ -88,7 +91,7 @@ const PUBLIC_ROUTES = new Map<RegExp, () => Promise<boolean>>([
   [new RegExp("^/sso-login"), async () => false],
 ]);
 
-export function IblaiProviders({ children }: { children: ReactNode }) {
+function IblaiProvidersInner({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   const username = useMemo(() => {
@@ -100,8 +103,23 @@ export function IblaiProviders({ children }: { children: ReactNode }) {
     return "";
   }, []);
 
-  // Tenant resolution: current_tenant.key -> NEXT_PUBLIC_MAIN_TENANT_KEY -> localStorage tenant
-  const tenantKey = useMemo(() => resolveAppTenant(), []);
+  // Read `currentTenant` directly from `localStorage.tenant` — the raw
+  // key that `handleTenantSwitch` writes before the auth-SPA round trip
+  // and that survives the redirect. Mirrors lms's `getTenant()`. Using
+  // `resolveAppTenant()` here breaks tenant switching: the SDK calls
+  // `saveCurrentTenant` mid-init and can overwrite `current_tenant.key`
+  // before the requested switch settles, so reading from there pins
+  // the UI to the SDK's resolved tenant instead of the user's choice.
+  const tenantKey = useMemo(() => {
+    if (typeof window === "undefined") return "";
+    return localStorage.getItem("tenant") ?? "";
+  }, []);
+
+  // `requestedTenant` lives in the Redux tenant slice so callers can
+  // dispatch a switch from anywhere; `currentTenant` is whatever the
+  // localStorage already holds. The SDK's TenantProvider compares the
+  // two and triggers a tenant switch when they diverge.
+  const requestedTenant = useSelector(selectRequestedTenant);
 
   // Hand AuthProvider the already-issued axd token. When this is
   // truthy the SDK's internal `performAuthCheck` is skipped (see
@@ -122,14 +140,24 @@ export function IblaiProviders({ children }: { children: ReactNode }) {
   // of the SDK's auth machinery stay active.
   const skipAuth = isSsoRoute;
 
+  // Front-load `GET /api/ibl/users/manage/platform/` and populate
+  // `localStorage.tenants` + `current_tenant` before the dropdown
+  // (HeaderAccountMenu) reads them synchronously on first render.
+  // Without this, the SDK's internal fetch resolves AFTER the
+  // dropdown has read an empty list, and its TenantSwitcher hides
+  // itself for the rest of the page lifetime.
+  const { tenantsLoading } = useDefineUserTenants();
+
   const LOADING = (
     <div className="flex min-h-screen items-center justify-center">
       <p className="text-sm text-gray-400">Loading...</p>
     </div>
   );
 
+  if (tenantsLoading && !isSsoRoute) return LOADING;
+
   return (
-    <ReduxProvider store={iblaiStore}>
+    <>
       <RadixPointerEventsGuard />
       {/* `useSearchParams` opts the subtree out of static prerendering;
           wrap in Suspense so the rest of the layout can still be SSG'd. */}
@@ -171,36 +199,53 @@ export function IblaiProviders({ children }: { children: ReactNode }) {
         <TenantProvider
           skip={skipAuth}
           currentTenant={tenantKey}
-          requestedTenant={tenantKey}
+          requestedTenant={requestedTenant}
           saveCurrentTenant={(t: any) => {
-            // TenantProvider hands us either the full tenant object
-            // (with `key`, `org`, `is_admin`, etc.) or a bare key
-            // string. Always persist `current_tenant` as the FULL
-            // object so the SDK and our own readers find `key` (and
-            // other fields like `is_admin`) on parse. The previous
-            // raw-string write triggered a `current_tenant.key`
-            // mismatch downstream and the SDK redirected back to the
-            // Auth SPA on every page load.
+            // Persist the SDK-resolved tenant *object* under
+            // `current_tenant` only. Do NOT overwrite
+            // `localStorage.tenant` — that's the raw key the standalone
+            // `handleTenantSwitch` wrote before the auth-SPA round trip
+            // and is the source of truth for which tenant the user
+            // asked for. Mirrors lms's `useCurrentTenant().saveCurrentTenant`,
+            // which writes only `current_tenant`. Overwriting
+            // `localStorage.tenant` here was pinning the UI to whatever
+            // the SDK first resolved (often the previous tenant) and
+            // reverting the requested switch.
             const key = typeof t === "string" ? t : t?.key ?? String(t);
             const tenantObj =
               t && typeof t === "object"
                 ? { ...t, key }
                 : { key };
             localStorage.setItem("current_tenant", JSON.stringify(tenantObj));
-            localStorage.setItem("tenant", key);
-
-            // If the SDK resolved a different tenant than what the app
-            // expects, redirect to re-login for the correct tenant.
-            checkTenantMismatch();
           }}
           saveUserTenants={(t: unknown) =>
             localStorage.setItem("tenants", JSON.stringify(t))
           }
-          handleTenantSwitch={async () => {
-            const tenant = resolveAppTenant();
+          handleTenantSwitch={async (tenant, saveRedirect) => {
+            // Only perform a real switch when the app explicitly asked
+            // for it via the Redux tenant slice (dispatch
+            // `updateRequestedTenant(key)`) and the SDK's requested key
+            // matches. Otherwise the SDK initiated the switch on its
+            // own — usually because `currentTenant` wasn't found in the
+            // user's fetched tenant list and it's falling back to
+            // `enhancedTenants[0]`. Performing that switch would call
+            // `runTenantSwitch` -> `localStorage.clear()` and wipe the
+            // user's tenants list, which hides the switcher dropdown.
+            // In that case, just bounce through the auth SPA for the
+            // user's existing tenant so localStorage is preserved.
+            const key =
+              typeof tenant === "string"
+                ? tenant
+                : ((tenant as { key?: string } | null | undefined)?.key ?? "");
+            if (key && requestedTenant && key === requestedTenant) {
+              await runTenantSwitch(key, {
+                saveRedirect: Boolean(saveRedirect),
+              });
+              return;
+            }
             redirectToAuthSpa({
               ...authSpaOptions(),
-              platformKey: tenant,
+              platformKey: resolveAppTenant(),
               saveRedirect: true,
             });
           }}
@@ -220,6 +265,14 @@ export function IblaiProviders({ children }: { children: ReactNode }) {
         </TenantProvider>
       </AuthProvider>
       </ServiceWorkerProvider>
+    </>
+  );
+}
+
+export function IblaiProviders({ children }: { children: ReactNode }) {
+  return (
+    <ReduxProvider store={iblaiStore}>
+      <IblaiProvidersInner>{children}</IblaiProvidersInner>
     </ReduxProvider>
   );
 }
