@@ -4,7 +4,6 @@ export const dynamic = "force-dynamic";
 
 import { Suspense, useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { Loader2 } from "lucide-react";
 
 import { Chat, type ChatConfig } from "@iblai/iblai-js/web-containers/next";
 import {
@@ -19,6 +18,7 @@ import {
 import { Header } from "@/components/platform/header";
 import { SidebarLearner } from "@/components/platform/sidebar-learner";
 import { ChatWelcomeOverride } from "@/components/iblai/welcome-override";
+import { PageLoader } from "@/components/iblai/page-loader";
 import { cn } from "@/lib/utils";
 import config from "@/lib/iblai/config";
 import { redirectToAuthSpa } from "@iblai/iblai-js/web-utils";
@@ -43,17 +43,9 @@ export default function MentorChatPage() {
   // `useSearchParams()` requires a Suspense boundary in App Router; the
   // SDK `<Chat>` tree uses it too.
   return (
-    <Suspense fallback={<ChatPageFallback />}>
+    <Suspense fallback={<PageLoader />}>
       <MentorChatPageInner />
     </Suspense>
-  );
-}
-
-function ChatPageFallback() {
-  return (
-    <div className="flex h-dvh w-full items-center justify-center bg-white">
-      <Loader2 className="size-5 animate-spin text-[#5f5f61]" aria-hidden />
-    </div>
   );
 }
 
@@ -116,6 +108,14 @@ function MentorChatPageInner() {
 
   const tenantKey = tenantId || config.mainTenantKey();
 
+  // Bumped to force a one-time <Chat> remount when the course-creation
+  // tool is *freshly* enabled below. The SDK opens the chat websocket on
+  // mount, before the enable PUT lands, so a brand-new agent's first
+  // connection predates the tool — the agent can't call it until the
+  // socket reconnects against the now-updated settings. Folding this into
+  // the <Chat> key (below) does exactly that.
+  const [courseCreationRemount, setCourseCreationRemount] = useState(0);
+
   // courseai requirement: every agent landed on must expose the
   // `course-creation` tool. Direct navigation to /platform/<t>/<id>
   // (bookmarks, copy-pasted URLs) skips both `startNewChat` and
@@ -124,21 +124,29 @@ function MentorChatPageInner() {
   // (New Chat, redirect, direct nav) lands here — so it's where a failed
   // enable is surfaced: if the tool genuinely can't be enabled the chat
   // can't create courses, so show the error page instead. The helper GETs
-  // first and only PUTs when the tool is missing, and returns `false` only
-  // when an enable attempt was actually made and failed.
+  // first and only PUTs when the tool is missing, and reports back whether
+  // it failed (-> error page) and whether it *just* enabled the tool
+  // (-> remount so the websocket reconnects).
   useEffect(() => {
     if (!tenantKey || !mentorId || !username) return;
     let cancelled = false;
     void (async () => {
-      const enabled = await enableCourseCreationToolIfMissing(
+      const { ok, justEnabled } = await enableCourseCreationToolIfMissing(
         tenantKey,
         username,
         mentorId,
       );
-      if (!cancelled && !enabled) {
+      if (cancelled) return;
+      if (!ok) {
         router.replace(
           `/error/500?errorType=${customErrorMessages.courseCreationUnavailable.key}`,
         );
+        return;
+      }
+      if (justEnabled) {
+        // Tool was absent when <Chat> first connected; remount so the SDK
+        // opens a fresh websocket and the agent can call it.
+        setCourseCreationRemount((n) => n + 1);
       }
     })();
     return () => {
@@ -184,14 +192,16 @@ function MentorChatPageInner() {
               No agent selected.
             </div>
           ) : !sessionReady ? (
-            <ChatPageFallback />
+            <PageLoader />
           ) : (
             <>
               <ChatWelcomeOverride />
             <Chat
             // Mentor + session + new nonce as the only legitimate
-            // remount trigger (see skill: "Mounting discipline").
-            key={`${mentorId}:${restoreSessionId ?? ""}:${newParam ?? ""}`}
+            // remount triggers (see skill: "Mounting discipline"), plus
+            // courseCreationRemount so a fresh course-creation enable
+            // reconnects the websocket against the updated agent.
+            key={`${mentorId}:${restoreSessionId ?? ""}:${newParam ?? ""}:${courseCreationRemount}`}
             isPreviewMode={false}
             mentorId={mentorId}
             tenantKey={tenantKey}

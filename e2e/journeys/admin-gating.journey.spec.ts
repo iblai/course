@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 import { waitForTenantsPopulated } from '../utils/wait-for-tenants';
+import { assertAdmin } from '../utils/assert-admin';
 
 /**
  * Admin-side of the gating contract.
@@ -12,91 +13,14 @@ import { waitForTenantsPopulated } from '../utils/wait-for-tenants';
  *
  * Pre-flight: this test only runs against the admin storage state
  * (`chromium-admin` / `firefox-admin` / `webkit-admin` projects).
- * It bails fast with a useful error if the storage state somehow
- * lacks admin rights on the active tenant, so a misconfigured
- * `.env.development` fails the gate-keeping test directly instead
- * of corrupting downstream assertions.
+ * `assertAdmin` (shared in `utils/assert-admin.ts`) bails fast with a
+ * useful error if the storage state somehow lacks admin rights on the
+ * active tenant, so a misconfigured `.env.development` fails the
+ * gate-keeping test directly instead of corrupting downstream
+ * assertions.
  */
 
 const APP_HOST = process.env.APP_HOST || 'http://localhost:3000';
-
-async function assertAdmin(page: import('@playwright/test').Page) {
-  // Wait for the tenants list to be NON-EMPTY (not just present —
-  // the SDK initially writes "[]" on mount, which made the previous
-  // `!!getItem('tenants')` guard pass too early). Then wait for
-  // `current_tenant` to land.
-  await waitForTenantsPopulated(page).catch(() => {
-    // Don't throw here — let the diagnostic below report what's
-    // actually in storage so the failure message is useful.
-  });
-  await page
-    .waitForFunction(
-      () => !!window.localStorage.getItem('current_tenant'),
-      { timeout: 30_000 },
-    )
-    .catch(() => null);
-
-  const result = await page.evaluate(() => {
-    // `current_tenant` is written by the SDK as JSON `{key: "..."}`
-    // (see lib/iblai/tenant.ts `readCurrentTenantKey`). The fallback
-    // (legacy / SDK-only path) is a bare string. Handle both.
-    function readTenantKey(): string {
-      const raw = window.localStorage.getItem('current_tenant');
-      if (!raw) {
-        // Last-ditch fallback: SDK also writes a raw key to `tenant`.
-        return window.localStorage.getItem('tenant') ?? '';
-      }
-      try {
-        const parsed = JSON.parse(raw);
-        if (parsed && typeof parsed === 'object' && typeof parsed.key === 'string') {
-          return parsed.key;
-        }
-      } catch {
-        // raw is a bare string — treat as the key directly.
-        if (raw.trim()) return raw;
-      }
-      return '';
-    }
-    try {
-      const tenant = readTenantKey();
-      const raw = window.localStorage.getItem('tenants');
-      if (!raw) {
-        return {
-          tenant,
-          ok: false,
-          reason: 'no tenants in storage',
-          tenantsRaw: null,
-        };
-      }
-      const parsed = JSON.parse(raw) as Array<{ key?: string; is_admin?: boolean }>;
-      const match = parsed.find((t) => t?.key === tenant);
-      const tenantList = parsed.map(
-        (t) => `${t.key}=${t.is_admin ? 'admin' : 'member'}`,
-      );
-      return {
-        tenant,
-        ok: Boolean(match?.is_admin),
-        reason: match
-          ? match.is_admin
-            ? 'admin'
-            : `tenant present but is_admin=false (account is a member, not admin, on "${tenant}")`
-          : `no entry for tenant="${tenant}"; visible tenants: [${tenantList.join(', ')}]`,
-        tenantsRaw: tenantList,
-      };
-    } catch (e) {
-      return { tenant: '', ok: false, reason: String(e), tenantsRaw: null };
-    }
-  });
-  expect(
-    result.ok,
-    `Admin-only journey requires the admin storage state.\n` +
-      `  current_tenant: "${result.tenant}"\n` +
-      `  tenants:        ${result.tenantsRaw ? JSON.stringify(result.tenantsRaw) : '(empty)'}\n` +
-      `  reason:         ${result.reason}\n` +
-      `Action: set PLAYWRIGHT_ADMIN_USERNAME/PASSWORD to an account that is_admin=true on the active tenant, ` +
-      `or switch the active tenant after login so the admin entry is selected.`,
-  ).toBe(true);
-}
 
 test.describe('admin gating — admin path', () => {
   test('New Course in the sidebar does not show the upgrade modal for admins', async ({

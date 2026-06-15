@@ -31,6 +31,7 @@ import { iblaiStore } from "@/store/iblai-store";
 import { LocalStorageService } from "@/lib/iblai/storage-service";
 import { RadixPointerEventsGuard } from "@/components/iblai/radix-pointer-events-guard";
 import { StripeCallbackHandler } from "@/components/iblai/stripe-callback-handler";
+import { PageLoader } from "@/components/iblai/page-loader";
 import config from "@/lib/iblai/config";
 import { resolveAppTenant, checkTenantMismatch } from "@/lib/iblai/tenant";
 import {
@@ -122,11 +123,7 @@ export function IblaiProviders({ children }: { children: ReactNode }) {
   // of the SDK's auth machinery stay active.
   const skipAuth = isSsoRoute;
 
-  const LOADING = (
-    <div className="flex min-h-screen items-center justify-center">
-      <p className="text-sm text-gray-400">Loading...</p>
-    </div>
-  );
+  const LOADING = <PageLoader />;
 
   return (
     <ReduxProvider store={iblaiStore}>

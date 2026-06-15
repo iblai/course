@@ -1,13 +1,13 @@
 {
   "version": 2,
-  "lastUpdated": "2026-05-23",
+  "lastUpdated": "2026-06-15",
   "summary": {
-    "totalCheckpoints": 40,
-    "coveredCheckpoints": 40,
+    "totalCheckpoints": 45,
+    "coveredCheckpoints": 45,
     "deprecatedCheckpoints": 0,
     "percent": 100,
-    "totalJourneys": 10,
-    "activeJourneys": 10
+    "totalJourneys": 12,
+    "activeJourneys": 12
   },
   "journeys": [
     {
@@ -338,6 +338,58 @@
         {
           "id": "gatesidebar-08",
           "description": "Monetization (admin footer) → upgrade modal opens, no navigation",
+          "status": "covered"
+        }
+      ]
+    },
+    {
+      "id": "course-creation",
+      "name": "Course Creation",
+      "spec": "course-creation.journey.spec.ts",
+      "role": "admin",
+      "sourceFiles": [
+        "components/platform/sidebar-learner.tsx",
+        "app/platform/[tenantId]/[mentorId]/page.tsx",
+        "lib/iblai/agent-tools.ts"
+      ],
+      "checkpoints": [
+        {
+          "id": "coursecreate-01",
+          "description": "New Course routes into /platform/<t>/<m> and NOT the course-creation error page (courseCreationUnavailable)",
+          "status": "covered"
+        },
+        {
+          "id": "coursecreate-02",
+          "description": "The mentor-settings call fires on arrival (the course-creation enable path ran)",
+          "status": "covered"
+        },
+        {
+          "id": "coursecreate-03",
+          "description": "The chat websocket connects after the fresh-enable remount — the reconnect contract that lets the agent call the tool. The live prompt → request-fires → My Courses drive runs best-effort (annotated) within the same test.",
+          "status": "covered"
+        }
+      ]
+    },
+    {
+      "id": "post-login-routing-learner",
+      "name": "Post-Login Routing — Learner",
+      "spec": "learner/learner-post-login-redirect.journey.spec.ts",
+      "role": "learner",
+      "sourceFiles": [
+        "lib/iblai/use-mentor-redirect.ts",
+        "app/platform/[tenantId]/[mentorId]/layout.tsx",
+        "hooks/use-admin-status.ts",
+        "app/page.tsx"
+      ],
+      "checkpoints": [
+        {
+          "id": "postlogin-01",
+          "description": "A student landing on / (the SSO default redirect) is sent to /course-catalog, not funneled into a per-agent chat (/platform/<t>/<m>)",
+          "status": "covered"
+        },
+        {
+          "id": "postlogin-02",
+          "description": "A student deep-linking straight to /platform/<t>/<m> (bookmark / shared link / saved redirectTo) is bounced to /course-catalog by the segment layout before the chat mounts",
           "status": "covered"
         }
       ]

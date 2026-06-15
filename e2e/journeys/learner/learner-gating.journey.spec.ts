@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 import { waitForTenantsPopulated } from '../../utils/wait-for-tenants';
+import { assertNotAdmin } from '../../utils/assert-admin';
 
 /**
  * Learner-side of the gating contract.
@@ -13,67 +14,12 @@ import { waitForTenantsPopulated } from '../../utils/wait-for-tenants';
  * full features" header instead of performing the gated action.
  *
  * If this file ever runs against an admin account by mistake, the
- * `assertNotAdmin` pre-flight bails immediately with a clear
- * message.
+ * shared `assertNotAdmin` pre-flight (`utils/assert-admin.ts`) bails
+ * immediately with a clear message.
  */
 
 const APP_HOST = process.env.APP_HOST || 'http://localhost:3000';
 const UPGRADE_HEADER = /subscribe to unlock full features/i;
-
-async function assertNotAdmin(page: import('@playwright/test').Page) {
-  await waitForTenantsPopulated(page).catch(() => null);
-  await page
-    .waitForFunction(
-      () => !!window.localStorage.getItem('current_tenant'),
-      { timeout: 30_000 },
-    )
-    .catch(() => null);
-  const result = await page.evaluate(() => {
-    function readTenantKey(): string {
-      const raw = window.localStorage.getItem('current_tenant');
-      if (!raw) return window.localStorage.getItem('tenant') ?? '';
-      try {
-        const parsed = JSON.parse(raw);
-        if (parsed && typeof parsed === 'object' && typeof parsed.key === 'string') {
-          return parsed.key;
-        }
-      } catch {
-        if (raw.trim()) return raw;
-      }
-      return '';
-    }
-    try {
-      const tenant = readTenantKey();
-      const raw = window.localStorage.getItem('tenants');
-      if (!raw) {
-        return { ok: false, reason: 'no tenants in storage', tenant, tenants: null };
-      }
-      const parsed = JSON.parse(raw) as Array<{ key?: string; is_admin?: boolean }>;
-      const match = parsed.find((t) => t?.key === tenant);
-      const tenantList = parsed.map(
-        (t) => `${t.key}=${t.is_admin ? 'admin' : 'member'}`,
-      );
-      return {
-        ok: !match?.is_admin,
-        reason: match?.is_admin
-          ? `tenant="${tenant}" reports is_admin=true (use a non-admin account)`
-          : 'non-admin',
-        tenant,
-        tenants: tenantList,
-      };
-    } catch (e) {
-      return { ok: false, reason: String(e), tenant: '', tenants: null };
-    }
-  });
-  expect(
-    result.ok,
-    `Learner-only journey requires a non-admin account.\n` +
-      `  current_tenant: "${result.tenant}"\n` +
-      `  tenants:        ${result.tenants ? JSON.stringify(result.tenants) : '(empty)'}\n` +
-      `  reason:         ${result.reason}\n` +
-      `Action: set PLAYWRIGHT_LEARNER_USERNAME/PASSWORD to a non-admin account.`,
-  ).toBe(true);
-}
 
 test.describe('admin gating — learner path', () => {
   test('clicking New Course opens the upgrade modal (no navigation)', async ({

@@ -6,6 +6,7 @@ import { redirectToAuthSpa } from "@iblai/iblai-js/web-utils";
 import { authSpaOptions, hasNonExpiredAuthToken } from "@/lib/iblai/auth-utils";
 import { resolveAppTenant } from "@/lib/iblai/tenant";
 import config from "@/lib/iblai/config";
+import { PageLoader } from "@/components/iblai/page-loader";
 
 /**
  * Real login + post-login agent auto-select.
@@ -52,14 +53,7 @@ export default function LoginPage() {
     };
   }, [router]);
 
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-white p-8">
-      <div className="text-center">
-        <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" />
-        <p className="text-sm text-gray-600">Loading…</p>
-      </div>
-    </main>
-  );
+  return <PageLoader />;
 }
 
 /**

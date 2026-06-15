@@ -7,45 +7,7 @@ import { ShieldAlert, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useUrlContext } from "@/lib/iblai/use-url-context"
 import { handleLogout } from "@/lib/iblai/auth-utils"
-
-interface TenantEntry {
-  key: string
-  is_admin?: boolean
-}
-
-/**
- * Synchronous tri-state admin check.
- *
- * Returns `"admin"` / `"denied"` only when `localStorage.tenants` is
- * present AND we know the answer. Returns `"loading"` while tenants
- * haven't been written yet (the SDK's TenantProvider fetches them
- * asynchronously on first SSO; on a refresh they're already there).
- *
- * `useIsAdmin` is `useState(false) + useEffect`, which always yields
- * one render where the state is `false` even if the underlying answer
- * is `true`. That tick is what produces the access-denied flash. We
- * compute synchronously here so AdminGate never has to render through
- * a wrong-then-right transition.
- */
-function readAdminStatus(tenantKey: string): "loading" | "admin" | "denied" {
-  if (typeof window === "undefined") return "loading"
-  let raw: string | null
-  try {
-    raw = window.localStorage.getItem("tenants")
-  } catch {
-    return "loading"
-  }
-  if (!raw) return "loading"
-  let parsed: unknown
-  try {
-    parsed = JSON.parse(raw)
-  } catch {
-    return "loading"
-  }
-  if (!Array.isArray(parsed) || parsed.length === 0) return "loading"
-  const match = (parsed as TenantEntry[]).find((t) => t?.key === tenantKey)
-  return match?.is_admin ? "admin" : "denied"
-}
+import { readAdminStatus } from "@/hooks/use-admin-status"
 
 /**
  * Routes that bypass admin gating. The auth handshake and login

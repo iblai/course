@@ -44,6 +44,21 @@ interface MentorSettingsResponse {
   mentor_tools?: MentorToolEntry[] | null;
 }
 
+/**
+ * Outcome of an enable attempt.
+ *
+ * - `ok` — whether the agent can be expected to expose the tool. `false`
+ *   only when an enable attempt was actually made and failed.
+ * - `justEnabled` — `true` only when this call's PUT freshly enabled the
+ *   tool. The chat websocket connects before this runs, so when the tool
+ *   was just added the caller must remount the chat to reconnect, or the
+ *   agent won't be able to call it.
+ */
+export interface CourseCreationEnableResult {
+  ok: boolean;
+  justEnabled: boolean;
+}
+
 function readDmToken(): string {
   if (typeof window === "undefined") return "";
   return localStorage.getItem("dm_token") ?? "";
@@ -101,27 +116,31 @@ export async function agentExists(
  * (the New Course click, `useMentorRedirect`'s pre-warm) is never blocked
  * by a network hiccup or a stale token.
  *
- * Returns whether the agent can be expected to expose the tool:
- *   - `true`  — the tool is now enabled, was already enabled, or there was
- *               nothing to attempt yet (missing args / auth token still
- *               hydrating). Safe to proceed into the chat.
- *   - `false` — an enable attempt was actually made and failed (the
- *               settings GET or PUT errored, or the request threw). The
- *               course-creation chat can't work on this agent, so a
- *               caller that depends on it should surface the error page.
+ * Returns a `CourseCreationEnableResult`:
+ *   - `ok: false` — an enable attempt was actually made and failed (the
+ *     settings GET or PUT errored, or the request threw). The
+ *     course-creation chat can't work on this agent, so a caller that
+ *     depends on it should surface the error page.
+ *   - `ok: true, justEnabled: false` — the tool was already enabled, or
+ *     there was nothing to attempt yet (missing args / auth token still
+ *     hydrating). Safe to proceed into the chat as-is.
+ *   - `ok: true, justEnabled: true` — this call's PUT just enabled the
+ *     tool. The chat connected before that, so the caller must remount the
+ *     chat (reconnect the websocket) for the agent to be able to call it.
  */
 export async function enableCourseCreationToolIfMissing(
   tenantKey: string,
   username: string,
   mentorUniqueId: string,
-): Promise<boolean> {
+): Promise<CourseCreationEnableResult> {
   // Nothing to attempt — not a failure (the platform page guards these
   // before calling, so this only trips during the brief hydration window).
-  if (!tenantKey || !username || !mentorUniqueId) return true;
+  if (!tenantKey || !username || !mentorUniqueId)
+    return { ok: true, justEnabled: false };
   const token = readDmToken();
   // Token not in localStorage yet: let the SDK auth flow handle it rather
   // than flashing the error page mid-hydration.
-  if (!token) return true;
+  if (!token) return { ok: true, justEnabled: false };
 
   const url = settingsUrl(tenantKey, username, mentorUniqueId);
 
@@ -136,7 +155,7 @@ export async function enableCourseCreationToolIfMissing(
         getResp.status,
         mentorUniqueId,
       );
-      return false;
+      return { ok: false, justEnabled: false };
     }
     const data = (await getResp.json()) as MentorSettingsResponse;
     const tools = data.mentor_tools ?? [];
@@ -151,7 +170,7 @@ export async function enableCourseCreationToolIfMissing(
       // used to confirm it lingered too long on the configure page.
       // Successful writes still toast (see `Agent settings updated`
       // below).
-      return true;
+      return { ok: true, justEnabled: false };
     }
 
     const updatedSlugs = [...currentSlugs, COURSE_CREATION_SLUG];
@@ -175,12 +194,12 @@ export async function enableCourseCreationToolIfMissing(
         errText,
         mentorUniqueId,
       );
-      return false;
+      return { ok: false, justEnabled: false };
     }
     toast.success("Agent settings updated");
-    return true;
+    return { ok: true, justEnabled: true };
   } catch (err) {
     console.error("[agent-tools] enableCourseCreationToolIfMissing", err);
-    return false;
+    return { ok: false, justEnabled: false };
   }
 }

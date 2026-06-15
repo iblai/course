@@ -8,6 +8,7 @@ import { Account } from "@iblai/iblai-js/web-containers/next"
 import config from "@/lib/iblai/config"
 import { useUrlContext } from "@/lib/iblai/use-url-context"
 import { STANDARD_DIALOG_CLASSNAME } from "@/lib/iblai/dialog-style"
+import { Spinner } from "@/components/iblai/page-loader"
 
 interface Tenant {
   key: string
@@ -115,7 +116,7 @@ export function OrgAccountDialog({
             />
           ) : (
             <div className="flex h-full items-center justify-center py-12 text-sm text-muted-foreground">
-              {!ready ? "Loading…" : "Sign in to view account settings."}
+              {!ready ? <Spinner /> : "Sign in to view account settings."}
             </div>
           )}
         </div>

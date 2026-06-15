@@ -4,6 +4,8 @@ import { Suspense } from "react";
 
 import { SsoLogin } from "@iblai/iblai-js/web-containers/next";
 
+import { PageLoader } from "@/components/iblai/page-loader";
+
 /**
  * SSO Login Complete page.
  *
@@ -13,7 +15,7 @@ import { SsoLogin } from "@iblai/iblai-js/web-containers/next";
  */
 export default function SsoLoginCompletePage() {
   return (
-    <Suspense fallback={<div>Completing login…</div>}>
+    <Suspense fallback={<PageLoader />}>
       <SsoLogin
         localStorageKeys={{
           CURRENT_TENANT: "current_tenant",

@@ -4,7 +4,6 @@ export const dynamic = "force-dynamic";
 
 import { Suspense, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
 
 import { Chat, type ChatConfig } from "@iblai/iblai-js/web-containers/next";
 import {
@@ -19,6 +18,7 @@ import {
 import { Header } from "@/components/platform/header";
 import { SidebarLearner } from "@/components/platform/sidebar-learner";
 import { ProjectGridInterceptor } from "@/components/iblai/project-grid-interceptor";
+import { PageLoader } from "@/components/iblai/page-loader";
 import { cn } from "@/lib/utils";
 import config from "@/lib/iblai/config";
 import { redirectToAuthSpa } from "@iblai/iblai-js/web-utils";
@@ -35,17 +35,9 @@ import { authSpaOptions } from "@/lib/iblai/auth-utils";
  */
 export default function MentorProjectPage() {
   return (
-    <Suspense fallback={<ProjectFallback />}>
+    <Suspense fallback={<PageLoader />}>
       <MentorProjectPageInner />
     </Suspense>
-  );
-}
-
-function ProjectFallback() {
-  return (
-    <div className="flex h-dvh w-full items-center justify-center bg-white">
-      <Loader2 className="size-5 animate-spin text-[#5f5f61]" aria-hidden />
-    </div>
   );
 }
 
@@ -133,7 +125,7 @@ function MentorProjectPageInner() {
               Missing project or agent context.
             </div>
           ) : !sessionPurged ? (
-            <ProjectFallback />
+            <PageLoader />
           ) : (
             <>
               <ProjectGridInterceptor

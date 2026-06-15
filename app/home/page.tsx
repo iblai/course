@@ -1,8 +1,7 @@
 "use client"
 
-import { Loader2 } from "lucide-react"
-
 import { useMentorRedirect } from "@/lib/iblai/use-mentor-redirect"
+import { PageLoader } from "@/components/iblai/page-loader"
 
 /**
  * `/home` is a thin redirect to `/platform/<tenantKey>/<unique_id>`, where
@@ -15,9 +14,5 @@ import { useMentorRedirect } from "@/lib/iblai/use-mentor-redirect"
  */
 export default function HomePage() {
   useMentorRedirect()
-  return (
-    <div className="flex h-dvh w-full items-center justify-center bg-[#fafafa]">
-      <Loader2 className="size-5 animate-spin text-[#5f5f61]" aria-hidden />
-    </div>
-  )
+  return <PageLoader className="bg-[#fafafa]" />
 }

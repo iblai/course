@@ -1,6 +1,6 @@
 # courseAI E2E Coverage — User Journey Checklist
 
-> Last updated: 2026-05-23 | 40 checkpoints (40 active) | 10 journeys | 100% covered | Auth: admin + learner storageState
+> Last updated: 2026-06-15 | 45 checkpoints (45 active) | 12 journeys | 100% covered | Auth: admin + learner storageState
 
 ## How This Works
 
@@ -184,6 +184,48 @@ top-nav, section, and admin-footer button)
 
 ---
 
+## Journey 11: Course Creation (3 checkpoints) — `journeys/course-creation.journey.spec.ts`
+
+**Source files:** `components/platform/sidebar-learner.tsx`
+(`startNewChat`), `app/platform/[tenantId]/[mentorId]/page.tsx`
+(mounts the SDK `<Chat>`, enables the `course-creation` tool, and
+remounts on a fresh enable), `lib/iblai/agent-tools.ts`
+(`enableCourseCreationToolIfMissing`)
+
+> Runs under the `*-admin` projects only (course creation is admin-gated).
+
+- [x] **New Course** routes into `/platform/<t>/<m>` and NOT the
+      course-creation error page (`courseCreationUnavailable`)
+- [x] The mentor-settings call fires on arrival (the `course-creation`
+      enable path ran)
+- [x] The chat websocket connects after the fresh-enable remount — the
+      reconnect contract that lets the agent actually call the tool
+
+The live course-creation drive (type a "create a course" prompt → observe
+the request fire over the websocket/HTTP → the new course appears in My
+Courses) runs as **best-effort** inside the same test: the chat input is a
+compiled SDK surface and the agent is non-deterministic, so those steps
+annotate the result rather than fail the suite.
+
+---
+
+## Journey 12: Post-Login Routing — Learner (2 checkpoints) — `journeys/learner/learner-post-login-redirect.journey.spec.ts`
+
+**Source files:** `lib/iblai/use-mentor-redirect.ts` (admin-status gate),
+`app/platform/[tenantId]/[mentorId]/layout.tsx` (segment gate),
+`hooks/use-admin-status.ts`, `app/page.tsx`
+
+> Runs under the `*-learner` projects only.
+
+- [x] A student landing on `/` (the SSO default redirect) is sent to
+      `/course-catalog`, NOT funneled into a per-agent chat
+      (`/platform/<t>/<m>`, the admin path)
+- [x] A student deep-linking straight to `/platform/<t>/<m>` (bookmark /
+      shared link / saved `redirectTo`) is bounced to `/course-catalog`
+      by the segment layout before the chat mounts
+
+---
+
 ## Surfaces NOT yet covered (known gaps)
 
 These app surfaces have no dedicated journey yet. Tracked here so a future
@@ -194,7 +236,6 @@ this hardening pass — its absence does not affect the 100% number above.
 - `app/analytics/financial/page.tsx` — billing analytics dashboard (admin)
 - `app/customize/page.tsx` — mentor customization redirect
 - `app/notifications/page.tsx` — notification center
-- `app/platform/[tenantId]/[mentorId]/page.tsx` — main mentor chat surface
 - `app/platform/[tenantId]/[mentorId]/customize/page.tsx` — per-mentor customize
 - `app/platform/[tenantId]/[mentorId]/projects/[projectId]/page.tsx` — project view
 - `app/course/[id]/edit/page.tsx` — course editor

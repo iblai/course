@@ -7,6 +7,7 @@ import {
 } from "@iblai/iblai-js/web-containers";
 
 import config from "@/lib/iblai/config";
+import { Spinner } from "@/components/iblai/page-loader";
 
 interface DiscoverGridProps {
   /**
@@ -85,7 +86,11 @@ export function DiscoverGrid({
   const contentsLoading: boolean = !!discover?.contentsLoading;
 
   if (contentsLoading) {
-    return <p className="text-sm text-muted-foreground">Loading…</p>;
+    return (
+      <div className="flex items-center justify-center py-16">
+        <Spinner />
+      </div>
+    );
   }
   if (contents.length === 0) {
     return (

@@ -7,6 +7,7 @@ import {
 } from '@iblai/iblai-js/data-layer'
 
 import { useUrlContext } from './use-url-context'
+import { useAdminStatus } from '@/hooks/use-admin-status'
 import { agentExists, enableCourseCreationToolIfMissing } from './agent-tools'
 import {
   getPlatformDefaultAgentId,
@@ -48,6 +49,7 @@ export function useMentorRedirect(options: UseMentorRedirectOptions = {}) {
   const { pathSuffix = '', query = '' } = options
   const router = useRouter()
   const { tenantKey, username, ready } = useUrlContext()
+  const adminStatus = useAdminStatus()
   const [fetchMentors] = useLazyGetMentorsQuery()
   const [resolving, setResolving] = useState(true)
   const [hasResolved, setHasResolved] = useState(false)
@@ -59,6 +61,19 @@ export function useMentorRedirect(options: UseMentorRedirectOptions = {}) {
     // Without a tenant + username we have no way to fetch — treat as resolved
     // so the caller can fall through to its non-redirect render path.
     if (!tenantKey || !username) {
+      setResolving(false)
+      setHasResolved(true)
+      return
+    }
+
+    // Students (non-admins) don't belong in the agent-authoring chat —
+    // land them on the public course catalog instead. Crucially, wait
+    // out the hydration window first: `loading` must NOT be treated as
+    // denied, or an admin would be bounced to the catalog before the SDK
+    // writes `tenants`. We re-run once `adminStatus` settles.
+    if (adminStatus === 'loading') return
+    if (adminStatus === 'denied') {
+      router.replace('/course-catalog')
       setResolving(false)
       setHasResolved(true)
       return
@@ -181,7 +196,7 @@ export function useMentorRedirect(options: UseMentorRedirectOptions = {}) {
     return () => {
       cancelled = true
     }
-  }, [ready, tenantKey, username, hasResolved, fetchMentors, router, pathSuffix, query])
+  }, [ready, tenantKey, username, adminStatus, hasResolved, fetchMentors, router, pathSuffix, query])
 
   return { resolving, hasResolved }
 }

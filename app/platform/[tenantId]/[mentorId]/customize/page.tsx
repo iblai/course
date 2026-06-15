@@ -4,7 +4,6 @@ export const dynamic = "force-dynamic";
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
-import { Loader2 } from "lucide-react";
 
 import {
   AgentPromptsTab,
@@ -14,6 +13,7 @@ import { useUsername } from "@iblai/iblai-js/web-utils";
 
 import { Header } from "@/components/platform/header";
 import { SidebarLearner } from "@/components/platform/sidebar-learner";
+import { Spinner } from "@/components/iblai/page-loader";
 import { cn } from "@/lib/utils";
 import config from "@/lib/iblai/config";
 
@@ -59,9 +59,8 @@ export default function ConfigurePromptsPage() {
         />
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-4 sm:p-6">
           {!mentorId || !username ? (
-            <div className="flex flex-1 items-center justify-center text-sm text-gray-400">
-              <Loader2 className="mr-2 size-4 animate-spin" aria-hidden />
-              Loading…
+            <div className="flex flex-1 items-center justify-center">
+              <Spinner />
             </div>
           ) : (
             <AgentSettingsProvider
