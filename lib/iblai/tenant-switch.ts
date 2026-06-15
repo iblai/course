@@ -131,7 +131,18 @@ export async function handleTenantSwitch(
   // user back where they were" signal from the caller.
   localStorage.setItem("tenant", tenant);
   if (saveRedirect) {
-    localStorage.setItem(REDIRECT_PATH_LS_KEY, currentPath);
+    // If the current route is tenant-prefixed (`/platform/<tenant>/...`),
+    // saving it verbatim would land the user back on the OLD tenant's
+    // URL after the switch — and `useUrlContext` / `useParams` read
+    // `tenantId` from the URL, so the header, dropdown, mentor data
+    // fetches, etc. would all stay scoped to the old tenant even
+    // though `localStorage.tenant` is the new one. Strip the
+    // tenant-prefixed segment so the user lands on the app root,
+    // which then resolves tenant from `localStorage`.
+    const sanitizedPath = /^\/platform\/[^/]+/.test(currentPath)
+      ? "/"
+      : currentPath;
+    localStorage.setItem(REDIRECT_PATH_LS_KEY, sanitizedPath);
   } else if (redirectPath) {
     localStorage.setItem(REDIRECT_PATH_LS_KEY, redirectPath);
   }

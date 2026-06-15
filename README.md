@@ -2,31 +2,33 @@
 
 <a href="https://ibl.ai"><img src="https://ibl.ai/images/iblai-logo.png" alt="ibl.ai" width="300"></a>
 
-# courseAI
-The video demo is available [here](https://drive.google.com/file/d/1IcfMBCSjZ5jqnCj_hQr6l1bxGjXY_xi9/view?usp=sharing).
+# Course
 
 AI-assisted course authoring and delivery — design programs, browse the catalog, and chat with course agents on the ibl.ai platform.
+
+The video demo is available [here](https://drive.google.com/file/d/1IcfMBCSjZ5jqnCj_hQr6l1bxGjXY_xi9/view?usp=sharing).
 
 [![Next.js](https://img.shields.io/badge/Next.js-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-CC785C?logoColor=white)](https://claude.ai)
 [![Desktop & Mobile](https://img.shields.io/badge/Desktop_%26_Mobile-supported-blue)](https://github.com/iblai/vibe/blob/main/skills/iblai-ops-build/SKILL.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](#license)
 
 </div>
 
 ---
 
-## What is courseAI
-courseAI is deployed at [course.ibl.ai](https://course.ibl.ai).
+## What is Course
+Course is deployed at [course.ibl.ai](https://course.ibl.ai).
 
-courseAI is an end-to-end course-authoring workspace on the [ibl.ai](https://ibl.ai) platform. Plan a project, attach mentors, browse or create courses, and chat with an agent that helps draft outlines and unit content — all from one shell powered by the [@iblai/iblai-js](https://www.npmjs.com/package/@iblai/iblai-js) SDK and connected to [iblai.app](https://iblai.app).
+Course is an end-to-end course-authoring workspace on the [ibl.ai](https://ibl.ai) platform. Plan a project, attach mentors, browse or create courses, and chat with an agent that helps draft outlines and unit content — all from one shell powered by the [@iblai/iblai-js](https://www.npmjs.com/package/@iblai/iblai-js) SDK and connected to [iblai.app](https://iblai.app).
 
 ## Screenshots
 
 | Home | My Courses |
 |------|------------|
-| ![courseAI home](docs/screenshots/homepage.png) | ![My Courses](docs/screenshots/my_courses.png) |
+| ![Course home](docs/screenshots/homepage.png) | ![My Courses](docs/screenshots/my_courses.png) |
 
 | Feature | Description |
 |---------|-------------|
@@ -133,7 +135,7 @@ pnpm test:e2e:headed     # headed browser
 iblai deploy vercel
 ```
 
-The CLI auto-detects the deploy mode from `next.config.mjs`. courseAI is a server-rendered Next.js app, so the CLI will:
+The CLI auto-detects the deploy mode from `next.config.mjs`. Course is a server-rendered Next.js app, so the CLI will:
 
 - deploy the repo root to Vercel for a remote build,
 - disable Vercel authentication / password protection,
@@ -152,7 +154,7 @@ echo 'VERCEL_TOKEN=<token>' >> iblai.env
 
 ### Native builds (iOS, Android, macOS, Linux, Surface)
 
-Wrap courseAI in a native shell with [Tauri v2](https://tauri.app) using the `iblai builds` family of commands (full guide: [`/iblai-ops-build`](https://github.com/iblai/vibe/blob/main/skills/iblai-ops-build/SKILL.md)). All platforms share a single static `next build` export — the CLI runs the frontend build automatically before starting the Tauri dev server, and the WebView loads the same `out/` bundle. **Stop `pnpm dev` (and any other process on port 3000) before running a dev build.**
+Wrap Course in a native shell with [Tauri v2](https://tauri.app) using the `iblai builds` family of commands (full guide: [`/iblai-ops-build`](https://github.com/iblai/vibe/blob/main/skills/iblai-ops-build/SKILL.md)). All platforms share a single static `next build` export — the CLI runs the frontend build automatically before starting the Tauri dev server, and the WebView loads the same `out/` bundle. **Stop `pnpm dev` (and any other process on port 3000) before running a dev build.**
 
 #### One-time setup
 
@@ -332,6 +334,10 @@ See `CLAUDE.md` for the full list of skills and component priority rules.
 - [@iblai/mcp](https://www.npmjs.com/package/@iblai/mcp) — MCP server for AI-assisted development
 - [Vibe](https://github.com/iblai/vibe) — developer toolkit for building with ibl.ai
 - [Vibe Starter](https://github.com/iblai/vibe-starter) — pre-wired Next.js + ibl.ai SSO template
+
+## License
+
+Released under the [MIT License](LICENSE).
 
 ---
 

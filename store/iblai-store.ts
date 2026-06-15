@@ -27,6 +27,7 @@ import {
   subscriptionReducer,
   topBannerReducer,
 } from "@iblai/iblai-js/web-utils";
+import { tenantSlice } from "@/features/tenant";
 
 export const iblaiStore = configureStore({
   reducer: {
@@ -46,6 +47,11 @@ export const iblaiStore = configureStore({
     rbac: rbacReducer,
     subscription: subscriptionReducer,
     topBanner: topBannerReducer,
+
+    // Local tenant slice: holds `requestedTenant` separately from
+    // `currentTenant` (which lives in localStorage) so the
+    // TenantProvider can detect a mismatch and trigger a switch.
+    tenant: tenantSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false })
