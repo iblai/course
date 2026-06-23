@@ -11,14 +11,15 @@
  * Auth: `Authorization: Token <dm_token>` (stored by the SDK at
  * `localStorage.dm_token`; see `STORAGE_KEYS.DM_TOKEN_KEY`).
  *
- * The PUT body is **JSON** and a **partial merge** — only the fields we
- * send are updated; everything else on the agent is left intact. Setting
- * up the course-creator agent writes two things:
+ * The PUT body is **JSON** and a **full replace** — the endpoint overwrites
+ * the entire settings object; any writable field we omit gets wiped. So we
+ * GET the current settings first and send them back with `course-creation`
+ * added to the tools:
  *
  *   {
+ *     ...<all of the agent's existing settings from the GET>,
  *     "tool_slugs": ["<existing-slug-1>", ..., "course-creation"],
- *     "can_use_tools": true,
- *     "system_prompt": "<existing prompt>\n\n<Studio-link instruction>"
+ *     "can_use_tools": true
  *   }
  *
  * `tool_slugs` is the **full** list of slugs to keep enabled, not a
@@ -27,17 +28,9 @@
  * current slugs from `mentor_tools[].slug` and append `course-creation`
  * iff missing.
  *
- * `system_prompt` is **appended** (never replaced) with one instruction:
- * after creating a course, hand the user a Studio link to edit it, built
- * from the `course_id` the course-creation tool returns
- * (`<studioUrl>/course/<course_id>`). A fixed phrase in that instruction
- * (`COURSE_LINK_MARKER`) is the idempotency marker, so it's added at most
- * once per agent.
- *
- * The whole operation is idempotent — once the tool is on and the prompt
- * has the Studio-link instruction, subsequent GETs short-circuit and we
- * skip the PUT. Failures are logged but never thrown; the New Course flow
- * continues navigating either way.
+ * The operation is idempotent — once the tool is on, subsequent GETs
+ * short-circuit and we skip the PUT. Failures are logged but never thrown;
+ * the New Course flow continues navigating either way.
  */
 
 import { toast } from "sonner";
@@ -46,43 +39,12 @@ import config from "@/lib/iblai/config";
 
 const COURSE_CREATION_SLUG = "course-creation";
 
-/**
- * Stable marker for the Studio-link instruction appended to the
- * course-creator agent's `system_prompt`. The Studio host is
- * deployment-specific (`config.studioUrl()`), so idempotency keys off
- * this fixed phrase rather than the full URL — if the prompt already
- * contains it, we don't re-append.
- */
-const COURSE_LINK_MARKER = "open and edit it in Studio";
-
-/**
- * The instruction appended to the course-creator agent's system prompt:
- * after creating a course, hand the user a Studio link to edit it. The
- * course-creation tool returns the new course's `course_id` (an edX
- * locator like `course-v1:org+number+run`), and Studio opens it at
- * `<studioUrl>/course/<course_id>` — same shape as `studioOutlineUrl` in
- * `course-actions.ts`. `COURSE_LINK_MARKER` stays a substring of the
- * returned text so the append is idempotent.
- */
-function courseLinkInstruction(): string {
-  const studioBase = config.studioUrl().replace(/\/+$/, "");
-  return (
-    `After you create a course, the course-creation tool returns the new ` +
-    `course's "course_id" — an edX course locator like ` +
-    `"course-v1:org+number+run". Always give the user a link to ` +
-    `${COURSE_LINK_MARKER} by appending that course_id to ` +
-    `${studioBase}/course/ (for example, ` +
-    `${studioBase}/course/course-v1:org+number+run).`
-  );
-}
-
 interface MentorToolEntry {
   slug?: string | null;
 }
 
 interface MentorSettingsResponse {
   mentor_tools?: MentorToolEntry[] | null;
-  system_prompt?: string | null;
 }
 
 /**
@@ -90,11 +52,10 @@ interface MentorSettingsResponse {
  *
  * - `ok` — whether the agent can be expected to expose the tool. `false`
  *   only when an enable attempt was actually made and failed.
- * - `justEnabled` — `true` when this call's PUT wrote the agent settings
- *   (freshly enabled the `course-creation` tool and/or appended the
- *   Studio-link instruction to its system prompt). The chat websocket
- *   connects before this runs, so the caller must remount the chat to
- *   reconnect for the new tool/prompt to take effect.
+ * - `justEnabled` — `true` when this call's PUT freshly enabled the
+ *   `course-creation` tool. The chat websocket connects before this runs,
+ *   so the caller must remount the chat to reconnect for the tool to take
+ *   effect.
  */
 export interface CourseCreationEnableResult {
   ok: boolean;
@@ -150,29 +111,28 @@ export async function agentExists(
 }
 
 /**
- * Set up the course-creator agent. GET its settings, then PUT (partial
- * merge) whatever's missing: append `course-creation` to `tool_slugs`
- * (with `can_use_tools=true`) if absent, and append the Studio-link
- * instruction to `system_prompt` if absent. Skips the PUT entirely when
- * both are already in place.
+ * Set up the course-creator agent. GET its settings; if the
+ * `course-creation` tool is missing, PUT the existing settings back with
+ * `course-creation` added to `tool_slugs` (and `can_use_tools=true`).
+ * Because the PUT is a full replace, we must include the agent's current
+ * settings or they'd be wiped. Skips the PUT entirely when the tool is
+ * already on.
  *
  * Never throws — logs errors to the console so a fire-and-forget caller
  * (the New Course click, `useMentorRedirect`'s pre-warm) is never blocked
  * by a network hiccup or a stale token.
  *
  * Returns a `CourseCreationEnableResult`:
- *   - `ok: false` — a setup attempt was actually made and failed (the
+ *   - `ok: false` — an enable attempt was actually made and failed (the
  *     settings GET or PUT errored, or the request threw). The
  *     course-creation chat can't work on this agent, so a caller that
  *     depends on it should surface the error page.
- *   - `ok: true, justEnabled: false` — the tool was already enabled and
- *     the prompt already has the Studio link, or there was nothing to
- *     attempt yet (missing args / auth token still hydrating). Safe to
- *     proceed into the chat as-is.
- *   - `ok: true, justEnabled: true` — this call's PUT just wrote the agent
- *     settings (tool and/or system prompt). The chat connected before
- *     that, so the caller must remount it (reconnect the websocket) for
- *     the change to take effect.
+ *   - `ok: true, justEnabled: false` — the tool was already enabled, or
+ *     there was nothing to attempt yet (missing args / auth token still
+ *     hydrating). Safe to proceed into the chat as-is.
+ *   - `ok: true, justEnabled: true` — this call's PUT just enabled the tool.
+ *     The chat connected before that, so the caller must remount it
+ *     (reconnect the websocket) for the tool to take effect.
  */
 export async function enableCourseCreationToolIfMissing(
   tenantKey: string,
@@ -212,32 +172,23 @@ export async function enableCourseCreationToolIfMissing(
       (s) => s.toLowerCase() === COURSE_CREATION_SLUG,
     );
 
-    const currentPrompt =
-      typeof data.system_prompt === "string" ? data.system_prompt : "";
-    // Idempotency marker: if the Studio-link instruction is already in the
-    // prompt, this agent has been set up before — leave the prompt alone.
-    const promptNeedsInstruction = !currentPrompt.includes(COURSE_LINK_MARKER);
-
-    // Nothing to write — the tool is on and the prompt already has the
-    // Studio link. No-op (no toast); the SDK route was a load+sync.
-    if (alreadyEnabled && !promptNeedsInstruction) {
+    // Tool already on — no-op (no toast); the SDK route was a load + sync.
+    if (alreadyEnabled) {
       return { ok: true, justEnabled: false };
     }
 
-    // Partial-merge PUT: send only the fields that changed so we never
-    // clobber the agent's other settings.
-    const body: Record<string, unknown> = {};
-    if (!alreadyEnabled) {
-      body.tool_slugs = [...currentSlugs, COURSE_CREATION_SLUG];
-      body.can_use_tools = true;
-    }
-    if (promptNeedsInstruction) {
-      // Append, never replace — keep whatever the agent already says.
-      const instruction = courseLinkInstruction();
-      body.system_prompt = currentPrompt
-        ? `${currentPrompt.trimEnd()}\n\n${instruction}`
-        : instruction;
-    }
+    // This endpoint REPLACES the whole settings object — it does NOT merge
+    // per field. So send the agent's *existing* settings back and add our
+    // tool on top, or we'd silently wipe its LLM config, its prompts, and
+    // the rest of its tools. Start from the GET payload, drop the read-only
+    // `mentor_tools` (the writable field is `tool_slugs`), and send the FULL
+    // slug list (existing + course-creation) with tools enabled.
+    const body: Record<string, unknown> = {
+      ...(data as Record<string, unknown>),
+    };
+    delete body.mentor_tools;
+    body.tool_slugs = [...currentSlugs, COURSE_CREATION_SLUG];
+    body.can_use_tools = true;
 
     const putResp = await fetch(url, {
       method: "PUT",
@@ -250,7 +201,7 @@ export async function enableCourseCreationToolIfMissing(
     if (!putResp.ok) {
       const errText = await putResp.text().catch(() => "");
       console.warn(
-        "[agent-tools] PUT course-creator setup failed",
+        "[agent-tools] PUT course-creation failed",
         putResp.status,
         errText,
         mentorUniqueId,
