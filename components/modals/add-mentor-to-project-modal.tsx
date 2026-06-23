@@ -1,16 +1,39 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, Check, X } from "lucide-react"
-import { mentorsByCategory, type Mentor } from "@/data/mentors"
+import { Search, Check, X, Loader2 } from "lucide-react"
 import { MentorCategories } from "@/components/mentor-categories"
+
+import { useGetMentorsQuery } from "@iblai/iblai-js/data-layer"
+import { useUrlContext } from "@/lib/iblai/use-url-context"
+
+/**
+ * Agent row used by the picker. Replaces the v0 fake catalog
+ * (`@/data/mentors`) with live `useGetMentorsQuery` results — the same
+ * move `CreateProjectModal` made — so the user adds real tenant agents.
+ * `id` is the agent's `unique_id`, so the project's add/remove stays keyed
+ * on the real agent id.
+ */
+interface Mentor {
+  id: string
+  title: string
+  avatar: string
+  description: string
+}
+
+type SdkMentor = {
+  unique_id?: string | null
+  name?: string | null
+  description?: string | null
+  profile_image?: string | null
+}
 
 interface ProjectMentor {
   id: string
-  title: string // Changed from 'name' to 'title' to match Mentor interface
+  title: string
   avatar: string
   description: string
 }
@@ -32,6 +55,7 @@ export function AddMentorToProjectModal({
   projectName,
   existingMentors,
 }: AddMentorToProjectModalProps) {
+  const { tenantKey, username } = useUrlContext()
   const [searchQuery, setSearchQuery] = useState("")
   const [filters, setFilters] = useState({
     category: "",
@@ -39,16 +63,36 @@ export function AddMentorToProjectModal({
     audience: "",
   })
 
+  const { data: mentorsQueryData, isFetching: isLoadingMentors } =
+    useGetMentorsQuery(
+      {
+        org: tenantKey,
+        username: username ?? "",
+        limit: 100,
+      } as never,
+      { skip: !tenantKey || !username || !isOpen },
+    )
+  const sdkMentors: SdkMentor[] =
+    (mentorsQueryData as { results?: SdkMentor[] } | undefined)?.results ?? []
+
+  const mentors: Mentor[] = useMemo(
+    () =>
+      sdkMentors
+        .filter(
+          (m) => typeof m.unique_id === "string" && m.unique_id.length > 0,
+        )
+        .map((m) => ({
+          id: m.unique_id as string,
+          title: m.name ?? "Untitled agent",
+          avatar: m.profile_image ?? "",
+          description: m.description ?? "",
+        })),
+    [sdkMentors],
+  )
+
   const getFilteredMentors = () => {
-    let allMentors: Mentor[] = []
-
-    // Get all mentors from all categories
-    Object.values(mentorsByCategory).forEach((categoryMentors) => {
-      allMentors = [...allMentors, ...categoryMentors]
-    })
-
-    // Remove duplicates
-    allMentors = allMentors.filter((mentor, index, self) => index === self.findIndex((m) => m.id === mentor.id))
+    // Start from the live agents (already unique by `unique_id`).
+    let allMentors: Mentor[] = mentors
 
     // Apply filters
     if (filters.subject || filters.category || filters.audience) {
@@ -105,8 +149,16 @@ export function AddMentorToProjectModal({
     return allMentors
   }
 
-  const handleFiltersChange = (newFilters: { category: string; subject: string; audience: string }) => {
-    setFilters(newFilters)
+  const handleFiltersChange = (newFilters: {
+    category: string | null
+    subject: string | null
+    audience: string | null
+  }) => {
+    setFilters({
+      category: newFilters.category ?? "",
+      subject: newFilters.subject ?? "",
+      audience: newFilters.audience ?? "",
+    })
   }
 
   const filteredMentors = getFilteredMentors()
@@ -136,11 +188,10 @@ export function AddMentorToProjectModal({
     }
   }
 
-  const isMentorAlreadyAdded = (mentorId: number) => {
-    return existingMentors.some((mentor) => {
-      // Convert both to strings for comparison to handle type mismatches
-      return mentor.id.toString() === mentorId.toString()
-    })
+  const isMentorAlreadyAdded = (mentorId: string) => {
+    return existingMentors.some(
+      (mentor) => mentor.id.toString() === mentorId.toString(),
+    )
   }
 
   return (
@@ -202,6 +253,12 @@ export function AddMentorToProjectModal({
 
             {/* Agents Grid - same structure as New Project */}
             <div className="px-0 pb-4">
+              {isLoadingMentors ? (
+                <div className="flex items-center justify-center py-8 text-sm text-gray-500">
+                  <Loader2 className="mr-2 size-4 animate-spin" aria-hidden />
+                  Loading agents…
+                </div>
+              ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {filteredMentors.map((mentor) => {
                   const isAdded = isMentorAlreadyAdded(mentor.id)
@@ -240,6 +297,7 @@ export function AddMentorToProjectModal({
                   </div>
                 )}
               </div>
+              )}
             </div>
           </div>
         </div>
