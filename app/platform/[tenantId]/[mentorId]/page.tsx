@@ -108,13 +108,14 @@ function MentorChatPageInner() {
 
   const tenantKey = tenantId || config.mainTenantKey();
 
-  // Bumped to force a one-time <Chat> remount when the course-creation
-  // tool is *freshly* enabled below. The SDK opens the chat websocket on
-  // mount, before the enable PUT lands, so a brand-new agent's first
-  // connection predates the tool — the agent can't call it until the
-  // socket reconnects against the now-updated settings. Folding this into
-  // the <Chat> key (below) does exactly that.
-  const [courseCreationRemount, setCourseCreationRemount] = useState(0);
+  // Gate the chat behind the tool check so a chat that's about to refresh
+  // never renders. `readyForMentor` is the agent id we've confirmed the
+  // course-creation tool on — the chat shows only once it matches the
+  // current `mentorId` (so switching agents re-shows the loader and
+  // re-checks). `reloading` keeps the spinner up while a refresh (after a
+  // re-enable) is in flight.
+  const [readyForMentor, setReadyForMentor] = useState<string | null>(null);
+  const [reloading, setReloading] = useState(false);
 
   // courseai requirement: every agent landed on must expose the
   // `course-creation` tool. Direct navigation to /platform/<t>/<id>
@@ -124,12 +125,13 @@ function MentorChatPageInner() {
   // (New Chat, redirect, direct nav) lands here — so it's where a failed
   // enable is surfaced: if the tool genuinely can't be enabled the chat
   // can't create courses, so show the error page instead. The helper GETs
-  // first and only PUTs when the tool is missing, and reports back whether
-  // it failed (-> error page) and whether it *just* enabled the tool
-  // (-> remount so the websocket reconnects).
+  // first and only PUTs when something's missing, and reports back whether
+  // it failed (-> error page) and whether it *just* wrote the settings
+  // (-> hard refresh so the change takes effect).
   useEffect(() => {
     if (!tenantKey || !mentorId || !username) return;
     let cancelled = false;
+    let reloadTimer: ReturnType<typeof setTimeout> | undefined;
     void (async () => {
       const { ok, justEnabled } = await enableCourseCreationToolIfMissing(
         tenantKey,
@@ -143,14 +145,42 @@ function MentorChatPageInner() {
         );
         return;
       }
+      // We re-check on EVERY entry — this effect runs on mount and whenever
+      // `mentorId` changes — because another admin can disable the
+      // course-creation tool on the agent at any time. `enableCourse…` GETs
+      // the live settings on each call and re-PUTs the tool when it's gone,
+      // returning `justEnabled: true` only when it had to write something.
       if (justEnabled) {
-        // Tool was absent when <Chat> first connected; remount so the SDK
-        // opens a fresh websocket and the agent can call it.
-        setCourseCreationRemount((n) => n + 1);
+        // The tool was off (disabled by someone, or never set up) and we
+        // just re-enabled it. Bumping the <Chat> key only remounts the
+        // React subtree — the SDK keeps its Redux store + open websocket,
+        // so the re-enabled tool never takes effect. A real refresh
+        // reconnects everything against the updated agent. We hold the
+        // loader and refresh *before* the chat ever renders, so there's no
+        // "chat finishes loading, then refreshes" jump.
+        //
+        // Loop guard: if a backend hiccup makes the PUT return 2xx but the
+        // next GET still read "disabled" (e.g. read-replica lag), we'd
+        // reload forever. Suppress only reloads <10s apart — a genuine
+        // "disabled again later" re-entry is always far enough apart that
+        // this never blocks a real refresh.
+        const tsKey = `cc-reload-ts:${mentorId}`;
+        const last = Number(sessionStorage.getItem(tsKey)) || 0;
+        const now = Date.now();
+        if (now - last >= 10_000) {
+          sessionStorage.setItem(tsKey, String(now));
+          setReloading(true);
+          reloadTimer = setTimeout(() => window.location.reload(), 0);
+          return; // keep the loader up through the refresh
+        }
       }
+      // Tool confirmed enabled (already enabled, or just re-enabled but a
+      // too-soon reload was loop-guarded) — now it's safe to reveal the chat.
+      setReadyForMentor(mentorId);
     })();
     return () => {
       cancelled = true;
+      if (reloadTimer) clearTimeout(reloadTimer);
     };
   }, [tenantKey, mentorId, username, router]);
 
@@ -166,6 +196,11 @@ function MentorChatPageInner() {
     navigateToExplore: () => router.push("/agents"),
     navigateToMentor: (id) => router.push(`/platform/${tenantKey}/${id}`),
   };
+
+  // Chat is gated until the course-creation tool check for THIS agent has
+  // passed (or kicked off a refresh) — so the spinner shows the whole time
+  // we're checking, never a chat that's about to reload.
+  const toolReady = readyForMentor === mentorId;
 
   return (
     <div className="h-dvh w-full bg-white">
@@ -191,17 +226,17 @@ function MentorChatPageInner() {
             <div className="flex flex-1 items-center justify-center text-sm text-gray-400">
               No agent selected.
             </div>
-          ) : !sessionReady ? (
+          ) : reloading || !sessionReady || !toolReady ? (
             <PageLoader />
           ) : (
             <>
               <ChatWelcomeOverride />
             <Chat
-            // Mentor + session + new nonce as the only legitimate
-            // remount triggers (see skill: "Mounting discipline"), plus
-            // courseCreationRemount so a fresh course-creation enable
-            // reconnects the websocket against the updated agent.
-            key={`${mentorId}:${restoreSessionId ?? ""}:${newParam ?? ""}:${courseCreationRemount}`}
+            // Mentor + session + new nonce as the only legitimate remount
+            // triggers (see skill: "Mounting discipline"). A fresh
+            // course-creation enable hard-refreshes the page instead (see
+            // the effect above), so it needs no key nonce here.
+            key={`${mentorId}:${restoreSessionId ?? ""}:${newParam ?? ""}`}
             isPreviewMode={false}
             mentorId={mentorId}
             tenantKey={tenantKey}

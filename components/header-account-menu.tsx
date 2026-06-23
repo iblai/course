@@ -21,7 +21,20 @@ interface Tenant {
   key: string
   name?: string
   display_name?: string
+  platform_name?: string
   is_admin?: boolean
+}
+
+function readCurrentTenant(): Tenant | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = localStorage.getItem('current_tenant')
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    return parsed && typeof parsed === 'object' ? (parsed as Tenant) : null
+  } catch {
+    return null
+  }
 }
 
 function readUserData(): UserData | null {
@@ -49,8 +62,11 @@ function readTenants(): Tenant[] {
 /**
  * Account menu. SDK `UserProfileDropdown` handles the entire dropdown
  * shell: avatar trigger, name/email label, tenant switcher, Profile /
- * Account / Help / Logout items, and the SDK's own Profile + Account
- * modals.
+ * Help / Logout items, and the SDK's own Profile modal.
+ *
+ * The dedicated "Account" item is turned off (`showAccountTab={false}`),
+ * and the tenant switcher is shown to admins only
+ * (`showTenantSwitcher={isAdmin}`) — matching the reference app (os/main).
  *
  * Replaces hq's hand-rolled DropdownMenu + tenant Select + AccountDialog /
  * OrgAccountDialog mounts. hq-specific items the SDK has no slot for
@@ -70,16 +86,27 @@ export function HeaderAccountMenu({ className }: { className?: string }) {
     readUserData(),
   )
   const [tenants, setTenants] = React.useState<Tenant[]>(() => readTenants())
+  const [currentTenant, setCurrentTenant] = React.useState<Tenant | null>(() =>
+    readCurrentTenant(),
+  )
 
   // Re-read after mount in case another tab wrote new values while this
   // one was hydrating (rare, but cheap).
   React.useEffect(() => {
     setUserData(readUserData())
     setTenants(readTenants())
+    setCurrentTenant(readCurrentTenant())
   }, [])
 
   const email = userData?.email || userData?.user_email || ''
-  const username = userData?.username || userData?.user_nicename || ''
+  // `user_nicename` first: the SDK fetches the avatar from
+  // `/users/manage/metadata/?username=<this>`, which only resolves the
+  // profile image for the canonical nicename slug — not a display
+  // `username`. When the two differ, keying on `username` returns no
+  // metadata and the avatar renders blank. The rest of the app
+  // (`use-url-context`, course-actions, the iblai-profile skill) keys on
+  // `user_nicename` too.
+  const username = userData?.user_nicename || userData?.username || ''
 
   // Don't mount the SDK dropdown until we know the username. The SDK
   // fires `getUserMetadata?username=<value>` unconditionally on mount,
@@ -94,12 +121,26 @@ export function HeaderAccountMenu({ className }: { className?: string }) {
         mainPlatformKey={config.mainTenantKey()}
         tenantKey={activeTenantKey || ''}
         userTenants={tenants as any}
+        // The full active-tenant object (key + platform_name, …). Without
+        // it the SDK switcher can't resolve the current tenant and falls
+        // back to a generic "Community" label — os/main passes this too.
+        currentTenant={currentTenant as any}
         userIsAdmin={isAdmin}
+        userIsStudent={!isAdmin}
         showProfileTab
-        showAccountTab
-        showTenantSwitcher
+        // Drop the dedicated "Account" item — the tenant switcher below is
+        // the only org control we want in this dropdown.
+        showAccountTab={false}
+        // Admins only — matches os/main (`showTenantSwitcher={userIsAdmin}`).
+        // For a non-admin the SDK renders just the current-tenant name (e.g.
+        // "Community") with no working switch list, so we hide it.
+        showTenantSwitcher={isAdmin}
         showHelpLink
         showLogoutButton
+        // Fall back to the user's Gravatar (from their email) when they
+        // have no uploaded profile image. Defaults true; set explicitly so
+        // the avatar never renders blank.
+        enableGravatarOnProfilePic
         helpCenterUrl="https://ibl.ai/docs"
         authURL={config.authUrl()}
         currentPlatformBaseDomain={config.platformBaseDomain()}

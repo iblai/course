@@ -7,7 +7,7 @@
   "name": "courseai",
   "version": "1.0.19",
   "private": true,
-  "packageManager": "pnpm@11.3.0",
+  "packageManager": "pnpm@11.8.0",
   "scripts": {
     "prebuild": "next telemetry disable",
     "predev": "next telemetry disable",
