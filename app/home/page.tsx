@@ -13,6 +13,8 @@ import { PageLoader } from "@/components/iblai/page-loader"
  * [mentorId]/page.tsx` (and `/chat/page.tsx`).
  */
 export default function HomePage() {
-  useMentorRedirect()
+  // Admins default to the dedicated "Content Creation" agent (created on the
+  // fly if missing); students are routed to /course-catalog inside the hook.
+  useMentorRedirect({ preferContentCreationAgent: true })
   return <PageLoader className="bg-[#fafafa]" />
 }

@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   useLazyGetMentorsQuery,
+  useCreateMentorMutation,
 } from '@iblai/iblai-js/data-layer'
 
 import { useUrlContext } from './use-url-context'
 import { useAdminStatus } from '@/hooks/use-admin-status'
 import { agentExists, enableCourseCreationToolIfMissing } from './agent-tools'
+import { resolveOrCreateContentCreationAgent } from '@/hooks/use-ensure-content-creation-agent'
 import {
   getPlatformDefaultAgentId,
   setPlatformDefaultAgentId,
@@ -33,6 +35,14 @@ interface UseMentorRedirectOptions {
    * "New Chat" pattern (`?new=<ts>`).
    */
   query?: string
+  /**
+   * When true (set on the admin landing routes `/` and `/home`), resolve the
+   * dedicated "Content Creation" agent first and land there — the default
+   * course-authoring surface — creating it (and enabling its tool) if missing.
+   * Falls through to the generic recently-accessed → featured resolution if it
+   * can't be resolved.
+   */
+  preferContentCreationAgent?: boolean
 }
 
 /**
@@ -46,11 +56,13 @@ interface UseMentorRedirectOptions {
  * is replaced — the caller component unmounts.
  */
 export function useMentorRedirect(options: UseMentorRedirectOptions = {}) {
-  const { pathSuffix = '', query = '' } = options
+  const { pathSuffix = '', query = '', preferContentCreationAgent = false } =
+    options
   const router = useRouter()
   const { tenantKey, username, ready } = useUrlContext()
   const adminStatus = useAdminStatus()
   const [fetchMentors] = useLazyGetMentorsQuery()
+  const [createMentor] = useCreateMentorMutation()
   const [resolving, setResolving] = useState(true)
   const [hasResolved, setHasResolved] = useState(false)
 
@@ -113,6 +125,28 @@ export function useMentorRedirect(options: UseMentorRedirectOptions = {}) {
 
     ;(async () => {
       try {
+        // Admins default to the dedicated "Content Creation" agent — the
+        // primary course-authoring surface — so they land on it without
+        // clicking "New Course". Resolve-or-create it (and enable its tool)
+        // and go there first; only the landing routes opt in via
+        // `preferContentCreationAgent`. Falls through to the generic
+        // resolution below if it can't be resolved (e.g. create failed).
+        if (preferContentCreationAgent) {
+          const contentAgentId = await resolveOrCreateContentCreationAgent(
+            tenantKey,
+            username,
+            {
+              listMentors: (a) => fetchMentors(a as never).unwrap(),
+              createMentor: (a) => createMentor(a as never).unwrap(),
+            },
+          )
+          if (cancelled) return
+          if (contentAgentId && go(contentAgentId)) {
+            setHasResolved(true)
+            return
+          }
+        }
+
         // 0. Sticky default — set on first successful resolution (see
         //    step 1/2 below) and stored on platform metadata. Honoring
         //    it here lets repeat visits skip the mentor-list scan.
@@ -196,7 +230,7 @@ export function useMentorRedirect(options: UseMentorRedirectOptions = {}) {
     return () => {
       cancelled = true
     }
-  }, [ready, tenantKey, username, adminStatus, hasResolved, fetchMentors, router, pathSuffix, query])
+  }, [ready, tenantKey, username, adminStatus, hasResolved, fetchMentors, createMentor, router, pathSuffix, query, preferContentCreationAgent])
 
   return { resolving, hasResolved }
 }

@@ -17,7 +17,7 @@ import { useShowFreeTrialDialog } from "@/hooks/use-show-free-trial-dialog"
 import { AuthPopover } from "@/components/iblai/auth-popover"
 import { UpdateSubscriptionModal } from "@/components/iblai/update-subscription-modal"
 import { useIsAdmin } from "@/hooks/use-is-admin"
-import { enableCourseCreationToolIfMissing } from "@/lib/iblai/agent-tools"
+import { useEnsureContentCreationAgent } from "@/hooks/use-ensure-content-creation-agent"
 import { asset } from "@/lib/iblai/asset-url"
 const SIDEBAR_ICONS = asset("/icons/sidebar")
 const PROJECT_STORAGE_KEY = "project-data"
@@ -121,6 +121,12 @@ export function SidebarLearner({
   // through. Modal is controlled here so we can cancel the original
   // action atomically.
   const isPlatformAdmin = useIsAdmin()
+  // Get-or-create the tenant's admin-only "Content Creation" agent. The hook
+  // pre-warms it in the background; `ensureAgent()` resolves to its id,
+  // creating it first when missing, so the New Course click can await it and
+  // always land ON it. No-op for non-admins.
+  const { ensureAgent: ensureContentCreationAgent } =
+    useEnsureContentCreationAgent()
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false)
   /**
    * Run `action` if the viewer is a platform admin; otherwise open the
@@ -139,21 +145,16 @@ export function SidebarLearner({
   // `startNewChat` behaviour). Falls back to `/` when no mentor is
   // resolved so `useMentorRedirect` picks one for us.
   const { tenantKey: ctxTenantKey, mentorId: ctxMentorId, username } = useUrlContext()
-  const startNewChat = () => requireAdmin(() => {
-    if (ctxTenantKey && ctxMentorId) {
-      if (username) {
-        // Fire-and-forget — never blocks navigation. The settings GET
-        // returns immediately when the tool is already present; the
-        // PUT only runs the first time per agent.
-        void enableCourseCreationToolIfMissing(
-          ctxTenantKey,
-          username,
-          ctxMentorId,
-        )
-      }
-      router.push(`/platform/${ctxTenantKey}/${ctxMentorId}?new=${Date.now()}`)
+  const startNewChat = () => requireAdmin(async () => {
+    // Course creation runs on the dedicated "Content Creation" agent. Await
+    // get-or-create so a missing agent is created (and tool-enabled) BEFORE
+    // we navigate — we always land on it, never the previous mentor. Falls
+    // back to the current mentor only if the ensure step fails outright.
+    const courseAgentId = (await ensureContentCreationAgent()) ?? ctxMentorId
+    if (ctxTenantKey && courseAgentId) {
+      router.push(`/platform/${ctxTenantKey}/${courseAgentId}?new=${Date.now()}`)
     } else {
-      // No mentor in URL context — `/` mounts `useMentorRedirect` which
+      // No agent resolved yet — `/` mounts `useMentorRedirect` which
       // resolves the default mentor and enables course-creation there
       // before redirecting.
       router.push("/")

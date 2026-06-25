@@ -11,9 +11,17 @@ import { PageLoader } from "@/components/iblai/page-loader";
  * have no mentorId in `useUrlContext`, but this hook resolves the
  * user's current mentor via the SDK and pushes the user there.
  *
+ * `preferContentCreationAgent` so Configure lands on the SAME dedicated
+ * "Content Creation" agent the New Course button uses (creating it if
+ * missing) — otherwise Configure would resolve a different,
+ * recently-accessed agent than the one course authoring runs on.
+ *
  * Falls back to `/agents` when the user has no mentors.
  */
 export default function CustomizeRedirectPage() {
-  useMentorRedirect({ pathSuffix: "/customize" });
+  useMentorRedirect({
+    pathSuffix: "/customize",
+    preferContentCreationAgent: true,
+  });
   return <PageLoader />;
 }
